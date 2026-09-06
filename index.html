@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Oggetti in Scatola</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f4f8;
+  color: #1a202c;
+  min-height: 100vh;
+}
+header {
+  background: #2b6cb0;
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+header h1 { font-size: 1.3rem; font-weight: 700; }
+#btn-nuova-scatola {
+  background: #f6ad55;
+  color: #1a202c;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+#btn-nuova-scatola:active { background: #ed8936; }
+main { padding: 16px; max-width: 600px; margin: 0 auto; }
+
+/* Scatola attiva */
+#scatola-attiva {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  text-align: center;
+}
+#scatola-attiva .label {
+  font-size: 0.85rem;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+#scatola-attiva .numero {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #2b6cb0;
+  line-height: 1;
+}
+#scatola-attiva .conteggio {
+  font-size: 0.95rem;
+  color: #718096;
+  margin-top: 6px;
+}
+#scatola-attiva .meta-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+#scatola-attiva select, #scatola-attiva input.meta-input {
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  outline: none;
+  background: white;
+}
+#scatola-attiva select:focus, #scatola-attiva input.meta-input:focus { border-color: #2b6cb0; }
+
+/* Form aggiunta oggetto */
+#form-section {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+#form-section h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+  color: #2d3748;
+}
+#oggetto-input, #categoria-input {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 1rem;
+  outline: none;
+  margin-bottom: 10px;
+  -webkit-appearance: none;
+  background: white;
+}
+#oggetto-input:focus, #categoria-input:focus { border-color: #2b6cb0; }
+#btn-aggiungi {
+  width: 100%;
+  background: #38a169;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+#btn-aggiungi:active { background: #276749; }
+#feedback {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: none;
+  text-align: center;
+}
+#feedback.ok { background: #c6f6d5; color: #22543d; display: block; }
+#feedback.errore { background: #fed7d7; color: #742a2a; display: block; }
+
+/* Lista scatole */
+#lista-scatole h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #2d3748;
+}
+.scatola-card {
+  background: white;
+  border-radius: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+.scatola-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.scatola-header:active { background: #f7fafc; }
+.scatola-titolo {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #2b6cb0;
+}
+.scatola-badges { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+.badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 20px;
+}
+.badge-viaggio { background: #ebf8ff; color: #2b6cb0; }
+.badge-stanza { background: #faf5ff; color: #6b46c1; }
+.scatola-info {
+  font-size: 0.85rem;
+  color: #718096;
+}
+.scatola-toggle {
+  font-size: 1.1rem;
+  color: #a0aec0;
+  transition: transform 0.2s;
+}
+.scatola-toggle.aperta { transform: rotate(180deg); }
+.scatola-oggetti {
+  display: none;
+  padding: 0 18px 14px;
+  border-top: 1px solid #f0f4f8;
+}
+.scatola-oggetti.visibile { display: block; }
+.oggetto-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f4f8;
+  font-size: 0.9rem;
+}
+.oggetto-item:last-child { border-bottom: none; }
+.oggetto-nome { color: #2d3748; font-weight: 600; font-size: 0.9rem; }
+.oggetto-categoria { color: #718096; font-size: 0.82rem; }
+.btn-rimuovi {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #e53e3e;
+  flex-shrink: 0;
+}
+.btn-rimuovi:active { background: #fff5f5; }
+.btn-stampa, .btn-lucchetto {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #718096;
+}
+.btn-stampa:active, .btn-lucchetto:active { background: #f0f4f8; }
+.scatola-card.bloccata .scatola-header { background: #f7fafc; }
+.scatola-card.bloccata .scatola-titolo { color: #718096; }
+.scatola-card.bloccata .btn-rimuovi { opacity: 0.3; pointer-events: none; }
+
+.nessun-oggetto {
+  color: #a0aec0;
+  font-size: 0.85rem;
+  padding: 8px 0;
+  font-style: italic;
+}
+
+/* Ricerca */
+#cerca-container { margin-bottom: 14px; position: relative; }
+#cerca-input {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 40px 12px 14px;
+  font-size: 1rem;
+  outline: none;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+#cerca-clear {
+  display: none;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #a0aec0;
+  cursor: pointer;
+  padding: 4px;
+}
+#risultati-ricerca .res-item {
+  background: white;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+#risultati-ricerca .res-nome { font-weight: 600; font-size: 0.9rem; color: #2d3748; }
+#risultati-ricerca .res-categoria { font-size: 0.82rem; color: #718096; }
+#risultati-ricerca .res-scatola {
+  background: #2b6cb0;
+  color: white;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-left: 10px;
+}
+#nessun-risultato {
+  text-align: center;
+  color: #a0aec0;
+  padding: 20px;
+  font-size: 0.95rem;
+}
+
+footer {
+  text-align: center;
+  padding: 24px 16px;
+  color: #a0aec0;
+  font-size: 0.8rem;
+}
+
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #2d3748;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+#toast.visibile { transform: translateX(-50%) translateY(0); }
+
+#empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: #a0aec0;
+}
+#empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
+#empty-state p { font-size: 0.95rem; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧳 Oggetti in Scatola</h1>
+  <button id="btn-nuova-scatola">+ Nuova scatola</button>
+</header>
+
+<main>
+
+  <!-- Scatola attiva -->
+  <div id="scatola-attiva">
+    <div class="label">Stai riempiendo</div>
+    <div class="numero" id="numero-scatola">1</div>
+    <div class="conteggio" id="conteggio-scatola">0 oggetti</div>
+    <div class="meta-row">
+      <select id="viaggio-select">
+        <option value="">Viaggio…</option>
+        <option value="1">Viaggio 1</option>
+        <option value="2">Viaggio 2</option>
+        <option value="3">Viaggio 3</option>
+        <option value="4">Viaggio 4</option>
+        <option value="dopo">Da spedire dopo</option>
+      </select>
+      <input type="text" id="stanza-input" class="meta-input" placeholder="Stanza destinazione…" />
+    </div>
+  </div>
+
+  <!-- Form aggiunta -->
+  <div id="form-section">
+    <h2>Aggiungi oggetto</h2>
+    <input id="oggetto-input" type="text" placeholder="Nome oggetto (es. Pentola grande)…" />
+    <input id="categoria-input" type="text" placeholder="Categoria (opzionale, es. Cucina)…" list="categorie-suggerite" />
+    <datalist id="categorie-suggerite">
+      <option value="Cucina">
+      <option value="Vestiti">
+      <option value="Elettronica">
+      <option value="Bagno">
+      <option value="Documenti">
+      <option value="Decorazioni">
+      <option value="Attrezzi">
+      <option value="Giocattoli">
+      <option value="Sport">
+      <option value="Varie">
+    </datalist>
+    <button id="btn-aggiungi">Aggiungi alla scatola attiva</button>
+    <div id="feedback"></div>
+  </div>
+
+  <!-- Lista scatole -->
+  <div id="lista-scatole">
+    <h2>Tutte le scatole</h2>
+
+    <div id="cerca-container">
+      <input id="cerca-input" type="text" placeholder="🔍 Cerca per nome o categoria…" />
+      <button id="cerca-clear">✕</button>
+    </div>
+    <div id="risultati-ricerca" style="display:none; margin-bottom:12px;"></div>
+
+    <div id="scatole-container">
+      <div id="empty-state">
+        <div class="emoji">🧳</div>
+        <p>Nessun oggetto ancora.<br>Aggiungi il primo qui sopra!</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>Dati salvati sul tuo telefono</footer>
+<div id="toast"></div>
+
+<script>
+// ── STATO ─────────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'oggetti-in-scatola-v1';
+
+function caricaDati() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { scatolaAttiva: 1, scatole: {}, bloccate: {}, meta: {} };
+}
+
+function salvaDati() { localStorage.setItem(STORAGE_KEY, JSON.stringify(stato)); }
+
+let stato = caricaDati();
+if (!stato.scatole[stato.scatolaAttiva]) stato.scatole[stato.scatolaAttiva] = [];
+if (!stato.bloccate) stato.bloccate = {};
+if (!stato.meta) stato.meta = {};
+if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = { viaggio: '', stanza: '' };
+
+// ── ELEMENTI ──────────────────────────────────────────────────────────────────
+const oggettoInput = document.getElementById('oggetto-input');
+const categoriaInput = document.getElementById('categoria-input');
+const btnAggiungi = document.getElementById('btn-aggiungi');
+const feedback = document.getElementById('feedback');
+const viaggioSelect = document.getElementById('viaggio-select');
+const stanzaInput = document.getElementById('stanza-input');
+
+function mostraFeedback(msg, tipo) {
+  feedback.textContent = msg;
+  feedback.className = tipo ? tipo : '';
+  if (!tipo) feedback.style.display = 'none';
+}
+
+function mostraToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('visibile');
+  setTimeout(() => t.classList.remove('visibile'), 2200);
+}
+
+// ── META SCATOLA ATTIVA (viaggio/stanza) ───────────────────────────────────────
+function caricaMetaAttiva() {
+  const m = stato.meta[stato.scatolaAttiva] || { viaggio: '', stanza: '' };
+  viaggioSelect.value = m.viaggio || '';
+  stanzaInput.value = m.stanza || '';
+}
+viaggioSelect.addEventListener('change', () => {
+  if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+  stato.meta[stato.scatolaAttiva].viaggio = viaggioSelect.value;
+  salvaDati();
+  aggiornaUI();
+});
+stanzaInput.addEventListener('input', () => {
+  if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+  stato.meta[stato.scatolaAttiva].stanza = stanzaInput.value;
+  salvaDati();
+  aggiornaUI();
+});
+
+// ── AGGIUNTA OGGETTO ────────────────────────────────────────────────────────────
+function aggiungiOggetto() {
+  const nome = oggettoInput.value.trim();
+  const categoria = categoriaInput.value.trim();
+  if (!nome) {
+    mostraFeedback('Scrivi il nome dell\'oggetto.', 'errore');
+    return;
+  }
+  if (stato.bloccate[stato.scatolaAttiva]) {
+    mostraFeedback(`🔒 Scatola ${stato.scatolaAttiva} è bloccata!`, 'errore');
+    return;
+  }
+  stato.scatole[stato.scatolaAttiva].push({ nome, categoria });
+  stato.scatole[stato.scatolaAttiva].sort((a, b) =>
+    a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' })
+  );
+  salvaDati();
+  aggiornaUI();
+  oggettoInput.value = '';
+  categoriaInput.value = '';
+  oggettoInput.focus();
+  mostraToast(`📦 "${nome}" → Scatola ${stato.scatolaAttiva}`);
+  mostraFeedback('', '');
+}
+btnAggiungi.addEventListener('click', aggiungiOggetto);
+oggettoInput.addEventListener('keydown', e => { if (e.key === 'Enter') categoriaInput.focus(); });
+categoriaInput.addEventListener('keydown', e => { if (e.key === 'Enter') aggiungiOggetto(); });
+
+// ── NUOVA SCATOLA ───────────────────────────────────────────────────────────────
+document.getElementById('btn-nuova-scatola').addEventListener('click', () => {
+  const nuovoNum = Math.max(...Object.keys(stato.scatole).map(Number), 0) + 1;
+  stato.scatolaAttiva = nuovoNum;
+  stato.scatole[nuovoNum] = [];
+  stato.meta[nuovoNum] = { viaggio: '', stanza: '' };
+  salvaDati();
+  caricaMetaAttiva();
+  aggiornaUI();
+  mostraToast(`🧳 Scatola ${nuovoNum} creata!`);
+  oggettoInput.focus();
+});
+
+// ── RIMOZIONE ─────────────────────────────────────────────────────────────────
+function rimuoviOggetto(scatola, idx) {
+  stato.scatole[scatola].splice(idx, 1);
+  salvaDati();
+  aggiornaUI();
+  mostraToast('🗑️ Oggetto rimosso');
+}
+
+// ── LUCCHETTO ─────────────────────────────────────────────────────────────────
+function toggleLucchetto(num) {
+  if (stato.bloccate[num]) {
+    delete stato.bloccate[num];
+    mostraToast(`🔓 Scatola ${num} sbloccata`);
+  } else {
+    stato.bloccate[num] = true;
+    if (stato.scatolaAttiva == num) {
+      const libera = Object.keys(stato.scatole).map(Number).find(n => !stato.bloccate[n] && n != num);
+      if (libera) { stato.scatolaAttiva = libera; caricaMetaAttiva(); }
+    }
+    mostraToast(`🔒 Scatola ${num} bloccata`);
+  }
+  salvaDati();
+  aggiornaUI();
+}
+
+// ── TOGGLE APERTURA ───────────────────────────────────────────────────────────
+function toggleScatola(num) {
+  const el = document.getElementById(`oggetti-${num}`);
+  const toggle = document.getElementById(`toggle-${num}`);
+  el.classList.toggle('visibile');
+  toggle.classList.toggle('aperta');
+}
+
+// ── STAMPA / EXPORT PDF ────────────────────────────────────────────────────────
+function stampaScatola(num) {
+  const oggetti = stato.scatole[num] || [];
+  const meta = stato.meta[num] || {};
+  const righe = oggetti.map((o, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${o.nome}</td>
+      <td>${o.categoria || '—'}</td>
+    </tr>`).join('');
+  const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '—';
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>Scatola ${num}</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
+h1 { font-size: 1.6rem; margin-bottom: 4px; }
+.sub { color: #718096; margin-bottom: 8px; font-size: 0.95rem; }
+.meta { color: #4a5568; margin-bottom: 20px; font-size: 0.9rem; }
+table { width: 100%; border-collapse: collapse; }
+th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: #f7fafc; }
+.footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
+@media print { body { padding: 16px; } }
+</style>
+</head>
+<body>
+<h1>🧳 Scatola ${num}</h1>
+<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
+<div class="meta">Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>
+<table>
+<thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th></tr></thead>
+<tbody>${righe}</tbody>
+</table>
+<div class="footer">Oggetti in Scatola</div>
+<script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
+// ── RICERCA ───────────────────────────────────────────────────────────────────
+const cercaInput = document.getElementById('cerca-input');
+const cercaClear = document.getElementById('cerca-clear');
+const risultatiContainer = document.getElementById('risultati-ricerca');
+const scatoleContainer = document.getElementById('scatole-container');
+
+cercaInput.addEventListener('input', () => {
+  const q = cercaInput.value.trim().toLowerCase();
+  cercaClear.style.display = q ? 'block' : 'none';
+  if (!q) {
+    risultatiContainer.style.display = 'none';
+    scatoleContainer.style.display = 'block';
+    return;
+  }
+  scatoleContainer.style.display = 'none';
+  risultatiContainer.style.display = 'block';
+
+  const trovati = [];
+  for (const [num, oggetti] of Object.entries(stato.scatole)) {
+    oggetti.forEach(o => {
+      if (o.nome.toLowerCase().includes(q) || (o.categoria || '').toLowerCase().includes(q)) {
+        trovati.push({ ...o, scatola: num });
+      }
+    });
+  }
+  if (trovati.length === 0) {
+    risultatiContainer.innerHTML = `<div id="nessun-risultato">Nessun oggetto trovato per "${cercaInput.value}"</div>`;
+    return;
+  }
+  risultatiContainer.innerHTML = trovati.map(o => `
+    <div class="res-item">
+      <div>
+        <div class="res-nome">${o.nome}</div>
+        ${o.categoria ? `<div class="res-categoria">${o.categoria}</div>` : ''}
+      </div>
+      <div class="res-scatola">Scatola ${o.scatola}</div>
+    </div>`).join('');
+});
+cercaClear.addEventListener('click', () => {
+  cercaInput.value = '';
+  cercaInput.dispatchEvent(new Event('input'));
+});
+
+// ── UI ─────────────────────────────────────────────────────────────────────────
+function aggiornaUI() {
+  document.getElementById('numero-scatola').textContent = stato.scatolaAttiva;
+  const n = (stato.scatole[stato.scatolaAttiva] || []).length;
+  document.getElementById('conteggio-scatola').textContent = n === 1 ? '1 oggetto' : `${n} oggetti`;
+
+  const numeri = Object.keys(stato.scatole).map(Number).sort((a, b) => b - a);
+  const totOggetti = Object.values(stato.scatole).reduce((s, a) => s + a.length, 0);
+
+  if (totOggetti === 0) {
+    scatoleContainer.innerHTML = `
+      <div id="empty-state">
+        <div class="emoji">🧳</div>
+        <p>Nessun oggetto ancora.<br>Aggiungi il primo qui sopra!</p>
+      </div>`;
+    return;
+  }
+
+  scatoleContainer.innerHTML = numeri.map(num => {
+    const oggetti = stato.scatole[num] || [];
+    const meta = stato.meta[num] || {};
+    const isAttiva = num === stato.scatolaAttiva;
+    const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '';
+    return `
+    <div class="scatola-card${stato.bloccate[num] ? ' bloccata' : ''}">
+      <div class="scatola-header" onclick="toggleScatola(${num})">
+        <div>
+          <div class="scatola-titolo">🧳 Scatola ${num}${isAttiva ? ' ✏️' : ''}</div>
+          <div class="scatola-info">${oggetti.length === 1 ? '1 oggetto' : `${oggetti.length} oggetti`}</div>
+          <div class="scatola-badges">
+            ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
+            ${meta.stanza ? `<span class="badge badge-stanza">${meta.stanza}</span>` : ''}
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="btn-lucchetto" onclick="event.stopPropagation(); toggleLucchetto(${num})" title="${stato.bloccate[num] ? 'Sblocca' : 'Blocca'} scatola">${stato.bloccate[num] ? '🔒' : '🔓'}</button>
+          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${num})" title="Esporta PDF">🖨️</button>
+          <div class="scatola-toggle" id="toggle-${num}">▼</div>
+        </div>
+      </div>
+      <div class="scatola-oggetti" id="oggetti-${num}">
+        ${oggetti.length === 0
+          ? '<div class="nessun-oggetto">Nessun oggetto</div>'
+          : oggetti.map((o, idx) => `
+            <div class="oggetto-item">
+              <div>
+                <div class="oggetto-nome">${o.nome}</div>
+                ${o.categoria ? `<div class="oggetto-categoria">${o.categoria}</div>` : ''}
+              </div>
+              <button class="btn-rimuovi" onclick="rimuoviOggetto(${num}, ${idx})" title="Rimuovi">✕</button>
+            </div>`).join('')
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+caricaMetaAttiva();
+aggiornaUI();
+</script>
+
+</body>
+</html>
