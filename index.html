@@ -61,6 +61,9 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   color: #2b6cb0;
   line-height: 1;
 }
+#scatola-attiva .numero.testo {
+  font-size: 1.7rem;
+}
 #scatola-attiva .conteggio {
   font-size: 0.95rem;
   color: #718096;
@@ -244,6 +247,8 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 .scatola-card.bloccata .scatola-header { background: #f7fafc; }
 .scatola-card.bloccata .scatola-titolo { color: #718096; }
 .scatola-card.bloccata .btn-rimuovi { opacity: 0.3; pointer-events: none; }
+.scatola-card.fuori-scatola { border-left: 4px solid #f6ad55; }
+.scatola-card.diretti-auto { border-left: 4px solid #38a169; }
 
 .nessun-oggetto {
   color: #a0aec0;
@@ -344,7 +349,11 @@ footer {
 
 <header>
   <h1>🧳 Oggetti in Scatola</h1>
-  <button id="btn-nuova-scatola">+ Nuova scatola</button>
+  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+    <button id="btn-fuori-scatola" style="background:white; color:#2b6cb0; border:none; border-radius:8px; padding:8px 12px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">📤 Fuori scatola</button>
+    <button id="btn-diretti-auto" style="background:white; color:#2b6cb0; border:none; border-radius:8px; padding:8px 12px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">🚗 Diretti in auto</button>
+    <button id="btn-nuova-scatola">+ Nuova scatola</button>
+  </div>
 </header>
 
 <main>
@@ -499,7 +508,7 @@ function aggiungiOggetto() {
     return;
   }
   if (stato.bloccate[stato.scatolaAttiva]) {
-    mostraFeedback(`🔒 Scatola ${stato.scatolaAttiva} è bloccata!`, 'errore');
+    mostraFeedback(`🔒 ${labelScatola(stato.scatolaAttiva)} è bloccata!`, 'errore');
     return;
   }
   stato.scatole[stato.scatolaAttiva].push({ nome, categoria, valore });
@@ -512,7 +521,7 @@ function aggiungiOggetto() {
   categoriaInput.value = '';
   valoreInput.value = '';
   oggettoInput.focus();
-  mostraToast(`📦 "${nome}" → Scatola ${stato.scatolaAttiva}`);
+  mostraToast(`📦 "${nome}" → ${labelScatola(stato.scatolaAttiva)}`);
   mostraFeedback('', '');
 }
 btnAggiungi.addEventListener('click', aggiungiOggetto);
@@ -554,7 +563,7 @@ fileImporta.addEventListener('change', (e) => {
       let oggettiAggiunti = 0;
 
       for (const [numStr, oggettiImportati] of Object.entries(importato.scatole)) {
-        const num = Number(numStr);
+        const num = (numStr === 'fuori' || numStr === 'auto') ? numStr : Number(numStr);
 
         // Se la scatola non esiste ancora su questo dispositivo, la crea
         if (!stato.scatole[num]) {
@@ -599,9 +608,41 @@ fileImporta.addEventListener('change', (e) => {
   reader.readAsText(file);
 });
 
+// ── HELPER ETICHETTA SCATOLA ────────────────────────────────────────────────────
+function labelScatola(key) {
+  if (key === 'fuori') return '📤 Fuori scatola';
+  if (key === 'auto') return '🚗 Diretti in auto';
+  return `🧳 Scatola ${key}`;
+}
+
+// ── FUORI SCATOLA (contenitore speciale senza numero) ──────────────────────────
+document.getElementById('btn-fuori-scatola').addEventListener('click', () => {
+  if (!stato.scatole['fuori']) stato.scatole['fuori'] = [];
+  if (!stato.meta['fuori']) stato.meta['fuori'] = { viaggio: '', stanza: '' };
+  stato.scatolaAttiva = 'fuori';
+  salvaDati();
+  caricaMetaAttiva();
+  aggiornaUI();
+  mostraToast('📤 Ora stai aggiungendo a Fuori scatola');
+  oggettoInput.focus();
+});
+
+// ── DIRETTI IN AUTO (contenitore speciale senza numero) ─────────────────────────
+document.getElementById('btn-diretti-auto').addEventListener('click', () => {
+  if (!stato.scatole['auto']) stato.scatole['auto'] = [];
+  if (!stato.meta['auto']) stato.meta['auto'] = { viaggio: '', stanza: '' };
+  stato.scatolaAttiva = 'auto';
+  salvaDati();
+  caricaMetaAttiva();
+  aggiornaUI();
+  mostraToast('🚗 Ora stai aggiungendo a Diretti in auto');
+  oggettoInput.focus();
+});
+
 // ── NUOVA SCATOLA ───────────────────────────────────────────────────────────────
 document.getElementById('btn-nuova-scatola').addEventListener('click', () => {
-  const nuovoNum = Math.max(...Object.keys(stato.scatole).map(Number), 0) + 1;
+  const numeriEsistenti = Object.keys(stato.scatole).filter(k => k !== 'fuori' && k !== 'auto').map(Number);
+  const nuovoNum = Math.max(...numeriEsistenti, 0) + 1;
   stato.scatolaAttiva = nuovoNum;
   stato.scatole[nuovoNum] = [];
   stato.meta[nuovoNum] = { viaggio: '', stanza: '' };
@@ -624,14 +665,14 @@ function rimuoviOggetto(scatola, idx) {
 function toggleLucchetto(num) {
   if (stato.bloccate[num]) {
     delete stato.bloccate[num];
-    mostraToast(`🔓 Scatola ${num} sbloccata`);
+    mostraToast(`🔓 ${labelScatola(num)} sbloccata`);
   } else {
     stato.bloccate[num] = true;
     if (stato.scatolaAttiva == num) {
-      const libera = Object.keys(stato.scatole).map(Number).find(n => !stato.bloccate[n] && n != num);
+      const libera = Object.keys(stato.scatole).filter(k => k !== 'fuori' && k !== 'auto').map(Number).find(n => !stato.bloccate[n] && n != num);
       if (libera) { stato.scatolaAttiva = libera; caricaMetaAttiva(); }
     }
-    mostraToast(`🔒 Scatola ${num} bloccata`);
+    mostraToast(`🔒 ${labelScatola(num)} bloccata`);
   }
   salvaDati();
   aggiornaUI();
@@ -662,7 +703,7 @@ function stampaScatola(num) {
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
-<title>Scatola ${num}</title>
+<title>${labelScatola(num)}</title>
 <style>
 body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
 h1 { font-size: 1.6rem; margin-bottom: 4px; }
@@ -680,7 +721,7 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
 </style>
 </head>
 <body>
-<h1>🧳 Scatola ${num}</h1>
+<h1>${labelScatola(num)}</h1>
 <div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
 <div class="meta">Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>
 <table>
@@ -713,7 +754,15 @@ function aggiornaBottoneSelezionate() {
 function esportaScatole(numeriRichiesti) {
   const numeriConOggetti = numeriRichiesti
     .filter(n => (stato.scatole[n] || []).length > 0)
-    .sort((a, b) => a - b);
+    .sort((a, b) => {
+      const ordineSpeciali = { fuori: -2, auto: -1 };
+      const aSpeciale = ordineSpeciali[a];
+      const bSpeciale = ordineSpeciali[b];
+      if (aSpeciale !== undefined || bSpeciale !== undefined) {
+        return (aSpeciale ?? 0) - (bSpeciale ?? 0);
+      }
+      return a - b;
+    });
 
   if (numeriConOggetti.length === 0) {
     mostraToast('⚠️ Nessun oggetto da esportare');
@@ -737,7 +786,7 @@ function esportaScatole(numeriRichiesti) {
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
-      <h2>🧳 Scatola ${num}</h2>
+      <h2>${labelScatola(num)}</h2>
       <div class="meta">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>
       <table>
         <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th class="val">Valore stimato</th></tr></thead>
@@ -748,7 +797,7 @@ function esportaScatole(numeriRichiesti) {
   }).join('');
 
   const totOggettiGen = numeriConOggetti.reduce((s, n) => s + (stato.scatole[n] || []).length, 0);
-  const elencoNumeri = numeriConOggetti.join(', ');
+  const elencoNumeri = numeriConOggetti.map(n => (n === 'fuori' || n === 'auto') ? labelScatola(n).replace(/^[^\s]+\s/, '') : n).join(', ');
 
   const html = `<!DOCTYPE html>
 <html lang="it">
@@ -805,7 +854,7 @@ ${blocchi}
 }
 
 function esportaTutto() {
-  const tutteLeScatole = Object.keys(stato.scatole).map(Number);
+  const tutteLeScatole = Object.keys(stato.scatole).map(k => (k === 'fuori' || k === 'auto') ? k : Number(k));
   esportaScatole(tutteLeScatole);
 }
 document.getElementById('btn-esporta-tutto').addEventListener('click', esportaTutto);
@@ -850,7 +899,7 @@ cercaInput.addEventListener('input', () => {
         <div class="res-nome">${o.nome}</div>
         ${o.categoria ? `<div class="res-categoria">${o.categoria}</div>` : ''}
       </div>
-      <div class="res-scatola">Scatola ${o.scatola}</div>
+      <div class="res-scatola">${(o.scatola === 'fuori' || o.scatola === 'auto') ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</div>
     </div>`).join('');
 });
 cercaClear.addEventListener('click', () => {
@@ -865,11 +914,21 @@ function sommaValori(oggetti) {
 
 // ── UI ─────────────────────────────────────────────────────────────────────────
 function aggiornaUI() {
-  document.getElementById('numero-scatola').textContent = stato.scatolaAttiva;
+  const numeroEl = document.getElementById('numero-scatola');
+  if (stato.scatolaAttiva === 'fuori' || stato.scatolaAttiva === 'auto') {
+    numeroEl.textContent = labelScatola(stato.scatolaAttiva);
+    numeroEl.classList.add('testo');
+  } else {
+    numeroEl.textContent = stato.scatolaAttiva;
+    numeroEl.classList.remove('testo');
+  }
   const n = (stato.scatole[stato.scatolaAttiva] || []).length;
   document.getElementById('conteggio-scatola').textContent = n === 1 ? '1 oggetto' : `${n} oggetti`;
 
-  const numeri = Object.keys(stato.scatole).map(Number).sort((a, b) => b - a);
+  const chiavi = Object.keys(stato.scatole);
+  const chiaviNumeriche = chiavi.filter(k => k !== 'fuori' && k !== 'auto').map(Number).sort((a, b) => b - a);
+  const chiaviSpeciali = ['fuori', 'auto'].filter(k => chiavi.includes(k));
+  const ordineChiavi = [...chiaviSpeciali, ...chiaviNumeriche];
   const totOggetti = Object.values(stato.scatole).reduce((s, a) => s + a.length, 0);
 
   if (totOggetti === 0) {
@@ -881,18 +940,19 @@ function aggiornaUI() {
     return;
   }
 
-  scatoleContainer.innerHTML = numeri.map(num => {
+  scatoleContainer.innerHTML = ordineChiavi.map(num => {
     const oggetti = stato.scatole[num] || [];
     const meta = stato.meta[num] || {};
     const isAttiva = num === stato.scatolaAttiva;
     const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '';
+    const chiaveJs = JSON.stringify(num);
     return `
-    <div class="scatola-card${stato.bloccate[num] ? ' bloccata' : ''}">
-      <div class="scatola-header" onclick="toggleScatola(${num})">
+    <div class="scatola-card${stato.bloccate[num] ? ' bloccata' : ''}${num === 'fuori' ? ' fuori-scatola' : ''}${num === 'auto' ? ' diretti-auto' : ''}">
+      <div class="scatola-header" onclick="toggleScatola(${chiaveJs})">
         <div style="display:flex; align-items:flex-start;">
-          <input type="checkbox" class="checkbox-scatola" data-num="${num}" ${selezionate.has(num) ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelezione(${num})" />
+          <input type="checkbox" class="checkbox-scatola" data-num="${num}" ${selezionate.has(num) ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelezione(${chiaveJs})" />
           <div>
-            <div class="scatola-titolo">🧳 Scatola ${num}${isAttiva ? ' ✏️' : ''}</div>
+            <div class="scatola-titolo">${labelScatola(num)}${isAttiva ? ' ✏️' : ''}</div>
             <div class="scatola-info">${oggetti.length === 1 ? '1 oggetto' : `${oggetti.length} oggetti`}</div>
             <div class="scatola-badges">
               ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
@@ -901,8 +961,8 @@ function aggiornaUI() {
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
-          <button class="btn-lucchetto" onclick="event.stopPropagation(); toggleLucchetto(${num})" title="${stato.bloccate[num] ? 'Sblocca' : 'Blocca'} scatola">${stato.bloccate[num] ? '🔒' : '🔓'}</button>
-          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${num})" title="Esporta PDF">🖨️</button>
+          <button class="btn-lucchetto" onclick="event.stopPropagation(); toggleLucchetto(${chiaveJs})" title="${stato.bloccate[num] ? 'Sblocca' : 'Blocca'} scatola">${stato.bloccate[num] ? '🔒' : '🔓'}</button>
+          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs})" title="Esporta PDF">🖨️</button>
           <div class="scatola-toggle" id="toggle-${num}">▼</div>
         </div>
       </div>
@@ -916,7 +976,7 @@ function aggiornaUI() {
                 ${o.categoria ? `<div class="oggetto-categoria">${o.categoria}</div>` : ''}
                 ${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? `<div class="oggetto-valore">CHF ${o.valore.toFixed(2)}</div>` : ''}
               </div>
-              <button class="btn-rimuovi" onclick="rimuoviOggetto(${num}, ${idx})" title="Rimuovi">✕</button>
+              <button class="btn-rimuovi" onclick="rimuoviOggetto(${chiaveJs}, ${idx})" title="Rimuovi">✕</button>
             </div>`).join('')
         }
         ${oggetti.length > 0 ? `
