@@ -244,6 +244,21 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   max-width: 82px;
   margin-right: 4px;
 }
+.modal-cat-riga {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f7fafc;
+}
+.modal-cat-riga input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #9f7aea;
+  flex-shrink: 0;
+}
+.modal-cat-riga .nome { font-weight: 600; color: #2d3748; font-size: 0.92rem; flex: 1; }
+.modal-cat-riga .dettagli { color: #718096; font-size: 0.8rem; }
 .btn-stampa, .btn-lucchetto {
   background: none;
   border: none;
@@ -449,6 +464,21 @@ footer {
 
 <footer>Dati salvati su questo dispositivo — usa Esporta/Importa per sincronizzare con altri</footer>
 <div id="toast"></div>
+
+<!-- Modal selezione categorie -->
+<div id="modal-categorie" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:2000; align-items:flex-end; justify-content:center;">
+  <div style="background:white; border-radius:20px 20px 0 0; max-width:600px; width:100%; max-height:80vh; display:flex; flex-direction:column;">
+    <div style="padding:18px 20px 10px; border-bottom:1px solid #f0f4f8; display:flex; justify-content:space-between; align-items:center;">
+      <div style="font-weight:700; font-size:1.05rem; color:#2d3748;">Scegli le categorie</div>
+      <button id="modal-cat-chiudi" style="background:none; border:none; font-size:1.3rem; color:#a0aec0; cursor:pointer; padding:4px;">✕</button>
+    </div>
+    <div id="modal-cat-lista" style="overflow-y:auto; padding:8px 20px; flex:1;"></div>
+    <div style="padding:14px 20px; border-top:1px solid #f0f4f8; display:flex; gap:8px;">
+      <button id="modal-cat-tutte" style="flex:1; background:white; color:#9f7aea; border:2px solid #9f7aea; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">Seleziona tutte</button>
+      <button id="modal-cat-esporta" style="flex:1; background:#9f7aea; color:white; border:none; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">🖨️ Esporta</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ── STATO ─────────────────────────────────────────────────────────────────────
@@ -908,7 +938,7 @@ body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
 h1 { font-size: 1.7rem; margin-bottom: 4px; }
 h2 { font-size: 1.2rem; margin-bottom: 4px; color: #2b6cb0; }
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
-.blocco-scatola { margin-bottom: 28px; page-break-inside: avoid; }
+.blocco-scatola { margin-bottom: 28px; }
 .meta { color: #4a5568; margin-bottom: 10px; font-size: 0.85rem; }
 table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
 th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
@@ -963,11 +993,10 @@ function esportaSelezionate() {
 }
 document.getElementById('btn-esporta-selezionate').addEventListener('click', esportaSelezionate);
 
-// ── STAMPA / EXPORT PER CATEGORIA (trasversale a tutte le scatole) ─────────────
-function esportaPerCategoria() {
+// ── RAGGRUPPAMENTO OGGETTI PER CATEGORIA ────────────────────────────────────────
+function raggruppaPerCategoria() {
   const gruppi = {};
   let totOggetti = 0;
-
   for (const [num, oggetti] of Object.entries(stato.scatole)) {
     oggetti.forEach(o => {
       const cat = o.categoria && o.categoria.trim() ? o.categoria.trim() : 'Senza categoria';
@@ -976,17 +1005,31 @@ function esportaPerCategoria() {
       totOggetti++;
     });
   }
+  const categorieOrdinate = Object.keys(gruppi).sort((a, b) => {
+    if (a === 'Senza categoria') return 1;
+    if (b === 'Senza categoria') return -1;
+    return a.localeCompare(b, 'it', { sensitivity: 'base' });
+  });
+  return { gruppi, categorieOrdinate, totOggetti };
+}
+
+// ── STAMPA / EXPORT PER CATEGORIA (trasversale a tutte le scatole) ─────────────
+function esportaPerCategoria(filtroCategorie) {
+  const { gruppi, categorieOrdinate: tutteLeCategorie, totOggetti } = raggruppaPerCategoria();
 
   if (totOggetti === 0) {
     mostraToast('⚠️ Nessun oggetto da esportare');
     return;
   }
 
-  const categorieOrdinate = Object.keys(gruppi).sort((a, b) => {
-    if (a === 'Senza categoria') return 1;
-    if (b === 'Senza categoria') return -1;
-    return a.localeCompare(b, 'it', { sensitivity: 'base' });
-  });
+  const categorieOrdinate = filtroCategorie
+    ? tutteLeCategorie.filter(c => filtroCategorie.includes(c))
+    : tutteLeCategorie;
+
+  if (categorieOrdinate.length === 0) {
+    mostraToast('⚠️ Nessuna categoria selezionata');
+    return;
+  }
 
   let totaleGenerale = 0;
 
@@ -1022,7 +1065,7 @@ body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
 h1 { font-size: 1.7rem; margin-bottom: 4px; }
 h2 { font-size: 1.2rem; margin-bottom: 4px; color: #9f7aea; }
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
-.blocco-scatola { margin-bottom: 28px; page-break-inside: avoid; }
+.blocco-scatola { margin-bottom: 28px; }
 table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
 th { background: #9f7aea; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
 th.val, td.val { text-align: right; }
@@ -1062,7 +1105,52 @@ ${blocchi}
   w.document.write(html);
   w.document.close();
 }
-document.getElementById('btn-esporta-categoria').addEventListener('click', esportaPerCategoria);
+document.getElementById('btn-esporta-categoria').addEventListener('click', apriModalCategorie);
+
+// ── MODAL SELEZIONE CATEGORIE ───────────────────────────────────────────────────
+const modalCategorie = document.getElementById('modal-categorie');
+const modalCatLista = document.getElementById('modal-cat-lista');
+
+function apriModalCategorie() {
+  const { gruppi, categorieOrdinate, totOggetti } = raggruppaPerCategoria();
+  if (totOggetti === 0) {
+    mostraToast('⚠️ Nessun oggetto da esportare');
+    return;
+  }
+  modalCatLista.innerHTML = categorieOrdinate.map(cat => {
+    const oggetti = gruppi[cat];
+    const totale = sommaValori(oggetti);
+    return `
+    <label class="modal-cat-riga">
+      <input type="checkbox" class="modal-cat-checkbox" value="${cat.replace(/"/g, '&quot;')}" checked />
+      <span class="nome">${cat}</span>
+      <span class="dettagli">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} · CHF ${totale.toFixed(2)}</span>
+    </label>`;
+  }).join('');
+  modalCategorie.style.display = 'flex';
+}
+
+function chiudiModalCategorie() {
+  modalCategorie.style.display = 'none';
+}
+document.getElementById('modal-cat-chiudi').addEventListener('click', chiudiModalCategorie);
+modalCategorie.addEventListener('click', (e) => { if (e.target === modalCategorie) chiudiModalCategorie(); });
+
+document.getElementById('modal-cat-tutte').addEventListener('click', () => {
+  const checkboxes = modalCatLista.querySelectorAll('.modal-cat-checkbox');
+  const tutteSelezionate = [...checkboxes].every(c => c.checked);
+  checkboxes.forEach(c => { c.checked = !tutteSelezionate; });
+});
+
+document.getElementById('modal-cat-esporta').addEventListener('click', () => {
+  const selezionate = [...modalCatLista.querySelectorAll('.modal-cat-checkbox:checked')].map(c => c.value);
+  if (selezionate.length === 0) {
+    mostraToast('⚠️ Seleziona almeno una categoria');
+    return;
+  }
+  chiudiModalCategorie();
+  esportaPerCategoria(selezionate);
+});
 
 // ── RICERCA ───────────────────────────────────────────────────────────────────
 const cercaInput = document.getElementById('cerca-input');
