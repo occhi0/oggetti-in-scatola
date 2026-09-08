@@ -383,7 +383,10 @@ footer {
 
   <!-- Lista scatole -->
   <div id="lista-scatole">
-    <h2>Tutte le scatole</h2>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+      <h2 style="margin-bottom:0;">Tutte le scatole</h2>
+      <button id="btn-esporta-tutto" style="background:#2b6cb0; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta tutto</button>
+    </div>
 
     <div id="cerca-container">
       <input id="cerca-input" type="text" placeholder="🔍 Cerca per nome o categoria…" />
@@ -594,6 +597,102 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
   w.document.write(html);
   w.document.close();
 }
+
+// ── STAMPA / EXPORT TUTTE LE SCATOLE ────────────────────────────────────────────
+function esportaTutto() {
+  const numeri = Object.keys(stato.scatole).map(Number).sort((a, b) => a - b);
+  const numeriConOggetti = numeri.filter(n => (stato.scatole[n] || []).length > 0);
+
+  if (numeriConOggetti.length === 0) {
+    mostraToast('⚠️ Nessun oggetto da esportare');
+    return;
+  }
+
+  let totaleGenerale = 0;
+
+  const blocchi = numeriConOggetti.map(num => {
+    const oggetti = stato.scatole[num] || [];
+    const meta = stato.meta[num] || {};
+    const totale = sommaValori(oggetti);
+    totaleGenerale += totale;
+    const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '—';
+    const righe = oggetti.map((o, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${o.nome}</td>
+        <td>${o.categoria || '—'}</td>
+        <td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>
+      </tr>`).join('');
+    return `
+    <div class="blocco-scatola">
+      <h2>🧳 Scatola ${num}</h2>
+      <div class="meta">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>
+      <table>
+        <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th class="val">Valore stimato</th></tr></thead>
+        <tbody>${righe}</tbody>
+        <tfoot><tr><td colspan="3">Totale scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>
+      </table>
+    </div>`;
+  }).join('');
+
+  const totOggettiGen = numeriConOggetti.reduce((s, n) => s + (stato.scatole[n] || []).length, 0);
+
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>Elenco completo scatole</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
+h1 { font-size: 1.7rem; margin-bottom: 4px; }
+h2 { font-size: 1.2rem; margin-bottom: 4px; color: #2b6cb0; }
+.sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
+.blocco-scatola { margin-bottom: 28px; page-break-inside: avoid; }
+.meta { color: #4a5568; margin-bottom: 10px; font-size: 0.85rem; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+th.val, td.val { text-align: right; }
+td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: #f7fafc; }
+tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none; background: white; }
+.totale-generale {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: #ebf8ff;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2b6cb0;
+}
+.footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
+@media print {
+  body { padding: 16px; }
+  .blocco-scatola { page-break-after: always; }
+  .blocco-scatola:last-of-type { page-break-after: auto; }
+}
+</style>
+</head>
+<body>
+<h1>🧳 Elenco completo masserizie</h1>
+<div class="sub">${numeriConOggetti.length} ${numeriConOggetti.length === 1 ? 'scatola' : 'scatole'}, ${totOggettiGen} oggetti totali — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
+${blocchi}
+<div class="totale-generale">
+  <span>Totale valore complessivo</span>
+  <span>CHF ${totaleGenerale.toFixed(2)}</span>
+</div>
+<div class="footer">Oggetti in Scatola</div>
+<script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+document.getElementById('btn-esporta-tutto').addEventListener('click', esportaTutto);
 
 // ── RICERCA ───────────────────────────────────────────────────────────────────
 const cercaInput = document.getElementById('cerca-input');
