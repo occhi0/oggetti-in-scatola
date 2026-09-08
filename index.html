@@ -349,6 +349,13 @@ footer {
 
 <main>
 
+  <!-- Sincronizzazione tra dispositivi -->
+  <div id="sync-bar" style="display:flex; gap:8px; margin-bottom:16px;">
+    <button id="btn-esporta-dati" style="flex:1; background:white; color:#2b6cb0; border:2px solid #2b6cb0; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">⬇️ Esporta dati</button>
+    <button id="btn-importa-dati" style="flex:1; background:white; color:#2b6cb0; border:2px solid #2b6cb0; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">⬆️ Unisci dati</button>
+    <input type="file" id="file-importa" accept="application/json" style="display:none;" />
+  </div>
+
   <!-- Scatola attiva -->
   <div id="scatola-attiva">
     <div class="label">Stai riempiendo</div>
@@ -415,7 +422,7 @@ footer {
 
 </main>
 
-<footer>Dati salvati sul tuo telefono</footer>
+<footer>Dati salvati su questo dispositivo — usa Esporta/Importa per sincronizzare con altri</footer>
 <div id="toast"></div>
 
 <script>
@@ -512,6 +519,85 @@ btnAggiungi.addEventListener('click', aggiungiOggetto);
 oggettoInput.addEventListener('keydown', e => { if (e.key === 'Enter') categoriaInput.focus(); });
 categoriaInput.addEventListener('keydown', e => { if (e.key === 'Enter') valoreInput.focus(); });
 valoreInput.addEventListener('keydown', e => { if (e.key === 'Enter') aggiungiOggetto(); });
+
+// ── EXPORT / IMPORT DATI (sincronizzazione manuale tra dispositivi) ────────────
+document.getElementById('btn-esporta-dati').addEventListener('click', () => {
+  const dataStr = JSON.stringify(stato, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const oggi = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `oggetti-in-scatola-${oggi}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  mostraToast('⬇️ Dati esportati');
+});
+
+const fileImporta = document.getElementById('file-importa');
+document.getElementById('btn-importa-dati').addEventListener('click', () => {
+  fileImporta.value = '';
+  fileImporta.click();
+});
+fileImporta.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const importato = JSON.parse(ev.target.result);
+      if (!importato.scatole) throw new Error('Formato non valido');
+
+      let scatoleAggiunte = 0;
+      let oggettiAggiunti = 0;
+
+      for (const [numStr, oggettiImportati] of Object.entries(importato.scatole)) {
+        const num = Number(numStr);
+
+        // Se la scatola non esiste ancora su questo dispositivo, la crea
+        if (!stato.scatole[num]) {
+          stato.scatole[num] = [];
+          scatoleAggiunte++;
+        }
+
+        // Aggiunge solo gli oggetti non già presenti (stesso nome+categoria+valore = duplicato)
+        for (const o of oggettiImportati) {
+          const esisteGia = stato.scatole[num].some(x =>
+            x.nome === o.nome &&
+            (x.categoria || '') === (o.categoria || '') &&
+            (x.valore ?? null) === (o.valore ?? null)
+          );
+          if (!esisteGia) {
+            stato.scatole[num].push(o);
+            oggettiAggiunti++;
+          }
+        }
+        stato.scatole[num].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+
+        // Unisce i metadati (viaggio/stanza) solo se mancano su questo dispositivo
+        if (importato.meta && importato.meta[num]) {
+          if (!stato.meta[num]) stato.meta[num] = { viaggio: '', stanza: '' };
+          if (!stato.meta[num].viaggio && importato.meta[num].viaggio) stato.meta[num].viaggio = importato.meta[num].viaggio;
+          if (!stato.meta[num].stanza && importato.meta[num].stanza) stato.meta[num].stanza = importato.meta[num].stanza;
+        }
+
+        // Se la scatola era bloccata sull'altro dispositivo, mantiene il blocco anche qui
+        if (importato.bloccate && importato.bloccate[num] && !stato.bloccate[num]) {
+          stato.bloccate[num] = true;
+        }
+      }
+
+      salvaDati();
+      aggiornaUI();
+      mostraToast(`⬆️ Unite ${scatoleAggiunte} nuove scatole, aggiunti ${oggettiAggiunti} oggetti`);
+    } catch (err) {
+      alert('Il file selezionato non è valido. Assicurati di aver scelto un file esportato da questa app.');
+    }
+  };
+  reader.readAsText(file);
+});
 
 // ── NUOVA SCATOLA ───────────────────────────────────────────────────────────────
 document.getElementById('btn-nuova-scatola').addEventListener('click', () => {
