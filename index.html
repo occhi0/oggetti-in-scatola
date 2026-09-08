@@ -97,7 +97,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   margin-bottom: 14px;
   color: #2d3748;
 }
-#oggetto-input, #categoria-input {
+#oggetto-input, #categoria-input, #valore-input {
   width: 100%;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
@@ -108,7 +108,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   -webkit-appearance: none;
   background: white;
 }
-#oggetto-input:focus, #categoria-input:focus { border-color: #2b6cb0; }
+#oggetto-input:focus, #categoria-input:focus, #valore-input:focus { border-color: #2b6cb0; }
 #btn-aggiungi {
   width: 100%;
   background: #38a169;
@@ -199,6 +199,19 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 .oggetto-item:last-child { border-bottom: none; }
 .oggetto-nome { color: #2d3748; font-weight: 600; font-size: 0.9rem; }
 .oggetto-categoria { color: #718096; font-size: 0.82rem; }
+.oggetto-valore { color: #2b6cb0; font-weight: 700; font-size: 0.82rem; margin-top: 1px; }
+.scatola-totale {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0 4px;
+  margin-top: 6px;
+  border-top: 2px solid #e2e8f0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2d3748;
+}
+.scatola-totale .importo { color: #2b6cb0; font-size: 1rem; }
 .btn-rimuovi {
   background: none;
   border: none;
@@ -351,6 +364,7 @@ footer {
     <h2>Aggiungi oggetto</h2>
     <input id="oggetto-input" type="text" placeholder="Nome oggetto (es. Pentola grande)…" />
     <input id="categoria-input" type="text" placeholder="Categoria (opzionale, es. Cucina)…" list="categorie-suggerite" />
+    <input id="valore-input" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Valore stimato in CHF (opzionale)…" />
     <datalist id="categorie-suggerite">
       <option value="Cucina">
       <option value="Vestiti">
@@ -413,6 +427,7 @@ if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = { viaggi
 // ── ELEMENTI ──────────────────────────────────────────────────────────────────
 const oggettoInput = document.getElementById('oggetto-input');
 const categoriaInput = document.getElementById('categoria-input');
+const valoreInput = document.getElementById('valore-input');
 const btnAggiungi = document.getElementById('btn-aggiungi');
 const feedback = document.getElementById('feedback');
 const viaggioSelect = document.getElementById('viaggio-select');
@@ -454,6 +469,8 @@ stanzaInput.addEventListener('input', () => {
 function aggiungiOggetto() {
   const nome = oggettoInput.value.trim();
   const categoria = categoriaInput.value.trim();
+  const valoreRaw = valoreInput.value.trim();
+  const valore = valoreRaw ? parseFloat(valoreRaw) : null;
   if (!nome) {
     mostraFeedback('Scrivi il nome dell\'oggetto.', 'errore');
     return;
@@ -462,7 +479,7 @@ function aggiungiOggetto() {
     mostraFeedback(`🔒 Scatola ${stato.scatolaAttiva} è bloccata!`, 'errore');
     return;
   }
-  stato.scatole[stato.scatolaAttiva].push({ nome, categoria });
+  stato.scatole[stato.scatolaAttiva].push({ nome, categoria, valore });
   stato.scatole[stato.scatolaAttiva].sort((a, b) =>
     a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' })
   );
@@ -470,13 +487,15 @@ function aggiungiOggetto() {
   aggiornaUI();
   oggettoInput.value = '';
   categoriaInput.value = '';
+  valoreInput.value = '';
   oggettoInput.focus();
   mostraToast(`📦 "${nome}" → Scatola ${stato.scatolaAttiva}`);
   mostraFeedback('', '');
 }
 btnAggiungi.addEventListener('click', aggiungiOggetto);
 oggettoInput.addEventListener('keydown', e => { if (e.key === 'Enter') categoriaInput.focus(); });
-categoriaInput.addEventListener('keydown', e => { if (e.key === 'Enter') aggiungiOggetto(); });
+categoriaInput.addEventListener('keydown', e => { if (e.key === 'Enter') valoreInput.focus(); });
+valoreInput.addEventListener('keydown', e => { if (e.key === 'Enter') aggiungiOggetto(); });
 
 // ── NUOVA SCATOLA ───────────────────────────────────────────────────────────────
 document.getElementById('btn-nuova-scatola').addEventListener('click', () => {
@@ -533,7 +552,9 @@ function stampaScatola(num) {
       <td>${i + 1}</td>
       <td>${o.nome}</td>
       <td>${o.categoria || '—'}</td>
+      <td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>
     </tr>`).join('');
+  const totale = sommaValori(oggetti);
   const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '—';
   const html = `<!DOCTYPE html>
 <html lang="it">
@@ -547,9 +568,11 @@ h1 { font-size: 1.6rem; margin-bottom: 4px; }
 .meta { color: #4a5568; margin-bottom: 20px; font-size: 0.9rem; }
 table { width: 100%; border-collapse: collapse; }
 th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+th.val, td.val { text-align: right; }
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; }
 tr:last-child td { border-bottom: none; }
 tr:nth-child(even) td { background: #f7fafc; }
+tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none; background: white; }
 .footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
 @media print { body { padding: 16px; } }
 </style>
@@ -559,8 +582,9 @@ tr:nth-child(even) td { background: #f7fafc; }
 <div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
 <div class="meta">Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>
 <table>
-<thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th></tr></thead>
+<thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th class="val">Valore stimato</th></tr></thead>
 <tbody>${righe}</tbody>
+<tfoot><tr><td colspan="3">Totale valore scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>
 </table>
 <div class="footer">Oggetti in Scatola</div>
 <script>window.onload = () => { window.print(); }<\/script>
@@ -614,6 +638,11 @@ cercaClear.addEventListener('click', () => {
   cercaInput.dispatchEvent(new Event('input'));
 });
 
+// ── HELPER VALORE ─────────────────────────────────────────────────────────────
+function sommaValori(oggetti) {
+  return oggetti.reduce((s, o) => s + ((o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? o.valore : 0), 0);
+}
+
 // ── UI ─────────────────────────────────────────────────────────────────────────
 function aggiornaUI() {
   document.getElementById('numero-scatola').textContent = stato.scatolaAttiva;
@@ -662,10 +691,16 @@ function aggiornaUI() {
               <div>
                 <div class="oggetto-nome">${o.nome}</div>
                 ${o.categoria ? `<div class="oggetto-categoria">${o.categoria}</div>` : ''}
+                ${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? `<div class="oggetto-valore">CHF ${o.valore.toFixed(2)}</div>` : ''}
               </div>
               <button class="btn-rimuovi" onclick="rimuoviOggetto(${num}, ${idx})" title="Rimuovi">✕</button>
             </div>`).join('')
         }
+        ${oggetti.length > 0 ? `
+        <div class="scatola-totale">
+          <span>Totale valore scatola</span>
+          <span class="importo">CHF ${sommaValori(oggetti).toFixed(2)}</span>
+        </div>` : ''}
       </div>
     </div>`;
   }).join('');
