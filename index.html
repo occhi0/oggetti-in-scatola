@@ -426,6 +426,7 @@ footer {
       <h2 style="margin-bottom:0;">Tutte le scatole</h2>
       <div style="display:flex; gap:6px;">
         <button id="btn-esporta-selezionate" style="display:none; background:#38a169; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta selezionate (<span id="conteggio-selezionate">0</span>)</button>
+        <button id="btn-esporta-categoria" style="background:#9f7aea; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Per categoria</button>
         <button id="btn-esporta-tutto" style="background:#2b6cb0; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta tutto</button>
       </div>
     </div>
@@ -933,6 +934,107 @@ function esportaSelezionate() {
   esportaScatole(Array.from(selezionate));
 }
 document.getElementById('btn-esporta-selezionate').addEventListener('click', esportaSelezionate);
+
+// ── STAMPA / EXPORT PER CATEGORIA (trasversale a tutte le scatole) ─────────────
+function esportaPerCategoria() {
+  const gruppi = {};
+  let totOggetti = 0;
+
+  for (const [num, oggetti] of Object.entries(stato.scatole)) {
+    oggetti.forEach(o => {
+      const cat = o.categoria && o.categoria.trim() ? o.categoria.trim() : 'Senza categoria';
+      if (!gruppi[cat]) gruppi[cat] = [];
+      gruppi[cat].push({ ...o, scatola: num });
+      totOggetti++;
+    });
+  }
+
+  if (totOggetti === 0) {
+    mostraToast('⚠️ Nessun oggetto da esportare');
+    return;
+  }
+
+  const categorieOrdinate = Object.keys(gruppi).sort((a, b) => {
+    if (a === 'Senza categoria') return 1;
+    if (b === 'Senza categoria') return -1;
+    return a.localeCompare(b, 'it', { sensitivity: 'base' });
+  });
+
+  let totaleGenerale = 0;
+
+  const blocchi = categorieOrdinate.map(cat => {
+    const oggetti = gruppi[cat].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+    const totale = sommaValori(oggetti);
+    totaleGenerale += totale;
+    const righe = oggetti.map((o, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${o.nome}</td>
+        <td>${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</td>
+        <td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>
+      </tr>`).join('');
+    return `
+    <div class="blocco-scatola">
+      <h2>${cat}</h2>
+      <table>
+        <thead><tr><th>#</th><th>Oggetto</th><th>Si trova in</th><th class="val">Valore stimato</th></tr></thead>
+        <tbody>${righe}</tbody>
+        <tfoot><tr><td colspan="3">Totale categoria</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>
+      </table>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<title>Elenco per categoria</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
+h1 { font-size: 1.7rem; margin-bottom: 4px; }
+h2 { font-size: 1.2rem; margin-bottom: 4px; color: #9f7aea; }
+.sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
+.blocco-scatola { margin-bottom: 28px; page-break-inside: avoid; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+th { background: #9f7aea; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+th.val, td.val { text-align: right; }
+td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: #f7fafc; }
+tfoot td { font-weight: 700; border-top: 2px solid #9f7aea; border-bottom: none; background: white; }
+.totale-generale {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: #faf5ff;
+  border-radius: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #9f7aea;
+}
+.footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
+@media print { body { padding: 16px; } }
+</style>
+</head>
+<body>
+<h1>📂 Elenco masserizie per categoria</h1>
+<div class="sub">${categorieOrdinate.length} categorie, ${totOggetti} oggetti totali — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
+${blocchi}
+<div class="totale-generale">
+  <span>Totale valore complessivo</span>
+  <span>CHF ${totaleGenerale.toFixed(2)}</span>
+</div>
+<div class="footer">Oggetti in Scatola</div>
+<script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+document.getElementById('btn-esporta-categoria').addEventListener('click', esportaPerCategoria);
 
 // ── RICERCA ───────────────────────────────────────────────────────────────────
 const cercaInput = document.getElementById('cerca-input');
