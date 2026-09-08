@@ -760,7 +760,7 @@ function toggleScatola(num) {
 }
 
 // ── STAMPA / EXPORT PDF ────────────────────────────────────────────────────────
-function stampaScatola(num) {
+function stampaScatola(num, conMeta = true) {
   const oggetti = stato.scatole[num] || [];
   const meta = stato.meta[num] || {};
   const righe = oggetti.map((o, i) => `
@@ -795,8 +795,7 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
 </head>
 <body>
 <h1>${labelScatola(num)}</h1>
-<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
-<div class="meta">Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>
+${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
 <table>
 <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th class="val">Valore stimato</th></tr></thead>
 <tbody>${righe}</tbody>
@@ -860,7 +859,6 @@ function esportaScatole(numeriRichiesti) {
     return `
     <div class="blocco-scatola">
       <h2>${labelScatola(num)}</h2>
-      <div class="meta">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>
       <table>
         <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th class="val">Valore stimato</th></tr></thead>
         <tbody>${righe}</tbody>
@@ -1034,7 +1032,8 @@ function aggiornaUI() {
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
           <button class="btn-lucchetto" onclick="event.stopPropagation(); toggleLucchetto(${chiaveJs})" title="${stato.bloccate[num] ? 'Sblocca' : 'Blocca'} scatola">${stato.bloccate[num] ? '🔒' : '🔓'}</button>
-          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs})" title="Esporta PDF">🖨️</button>
+          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs})" title="Esporta PDF completo">🖨️</button>
+          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs}, false)" title="Esporta PDF semplice (senza viaggio/stanza)">🧾</button>
           <div class="scatola-toggle" id="toggle-${num}">▼</div>
         </div>
       </div>
