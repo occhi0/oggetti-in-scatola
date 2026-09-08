@@ -157,6 +157,14 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   -webkit-user-select: none;
 }
 .scatola-header:active { background: #f7fafc; }
+.checkbox-scatola {
+  width: 20px;
+  height: 20px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  accent-color: #2b6cb0;
+  cursor: pointer;
+}
 .scatola-titolo {
   font-weight: 700;
   font-size: 1rem;
@@ -383,9 +391,12 @@ footer {
 
   <!-- Lista scatole -->
   <div id="lista-scatole">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
       <h2 style="margin-bottom:0;">Tutte le scatole</h2>
-      <button id="btn-esporta-tutto" style="background:#2b6cb0; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta tutto</button>
+      <div style="display:flex; gap:6px;">
+        <button id="btn-esporta-selezionate" style="display:none; background:#38a169; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta selezionate (<span id="conteggio-selezionate">0</span>)</button>
+        <button id="btn-esporta-tutto" style="background:#2b6cb0; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta tutto</button>
+      </div>
     </div>
 
     <div id="cerca-container">
@@ -426,6 +437,8 @@ if (!stato.scatole[stato.scatolaAttiva]) stato.scatole[stato.scatolaAttiva] = []
 if (!stato.bloccate) stato.bloccate = {};
 if (!stato.meta) stato.meta = {};
 if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = { viaggio: '', stanza: '' };
+
+const selezionate = new Set();
 
 // ── ELEMENTI ──────────────────────────────────────────────────────────────────
 const oggettoInput = document.getElementById('oggetto-input');
@@ -598,10 +611,23 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
   w.document.close();
 }
 
-// ── STAMPA / EXPORT TUTTE LE SCATOLE ────────────────────────────────────────────
-function esportaTutto() {
-  const numeri = Object.keys(stato.scatole).map(Number).sort((a, b) => a - b);
-  const numeriConOggetti = numeri.filter(n => (stato.scatole[n] || []).length > 0);
+// ── SELEZIONE SCATOLE ────────────────────────────────────────────────────────
+function toggleSelezione(num) {
+  if (selezionate.has(num)) selezionate.delete(num);
+  else selezionate.add(num);
+  aggiornaBottoneSelezionate();
+}
+function aggiornaBottoneSelezionate() {
+  const btn = document.getElementById('btn-esporta-selezionate');
+  document.getElementById('conteggio-selezionate').textContent = selezionate.size;
+  btn.style.display = selezionate.size > 0 ? 'inline-flex' : 'none';
+}
+
+// ── STAMPA / EXPORT SCATOLE (generica: tutte o selezionate) ────────────────────
+function esportaScatole(numeriRichiesti) {
+  const numeriConOggetti = numeriRichiesti
+    .filter(n => (stato.scatole[n] || []).length > 0)
+    .sort((a, b) => a - b);
 
   if (numeriConOggetti.length === 0) {
     mostraToast('⚠️ Nessun oggetto da esportare');
@@ -636,12 +662,13 @@ function esportaTutto() {
   }).join('');
 
   const totOggettiGen = numeriConOggetti.reduce((s, n) => s + (stato.scatole[n] || []).length, 0);
+  const elencoNumeri = numeriConOggetti.join(', ');
 
   const html = `<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8"/>
-<title>Elenco completo scatole</title>
+<title>Elenco scatole</title>
 <style>
 body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
 h1 { font-size: 1.7rem; margin-bottom: 4px; }
@@ -671,13 +698,11 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
 .footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
 @media print {
   body { padding: 16px; }
-  .blocco-scatola { page-break-after: always; }
-  .blocco-scatola:last-of-type { page-break-after: auto; }
 }
 </style>
 </head>
 <body>
-<h1>🧳 Elenco completo masserizie</h1>
+<h1>🧳 Elenco masserizie — Scatole ${elencoNumeri}</h1>
 <div class="sub">${numeriConOggetti.length} ${numeriConOggetti.length === 1 ? 'scatola' : 'scatole'}, ${totOggettiGen} oggetti totali — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
 ${blocchi}
 <div class="totale-generale">
@@ -692,7 +717,17 @@ ${blocchi}
   w.document.write(html);
   w.document.close();
 }
+
+function esportaTutto() {
+  const tutteLeScatole = Object.keys(stato.scatole).map(Number);
+  esportaScatole(tutteLeScatole);
+}
 document.getElementById('btn-esporta-tutto').addEventListener('click', esportaTutto);
+
+function esportaSelezionate() {
+  esportaScatole(Array.from(selezionate));
+}
+document.getElementById('btn-esporta-selezionate').addEventListener('click', esportaSelezionate);
 
 // ── RICERCA ───────────────────────────────────────────────────────────────────
 const cercaInput = document.getElementById('cerca-input');
@@ -768,12 +803,15 @@ function aggiornaUI() {
     return `
     <div class="scatola-card${stato.bloccate[num] ? ' bloccata' : ''}">
       <div class="scatola-header" onclick="toggleScatola(${num})">
-        <div>
-          <div class="scatola-titolo">🧳 Scatola ${num}${isAttiva ? ' ✏️' : ''}</div>
-          <div class="scatola-info">${oggetti.length === 1 ? '1 oggetto' : `${oggetti.length} oggetti`}</div>
-          <div class="scatola-badges">
-            ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
-            ${meta.stanza ? `<span class="badge badge-stanza">${meta.stanza}</span>` : ''}
+        <div style="display:flex; align-items:flex-start;">
+          <input type="checkbox" class="checkbox-scatola" data-num="${num}" ${selezionate.has(num) ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelezione(${num})" />
+          <div>
+            <div class="scatola-titolo">🧳 Scatola ${num}${isAttiva ? ' ✏️' : ''}</div>
+            <div class="scatola-info">${oggetti.length === 1 ? '1 oggetto' : `${oggetti.length} oggetti`}</div>
+            <div class="scatola-badges">
+              ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
+              ${meta.stanza ? `<span class="badge badge-stanza">${meta.stanza}</span>` : ''}
+            </div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
@@ -803,6 +841,7 @@ function aggiornaUI() {
       </div>
     </div>`;
   }).join('');
+  aggiornaBottoneSelezionate();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
