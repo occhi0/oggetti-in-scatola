@@ -996,7 +996,12 @@ function aggiornaUI() {
   document.getElementById('conteggio-scatola').textContent = n === 1 ? '1 oggetto' : `${n} oggetti`;
 
   const chiavi = Object.keys(stato.scatole);
-  const chiaviNumeriche = chiavi.filter(k => !isChiaveSpeciale(k)).map(Number).sort((a, b) => b - a);
+  const chiaviNumeriche = chiavi.filter(k => !isChiaveSpeciale(k)).map(Number).sort((a, b) => {
+    const aBloccata = stato.bloccate[a] ? 1 : 0;
+    const bBloccata = stato.bloccate[b] ? 1 : 0;
+    if (aBloccata !== bBloccata) return aBloccata - bBloccata;
+    return b - a;
+  });
   const chiaviSpeciali = CHIAVI_SPECIALI.filter(k => chiavi.includes(k));
   const ordineChiavi = [...chiaviSpeciali, ...chiaviNumeriche];
   const totOggetti = Object.values(stato.scatole).reduce((s, a) => s + a.length, 0);
