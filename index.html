@@ -237,11 +237,11 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 .select-sposta {
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  font-size: 0.72rem;
-  padding: 3px 4px;
+  font-size: 0.7rem;
+  padding: 3px 3px;
   background: white;
   color: #4a5568;
-  max-width: 105px;
+  max-width: 82px;
   margin-right: 4px;
 }
 .btn-stampa, .btn-lucchetto {
@@ -666,6 +666,34 @@ function spostaOggetto(daKey, idx, destKeyStr) {
   mostraToast(`↔️ "${oggetto.nome}" spostato in ${labelScatola(destKey)}`);
 }
 
+// ── CAMBIO CATEGORIA OGGETTO ────────────────────────────────────────────────────
+function elencoCategorieUsate() {
+  const usate = new Set();
+  Object.values(stato.scatole).forEach(oggetti => {
+    oggetti.forEach(o => { if (o.categoria && o.categoria.trim()) usate.add(o.categoria.trim()); });
+  });
+  return [...new Set([...CATEGORIE_BASE, ...usate])].sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
+}
+
+function opzioniCategoria(correnteCat) {
+  const cat = (correnteCat || '').trim();
+  const tutte = elencoCategorieUsate();
+  const opzioni = [`<option value="" ${cat === '' ? 'selected' : ''}>— Nessuna categoria —</option>`];
+  tutte.forEach(c => {
+    opzioni.push(`<option value="${c}" ${c === cat ? 'selected' : ''}>${c}</option>`);
+  });
+  return opzioni.join('');
+}
+
+function cambiaCategoria(key, idx, nuovaCategoria) {
+  if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); aggiornaUI(); return; }
+  const oggetto = stato.scatole[key][idx];
+  oggetto.categoria = nuovaCategoria.trim();
+  salvaDati();
+  aggiornaUI();
+  mostraToast(`🏷️ Categoria di "${oggetto.nome}" aggiornata`);
+}
+
 // ── BOZZA / DA VALUTARE (contenitore speciale senza numero) ────────────────────
 document.getElementById('btn-bozza').addEventListener('click', () => {
   if (!stato.scatole['bozza']) stato.scatole['bozza'] = [];
@@ -1084,8 +1112,17 @@ function sommaValori(oggetti) {
   return oggetti.reduce((s, o) => s + ((o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? o.valore : 0), 0);
 }
 
+// ── CATEGORIE SUGGERITE DINAMICHE ───────────────────────────────────────────────
+const CATEGORIE_BASE = ['Cucina', 'Vestiti', 'Elettronica', 'Bagno', 'Documenti', 'Decorazioni', 'Attrezzi', 'Giocattoli', 'Sport', 'Varie'];
+function aggiornaCategorieSuggerite() {
+  const tutte = elencoCategorieUsate();
+  const datalist = document.getElementById('categorie-suggerite');
+  datalist.innerHTML = tutte.map(c => `<option value="${c}">`).join('');
+}
+
 // ── UI ─────────────────────────────────────────────────────────────────────────
 function aggiornaUI() {
+  aggiornaCategorieSuggerite();
   const numeroEl = document.getElementById('numero-scatola');
   if (isChiaveSpeciale(stato.scatolaAttiva)) {
     numeroEl.textContent = labelScatola(stato.scatolaAttiva);
@@ -1154,7 +1191,10 @@ function aggiornaUI() {
                 ${o.categoria ? `<div class="oggetto-categoria">${o.categoria}</div>` : ''}
                 ${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? `<div class="oggetto-valore">CHF ${o.valore.toFixed(2)}</div>` : ''}
               </div>
-              <div style="display:flex; align-items:center;">
+              <div style="display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:3px;">
+                <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaCategoria(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
+                  ${opzioniCategoria(o.categoria)}
+                </select>
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
                   ${opzioniDestinazione(num)}
                 </select>
