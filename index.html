@@ -234,6 +234,18 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   flex-shrink: 0;
 }
 .btn-rimuovi:active { background: #fff5f5; }
+.btn-modifica {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #2b6cb0;
+  flex-shrink: 0;
+}
+.btn-modifica:active { background: #ebf8ff; }
+.scatola-card.bloccata .btn-modifica { opacity: 0.3; pointer-events: none; }
 .select-sposta {
   border: 1px solid #e2e8f0;
   border-radius: 6px;
@@ -722,6 +734,31 @@ function cambiaCategoria(key, idx, nuovaCategoria) {
   salvaDati();
   aggiornaUI();
   mostraToast(`🏷️ Categoria di "${oggetto.nome}" aggiornata`);
+}
+
+// ── MODIFICA NOME/VALORE OGGETTO ────────────────────────────────────────────────
+function modificaOggetto(key, idx) {
+  if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); return; }
+  const oggetto = stato.scatole[key][idx];
+
+  const nuovoNome = prompt('Nome oggetto:', oggetto.nome);
+  if (nuovoNome === null) return;
+  const nomeTrim = nuovoNome.trim();
+  if (!nomeTrim) { mostraToast('⚠️ Il nome non può essere vuoto'); return; }
+
+  const valoreAttuale = (oggetto.valore !== null && oggetto.valore !== undefined && !isNaN(oggetto.valore)) ? String(oggetto.valore) : '';
+  const nuovoValoreStr = prompt('Valore stimato in CHF (lascia vuoto per nessun valore):', valoreAttuale);
+
+  oggetto.nome = nomeTrim;
+  if (nuovoValoreStr !== null) {
+    const valTrim = nuovoValoreStr.trim();
+    oggetto.valore = valTrim ? parseFloat(valTrim) : null;
+  }
+
+  stato.scatole[key].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+  salvaDati();
+  aggiornaUI();
+  mostraToast(`✏️ "${oggetto.nome}" aggiornato`);
 }
 
 // ── BOZZA / DA VALUTARE (contenitore speciale senza numero) ────────────────────
@@ -1286,6 +1323,7 @@ function aggiornaUI() {
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
                   ${opzioniDestinazione(num)}
                 </select>
+                <button class="btn-modifica" onclick="event.stopPropagation(); modificaOggetto(${chiaveJs}, ${idx})" title="Modifica nome/valore">✏️</button>
                 <button class="btn-rimuovi" onclick="rimuoviOggetto(${chiaveJs}, ${idx})" title="Rimuovi">✕</button>
               </div>
             </div>`).join('')
