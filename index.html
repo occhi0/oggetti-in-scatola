@@ -390,8 +390,19 @@ footer {
   padding: 32px 16px;
   color: #a0aec0;
 }
-#empty-state .emoji { font-size: 3rem; margin-bottom: 12px; }
-#empty-state p { font-size: 0.95rem; line-height: 1.5; }
+#toggle-valore-slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+#toggle-valore-stampa:checked + #toggle-valore-slider::before { transform: translateX(20px); }
+#toggle-valore-stampa:not(:checked) + #toggle-valore-slider { background: #cbd5e0; }
 </style>
 </head>
 <body>
@@ -407,6 +418,15 @@ footer {
 </header>
 
 <main>
+
+  <!-- Impostazione valore nei PDF -->
+  <div id="toggle-valore-bar" style="display:flex; align-items:center; justify-content:space-between; background:white; border-radius:10px; padding:10px 14px; margin-bottom:12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <span style="font-size:0.85rem; color:#2d3748; font-weight:600;">💰 Includi valore nei PDF</span>
+    <label style="position:relative; display:inline-block; width:44px; height:24px;">
+      <input type="checkbox" id="toggle-valore-stampa" checked style="opacity:0; width:0; height:0;">
+      <span id="toggle-valore-slider" style="position:absolute; cursor:pointer; inset:0; background:#38a169; border-radius:24px; transition:0.2s;"></span>
+    </label>
+  </div>
 
   <!-- Sincronizzazione tra dispositivi -->
   <div id="sync-bar" style="display:flex; gap:8px; margin-bottom:16px;">
@@ -521,6 +541,17 @@ if (!stato.meta) stato.meta = {};
 if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = { viaggio: '', stanza: '' };
 
 const selezionate = new Set();
+
+// ── TOGGLE VALORE NEI PDF ────────────────────────────────────────────────────
+const TOGGLE_VALORE_KEY = 'oggetti-in-scatola-mostra-valore';
+let mostraValoreStampa = localStorage.getItem(TOGGLE_VALORE_KEY) !== 'no';
+const toggleValoreCheckbox = document.getElementById('toggle-valore-stampa');
+toggleValoreCheckbox.checked = mostraValoreStampa;
+toggleValoreCheckbox.addEventListener('change', () => {
+  mostraValoreStampa = toggleValoreCheckbox.checked;
+  localStorage.setItem(TOGGLE_VALORE_KEY, mostraValoreStampa ? 'si' : 'no');
+  mostraToast(mostraValoreStampa ? '💰 Valore incluso nei PDF' : '🚫 Valore nascosto nei PDF');
+});
 
 // ── ELEMENTI ──────────────────────────────────────────────────────────────────
 const oggettoInput = document.getElementById('oggetto-input');
@@ -872,7 +903,7 @@ function stampaScatola(num, conMeta = true) {
       <td>${i + 1}</td>
       <td>${o.nome}</td>
       <td>${o.categoria || '—'}</td>
-      <td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>
+      ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
     </tr>`).join('');
   const totale = sommaValori(oggetti);
   const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '—';
@@ -889,7 +920,7 @@ h1 { font-size: 1.6rem; margin-bottom: 4px; }
 table { width: 100%; border-collapse: collapse; }
 th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
 th.val, td.val { text-align: right; }
-td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; }
+td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
 tr:last-child td { border-bottom: none; }
 tr:nth-child(even) td { background: #f7fafc; }
 tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none; background: white; }
@@ -901,9 +932,9 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
 <h1>${labelScatola(num)}</h1>
 ${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
 <table>
-<thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th class="val">Valore stimato</th></tr></thead>
+<thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
 <tbody>${righe}</tbody>
-<tfoot><tr><td colspan="3">Totale valore scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>
+${mostraValoreStampa ? `<tfoot><tr><td colspan="3">Totale valore scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
 </table>
 <div class="footer">Oggetti in Scatola</div>
 <script>window.onload = () => { window.print(); }<\/script>
@@ -958,15 +989,15 @@ function esportaScatole(numeriRichiesti) {
         <td>${i + 1}</td>
         <td>${o.nome}</td>
         <td>${o.categoria || '—'}</td>
-        <td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>
+        ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
       <h2>${labelScatola(num)}</h2>
       <table>
-        <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th class="val">Valore stimato</th></tr></thead>
+        <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
         <tbody>${righe}</tbody>
-        <tfoot><tr><td colspan="3">Totale scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>
+        ${mostraValoreStampa ? `<tfoot><tr><td colspan="3">Totale scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
       </table>
     </div>`;
   }).join('');
@@ -985,10 +1016,14 @@ h2 { font-size: 1.2rem; margin-bottom: 4px; color: #2b6cb0; }
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
 .blocco-scatola { margin-bottom: 28px; }
 .meta { color: #4a5568; margin-bottom: 10px; font-size: 0.85rem; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
+th:nth-child(1), td:nth-child(1) { width: 8%; }
+th:nth-child(2), td:nth-child(2) { width: 42%; }
+th:nth-child(3), td:nth-child(3) { width: 30%; }
+th:nth-child(4), td:nth-child(4) { width: 20%; }
 th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
 th.val, td.val { text-align: right; }
-td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; }
+td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
 tr:last-child td { border-bottom: none; }
 tr:nth-child(even) td { background: #f7fafc; }
 tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none; background: white; }
@@ -1014,10 +1049,10 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
 <h1>🧳 Elenco masserizie</h1>
 <div class="sub">${numeriConOggetti.length} ${numeriConOggetti.length === 1 ? 'scatola' : 'scatole'}, ${totOggettiGen} oggetti totali — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
 ${blocchi}
-<div class="totale-generale">
+${mostraValoreStampa ? `<div class="totale-generale">
   <span>Totale valore complessivo</span>
   <span>CHF ${totaleGenerale.toFixed(2)}</span>
-</div>
+</div>` : ''}
 <div class="footer">Oggetti in Scatola</div>
 <script>window.onload = () => { window.print(); }<\/script>
 </body>
@@ -1087,15 +1122,15 @@ function esportaPerCategoria(filtroCategorie) {
         <td>${i + 1}</td>
         <td>${o.nome}</td>
         <td>${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</td>
-        <td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>
+        ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
       <h2>${cat}</h2>
       <table>
-        <thead><tr><th>#</th><th>Oggetto</th><th>Si trova in</th><th class="val">Valore stimato</th></tr></thead>
+        <thead><tr><th>#</th><th>Oggetto</th><th>Si trova in</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
         <tbody>${righe}</tbody>
-        <tfoot><tr><td colspan="3">Totale categoria</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>
+        ${mostraValoreStampa ? `<tfoot><tr><td colspan="3">Totale categoria</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
       </table>
     </div>`;
   }).join('');
@@ -1111,10 +1146,14 @@ h1 { font-size: 1.7rem; margin-bottom: 4px; }
 h2 { font-size: 1.2rem; margin-bottom: 4px; color: #9f7aea; }
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
 .blocco-scatola { margin-bottom: 28px; }
-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+table { width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
+th:nth-child(1), td:nth-child(1) { width: 8%; }
+th:nth-child(2), td:nth-child(2) { width: 42%; }
+th:nth-child(3), td:nth-child(3) { width: 30%; }
+th:nth-child(4), td:nth-child(4) { width: 20%; }
 th { background: #9f7aea; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
 th.val, td.val { text-align: right; }
-td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; }
+td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
 tr:last-child td { border-bottom: none; }
 tr:nth-child(even) td { background: #f7fafc; }
 tfoot td { font-weight: 700; border-top: 2px solid #9f7aea; border-bottom: none; background: white; }
@@ -1138,10 +1177,10 @@ tfoot td { font-weight: 700; border-top: 2px solid #9f7aea; border-bottom: none;
 <h1>📂 Elenco masserizie per categoria</h1>
 <div class="sub">${categorieOrdinate.length} categorie, ${totOggetti} oggetti totali — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
 ${blocchi}
-<div class="totale-generale">
+${mostraValoreStampa ? `<div class="totale-generale">
   <span>Totale valore complessivo</span>
   <span>CHF ${totaleGenerale.toFixed(2)}</span>
-</div>
+</div>` : ''}
 <div class="footer">Oggetti in Scatola</div>
 <script>window.onload = () => { window.print(); }<\/script>
 </body>
@@ -1169,7 +1208,7 @@ function apriModalCategorie() {
     <label class="modal-cat-riga">
       <input type="checkbox" class="modal-cat-checkbox" value="${cat.replace(/"/g, '&quot;')}" checked />
       <span class="nome">${cat}</span>
-      <span class="dettagli">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} · CHF ${totale.toFixed(2)}</span>
+      <span class="dettagli">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'}${mostraValoreStampa ? ' · CHF ' + totale.toFixed(2) : ''}</span>
     </label>`;
   }).join('');
   modalCategorie.style.display = 'flex';
