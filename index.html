@@ -108,7 +108,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   margin-bottom: 14px;
   color: #2d3748;
 }
-#oggetto-input, #categoria-input, #valore-input {
+#oggetto-input, #categoria-input, #stanza-oggetto-input, #valore-input {
   width: 100%;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
@@ -119,7 +119,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   -webkit-appearance: none;
   background: white;
 }
-#oggetto-input:focus, #categoria-input:focus, #valore-input:focus { border-color: #2b6cb0; }
+#oggetto-input:focus, #categoria-input:focus, #stanza-oggetto-input:focus, #valore-input:focus { border-color: #2b6cb0; }
 #btn-aggiungi {
   width: 100%;
   background: #38a169;
@@ -219,6 +219,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 .oggetto-nome { color: #2d3748; font-weight: 600; font-size: 0.9rem; }
 .oggetto-categoria { color: #718096; font-size: 0.82rem; }
 .oggetto-valore { color: #2b6cb0; font-weight: 700; font-size: 0.82rem; margin-top: 1px; }
+.oggetto-stanza { color: #6b46c1; font-size: 0.8rem; margin-top: 1px; }
 .scatola-totale {
   display: flex;
   justify-content: space-between;
@@ -449,8 +450,9 @@ footer {
         <option value="4">Viaggio 4</option>
         <option value="dopo">Da spedire dopo</option>
       </select>
-      <input type="text" id="stanza-input" class="meta-input" placeholder="Stanza destinazione…" />
+      <input type="text" id="stanza-input" class="meta-input" placeholder="Destinazione…" list="stanze-suggerite" />
     </div>
+    <div style="font-size:0.75rem; color:#a0aec0; margin-top:6px;">La destinazione qui sopra vale per tutti gli oggetti della scatola, a meno che uno specifico oggetto non abbia una destinazione propria.</div>
   </div>
 
   <!-- Form aggiunta -->
@@ -458,6 +460,7 @@ footer {
     <h2>Aggiungi oggetto</h2>
     <input id="oggetto-input" type="text" placeholder="Nome oggetto (es. Pentola grande)…" />
     <input id="categoria-input" type="text" placeholder="Categoria (opzionale, es. Cucina)…" list="categorie-suggerite" />
+    <input id="stanza-oggetto-input" type="text" placeholder="Destinazione (opzionale, es. Cucina)…" list="stanze-suggerite" />
     <input id="valore-input" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Valore stimato in CHF (opzionale)…" />
     <datalist id="categorie-suggerite">
       <option value="Cucina">
@@ -471,6 +474,7 @@ footer {
       <option value="Sport">
       <option value="Varie">
     </datalist>
+    <datalist id="stanze-suggerite"></datalist>
     <button id="btn-aggiungi">Aggiungi alla scatola attiva</button>
     <div id="feedback"></div>
   </div>
@@ -556,6 +560,7 @@ toggleValoreCheckbox.addEventListener('change', () => {
 // ── ELEMENTI ──────────────────────────────────────────────────────────────────
 const oggettoInput = document.getElementById('oggetto-input');
 const categoriaInput = document.getElementById('categoria-input');
+const stanzaOggettoInput = document.getElementById('stanza-oggetto-input');
 const valoreInput = document.getElementById('valore-input');
 const btnAggiungi = document.getElementById('btn-aggiungi');
 const feedback = document.getElementById('feedback');
@@ -583,7 +588,7 @@ function mostraToast(msg, azione) {
   }
 }
 
-// ── META SCATOLA ATTIVA (viaggio/stanza) ───────────────────────────────────────
+// ── META SCATOLA ATTIVA (viaggio + stanza di default) ───────────────────────────
 function caricaMetaAttiva() {
   const m = stato.meta[stato.scatolaAttiva] || { viaggio: '', stanza: '' };
   viaggioSelect.value = m.viaggio || '';
@@ -606,6 +611,7 @@ stanzaInput.addEventListener('input', () => {
 function aggiungiOggetto() {
   const nome = oggettoInput.value.trim();
   const categoria = categoriaInput.value.trim();
+  const stanza = stanzaOggettoInput.value.trim();
   const valoreRaw = valoreInput.value.trim();
   const valore = valoreRaw ? parseFloat(valoreRaw) : null;
   if (!nome) {
@@ -616,7 +622,7 @@ function aggiungiOggetto() {
     mostraFeedback(`🔒 ${labelScatola(stato.scatolaAttiva)} è bloccata!`, 'errore');
     return;
   }
-  stato.scatole[stato.scatolaAttiva].push({ nome, categoria, valore });
+  stato.scatole[stato.scatolaAttiva].push({ nome, categoria, stanza, valore });
   stato.scatole[stato.scatolaAttiva].sort((a, b) =>
     a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' })
   );
@@ -624,6 +630,7 @@ function aggiungiOggetto() {
   aggiornaUI();
   oggettoInput.value = '';
   categoriaInput.value = '';
+  stanzaOggettoInput.value = '';
   valoreInput.value = '';
   oggettoInput.focus();
   mostraToast(`📦 "${nome}" → ${labelScatola(stato.scatolaAttiva)}`);
@@ -631,7 +638,8 @@ function aggiungiOggetto() {
 }
 btnAggiungi.addEventListener('click', aggiungiOggetto);
 oggettoInput.addEventListener('keydown', e => { if (e.key === 'Enter') categoriaInput.focus(); });
-categoriaInput.addEventListener('keydown', e => { if (e.key === 'Enter') valoreInput.focus(); });
+categoriaInput.addEventListener('keydown', e => { if (e.key === 'Enter') stanzaOggettoInput.focus(); });
+stanzaOggettoInput.addEventListener('keydown', e => { if (e.key === 'Enter') valoreInput.focus(); });
 valoreInput.addEventListener('keydown', e => { if (e.key === 'Enter') aggiungiOggetto(); });
 
 // ── EXPORT / IMPORT DATI (sincronizzazione manuale tra dispositivi) ────────────
@@ -723,6 +731,13 @@ function labelScatola(key) {
 const CHIAVI_SPECIALI = ['bozza', 'fuori', 'auto'];
 function isChiaveSpeciale(k) { return CHIAVI_SPECIALI.includes(k); }
 
+// ── STANZA EFFETTIVA (propria dell'oggetto, altrimenti default della scatola) ──
+function stanzaEffettiva(oggetto, containerKey) {
+  if (oggetto.stanza && oggetto.stanza.trim()) return oggetto.stanza.trim();
+  const meta = stato.meta[containerKey];
+  return (meta && meta.stanza) ? meta.stanza : '';
+}
+
 // ── SPOSTAMENTO OGGETTI TRA CONTENITORI ─────────────────────────────────────────
 function opzioniDestinazione(correnteKey) {
   const chiavi = Object.keys(stato.scatole);
@@ -756,6 +771,14 @@ function elencoCategorieUsate() {
   return [...new Set([...CATEGORIE_BASE, ...usate])].sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
 }
 
+function elencoStanzeUsate() {
+  const usate = new Set();
+  Object.values(stato.scatole).forEach(oggetti => {
+    oggetti.forEach(o => { if (o.stanza && o.stanza.trim()) usate.add(o.stanza.trim()); });
+  });
+  return [...usate].sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
+}
+
 function opzioniCategoria(correnteCat) {
   const cat = (correnteCat || '').trim();
   const tutte = elencoCategorieUsate();
@@ -775,7 +798,27 @@ function cambiaCategoria(key, idx, nuovaCategoria) {
   mostraToast(`🏷️ Categoria di "${oggetto.nome}" aggiornata`);
 }
 
-// ── MODIFICA NOME/VALORE OGGETTO ────────────────────────────────────────────────
+// ── CAMBIO STANZA OGGETTO ────────────────────────────────────────────────────────
+function opzioniStanza(propriaStanza) {
+  const val = (propriaStanza || '').trim();
+  const tutte = elencoStanzeUsate();
+  const opzioni = [`<option value="" ${val === '' ? 'selected' : ''}>— Come scatola —</option>`];
+  tutte.forEach(s => {
+    opzioni.push(`<option value="${s}" ${s === val ? 'selected' : ''}>${s}</option>`);
+  });
+  return opzioni.join('');
+}
+
+function cambiaStanza(key, idx, nuovaStanza) {
+  if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); aggiornaUI(); return; }
+  const oggetto = stato.scatole[key][idx];
+  oggetto.stanza = nuovaStanza.trim();
+  salvaDati();
+  aggiornaUI();
+  mostraToast(`📍 Destinazione di "${oggetto.nome}" aggiornata`);
+}
+
+// ── MODIFICA NOME/VALORE/STANZA OGGETTO ─────────────────────────────────────────
 function modificaOggetto(key, idx) {
   if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); return; }
   const oggetto = stato.scatole[key][idx];
@@ -785,10 +828,14 @@ function modificaOggetto(key, idx) {
   const nomeTrim = nuovoNome.trim();
   if (!nomeTrim) { mostraToast('⚠️ Il nome non può essere vuoto'); return; }
 
+  const stanzaAttuale = oggetto.stanza || '';
+  const nuovaStanzaStr = prompt('Destinazione (lascia vuoto per nessuna):', stanzaAttuale);
+
   const valoreAttuale = (oggetto.valore !== null && oggetto.valore !== undefined && !isNaN(oggetto.valore)) ? String(oggetto.valore) : '';
   const nuovoValoreStr = prompt('Valore stimato in CHF (lascia vuoto per nessun valore):', valoreAttuale);
 
   oggetto.nome = nomeTrim;
+  if (nuovaStanzaStr !== null) oggetto.stanza = nuovaStanzaStr.trim();
   if (nuovoValoreStr !== null) {
     const valTrim = nuovoValoreStr.trim();
     oggetto.valore = valTrim ? parseFloat(valTrim) : null;
@@ -903,6 +950,7 @@ function stampaScatola(num, conMeta = true) {
       <td>${i + 1}</td>
       <td>${o.nome}</td>
       <td>${o.categoria || '—'}</td>
+      <td>${stanzaEffettiva(o, num) || '—'}</td>
       ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
     </tr>`).join('');
   const totale = sommaValori(oggetti);
@@ -917,7 +965,12 @@ body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
 h1 { font-size: 1.6rem; margin-bottom: 4px; }
 .sub { color: #718096; margin-bottom: 8px; font-size: 0.95rem; }
 .meta { color: #4a5568; margin-bottom: 20px; font-size: 0.9rem; }
-table { width: 100%; border-collapse: collapse; }
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+th:nth-child(1), td:nth-child(1) { width: 6%; }
+th:nth-child(2), td:nth-child(2) { width: 34%; }
+th:nth-child(3), td:nth-child(3) { width: 24%; }
+th:nth-child(4), td:nth-child(4) { width: 20%; }
+th:nth-child(5), td:nth-child(5) { width: 16%; }
 th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
 th.val, td.val { text-align: right; }
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
@@ -930,11 +983,11 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
 </head>
 <body>
 <h1>${labelScatola(num)}</h1>
-${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel} &nbsp;|&nbsp; Stanza destinazione: ${meta.stanza || '—'}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
+${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
 <table>
-<thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
+<thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
 <tbody>${righe}</tbody>
-${mostraValoreStampa ? `<tfoot><tr><td colspan="3">Totale valore scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
+${mostraValoreStampa ? `<tfoot><tr><td colspan="4">Totale valore scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
 </table>
 <div class="footer">Oggetti in Scatola</div>
 <script>window.onload = () => { window.print(); }<\/script>
@@ -989,15 +1042,16 @@ function esportaScatole(numeriRichiesti) {
         <td>${i + 1}</td>
         <td>${o.nome}</td>
         <td>${o.categoria || '—'}</td>
+        <td>${stanzaEffettiva(o, num) || '—'}</td>
         ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
       <h2>${labelScatola(num)}</h2>
       <table>
-        <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
+        <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
         <tbody>${righe}</tbody>
-        ${mostraValoreStampa ? `<tfoot><tr><td colspan="3">Totale scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
+        ${mostraValoreStampa ? `<tfoot><tr><td colspan="4">Totale scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
       </table>
     </div>`;
   }).join('');
@@ -1017,10 +1071,11 @@ h2 { font-size: 1.2rem; margin-bottom: 4px; color: #2b6cb0; }
 .blocco-scatola { margin-bottom: 28px; }
 .meta { color: #4a5568; margin-bottom: 10px; font-size: 0.85rem; }
 table { width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
-th:nth-child(1), td:nth-child(1) { width: 8%; }
-th:nth-child(2), td:nth-child(2) { width: 42%; }
-th:nth-child(3), td:nth-child(3) { width: 30%; }
+th:nth-child(1), td:nth-child(1) { width: 6%; }
+th:nth-child(2), td:nth-child(2) { width: 34%; }
+th:nth-child(3), td:nth-child(3) { width: 24%; }
 th:nth-child(4), td:nth-child(4) { width: 20%; }
+th:nth-child(5), td:nth-child(5) { width: 16%; }
 th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
 th.val, td.val { text-align: right; }
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
@@ -1122,15 +1177,16 @@ function esportaPerCategoria(filtroCategorie) {
         <td>${i + 1}</td>
         <td>${o.nome}</td>
         <td>${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</td>
+        <td>${stanzaEffettiva(o, o.scatola) || '—'}</td>
         ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
       <h2>${cat}</h2>
       <table>
-        <thead><tr><th>#</th><th>Oggetto</th><th>Si trova in</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
+        <thead><tr><th>#</th><th>Oggetto</th><th>Si trova in</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
         <tbody>${righe}</tbody>
-        ${mostraValoreStampa ? `<tfoot><tr><td colspan="3">Totale categoria</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
+        ${mostraValoreStampa ? `<tfoot><tr><td colspan="4">Totale categoria</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
       </table>
     </div>`;
   }).join('');
@@ -1147,10 +1203,11 @@ h2 { font-size: 1.2rem; margin-bottom: 4px; color: #9f7aea; }
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
 .blocco-scatola { margin-bottom: 28px; }
 table { width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
-th:nth-child(1), td:nth-child(1) { width: 8%; }
-th:nth-child(2), td:nth-child(2) { width: 42%; }
-th:nth-child(3), td:nth-child(3) { width: 30%; }
+th:nth-child(1), td:nth-child(1) { width: 6%; }
+th:nth-child(2), td:nth-child(2) { width: 34%; }
+th:nth-child(3), td:nth-child(3) { width: 24%; }
 th:nth-child(4), td:nth-child(4) { width: 20%; }
+th:nth-child(5), td:nth-child(5) { width: 16%; }
 th { background: #9f7aea; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
 th.val, td.val { text-align: right; }
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
@@ -1290,6 +1347,10 @@ function aggiornaCategorieSuggerite() {
   const tutte = elencoCategorieUsate();
   const datalist = document.getElementById('categorie-suggerite');
   datalist.innerHTML = tutte.map(c => `<option value="${c}">`).join('');
+
+  const stanze = elencoStanzeUsate();
+  const datalistStanze = document.getElementById('stanze-suggerite');
+  datalistStanze.innerHTML = stanze.map(s => `<option value="${s}">`).join('');
 }
 
 // ── UI ─────────────────────────────────────────────────────────────────────────
@@ -1342,14 +1403,14 @@ function aggiornaUI() {
             <div class="scatola-info">${oggetti.length === 1 ? '1 oggetto' : `${oggetti.length} oggetti`}</div>
             <div class="scatola-badges">
               ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
-              ${meta.stanza ? `<span class="badge badge-stanza">${meta.stanza}</span>` : ''}
+              ${meta.stanza ? `<span class="badge badge-stanza">📍 ${meta.stanza}</span>` : ''}
             </div>
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
           <button class="btn-lucchetto" onclick="event.stopPropagation(); toggleLucchetto(${chiaveJs})" title="${stato.bloccate[num] ? 'Sblocca' : 'Blocca'} scatola">${stato.bloccate[num] ? '🔒' : '🔓'}</button>
           <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs})" title="Esporta PDF completo">🖨️</button>
-          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs}, false)" title="Esporta PDF semplice (senza viaggio/stanza)">🧾</button>
+          <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs}, false)" title="Esporta PDF semplice (senza viaggio/destinazione)">🧾</button>
           <div class="scatola-toggle" id="toggle-${num}">▼</div>
         </div>
       </div>
@@ -1361,11 +1422,20 @@ function aggiornaUI() {
               <div>
                 <div class="oggetto-nome">${o.nome}</div>
                 ${o.categoria ? `<div class="oggetto-categoria">${o.categoria}</div>` : ''}
+                ${(() => {
+                  const stanzaEff = stanzaEffettiva(o, num);
+                  if (!stanzaEff) return '';
+                  const ereditata = !(o.stanza && o.stanza.trim());
+                  return `<div class="oggetto-stanza">📍 ${stanzaEff}${ereditata ? ' <span style="opacity:0.6; font-size:0.72rem;">(scatola)</span>' : ''}</div>`;
+                })()}
                 ${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? `<div class="oggetto-valore">CHF ${o.valore.toFixed(2)}</div>` : ''}
               </div>
               <div style="display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:3px;">
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaCategoria(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
                   ${opzioniCategoria(o.categoria)}
+                </select>
+                <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaStanza(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
+                  ${opzioniStanza(o.stanza)}
                 </select>
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
                   ${opzioniDestinazione(num)}
