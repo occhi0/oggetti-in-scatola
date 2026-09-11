@@ -336,8 +336,10 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   margin-bottom: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 #risultati-ricerca .res-nome { font-weight: 600; font-size: 0.9rem; color: #2d3748; }
 #risultati-ricerca .res-categoria { font-size: 0.82rem; color: #718096; }
@@ -1299,7 +1301,7 @@ const cercaClear = document.getElementById('cerca-clear');
 const risultatiContainer = document.getElementById('risultati-ricerca');
 const scatoleContainer = document.getElementById('scatole-container');
 
-cercaInput.addEventListener('input', () => {
+function eseguiRicerca() {
   const q = cercaInput.value.trim().toLowerCase();
   cercaClear.style.display = q ? 'block' : 'none';
   if (!q) {
@@ -1312,9 +1314,9 @@ cercaInput.addEventListener('input', () => {
 
   const trovati = [];
   for (const [num, oggetti] of Object.entries(stato.scatole)) {
-    oggetti.forEach(o => {
+    oggetti.forEach((o, idx) => {
       if (o.nome.toLowerCase().includes(q) || (o.categoria || '').toLowerCase().includes(q)) {
-        trovati.push({ ...o, scatola: num });
+        trovati.push({ ...o, scatola: num, idx });
       }
     });
   }
@@ -1322,15 +1324,33 @@ cercaInput.addEventListener('input', () => {
     risultatiContainer.innerHTML = `<div id="nessun-risultato">Nessun oggetto trovato per "${cercaInput.value}"</div>`;
     return;
   }
-  risultatiContainer.innerHTML = trovati.map(o => `
+  risultatiContainer.innerHTML = trovati.map(o => {
+    const chiaveJs = (typeof o.scatola === 'string') ? `'${o.scatola}'` : o.scatola;
+    const chiaveOriginale = isChiaveSpeciale(o.scatola) ? o.scatola : Number(o.scatola);
+    return `
     <div class="res-item">
       <div>
         <div class="res-nome">${o.nome}</div>
         ${o.categoria ? `<div class="res-categoria">${o.categoria}</div>` : ''}
+        <div class="res-scatola" style="margin-top:4px;">${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</div>
       </div>
-      <div class="res-scatola">${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</div>
-    </div>`).join('');
-});
+      <div style="display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:3px; margin-top:6px;">
+        <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaCategoria(${chiaveJs}, ${o.idx}, this.value)" ${stato.bloccate[chiaveOriginale] ? 'disabled' : ''}>
+          ${opzioniCategoria(o.categoria)}
+        </select>
+        <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaStanza(${chiaveJs}, ${o.idx}, this.value)" ${stato.bloccate[chiaveOriginale] ? 'disabled' : ''}>
+          ${opzioniStanza(o.stanza)}
+        </select>
+        <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${o.idx}, this.value)" ${stato.bloccate[chiaveOriginale] ? 'disabled' : ''}>
+          ${opzioniDestinazione(o.scatola)}
+        </select>
+        <button class="btn-modifica" onclick="event.stopPropagation(); modificaOggetto(${chiaveJs}, ${o.idx})" title="Modifica nome/valore">✏️</button>
+        <button class="btn-rimuovi" onclick="event.stopPropagation(); rimuoviOggetto(${chiaveJs}, ${o.idx})" title="Rimuovi">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+cercaInput.addEventListener('input', eseguiRicerca);
 cercaClear.addEventListener('click', () => {
   cercaInput.value = '';
   cercaInput.dispatchEvent(new Event('input'));
@@ -1454,6 +1474,7 @@ function aggiornaUI() {
     </div>`;
   }).join('');
   aggiornaBottoneSelezionate();
+  if (cercaInput.value.trim()) eseguiRicerca();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
