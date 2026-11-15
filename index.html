@@ -304,8 +304,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
   color: #718096;
 }
 .btn-stampa:active, .btn-lucchetto:active { background: #f0f4f8; }
-.btn-lucchetto svg { width: 26px; height: 26px; display: block; }
-.btn-lucchetto.bloccato { background: #fff5f5; border-radius: 8px; }
+.btn-lucchetto svg { width: 22px; height: 22px; display: block; }
 .scatola-card.bloccata .scatola-header { background: #f7fafc; }
 .scatola-card.bloccata .scatola-titolo { color: #718096; }
 .scatola-card.bloccata .btn-rimuovi { opacity: 0.3; pointer-events: none; }
@@ -421,7 +420,7 @@ footer {
   transition: 0.2s;
 }
 #toggle-valore-stampa:checked + #toggle-valore-slider::before { transform: translateX(20px); }
-#toggle-valore-stampa:not(:checked) + #toggle-valore-slider { background: #cbd5e0; }
+#toggle-valore-stampa:not(:checked) + #toggle-valore-slider { background: #a9b4c4; }
 </style>
 </head>
 <body>
@@ -995,8 +994,8 @@ function rimuoviOggetto(scatola, idx) {
 // ── ICONA LUCCHETTO (chiuso rosso / aperto grigio) ─────────────────────────────
 function iconaLucchetto(chiuso) {
   return chiuso
-    ? '<svg viewBox="0 0 24 24" aria-label="Bloccata"><path d="M7 11V8a5 5 0 0 1 10 0v3" fill="none" stroke="#c53030" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="10.5" rx="2.5" fill="#c53030"/><circle cx="12" cy="16" r="1.7" fill="#fff"/></svg>'
-    : '<svg viewBox="0 0 24 24" aria-label="Sbloccata"><path d="M7 11V8a5 5 0 0 1 9.6-2" fill="none" stroke="#a0aec0" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="10.5" rx="2.5" fill="none" stroke="#a0aec0" stroke-width="2.2"/><circle cx="12" cy="16" r="1.5" fill="#a0aec0"/></svg>';
+    ? '<svg viewBox="0 0 24 24" aria-label="Bloccata"><path d="M7 11V8a5 5 0 0 1 10 0v3" fill="none" stroke="#718096" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="10.5" rx="2.5" fill="#718096"/><circle cx="12" cy="16" r="1.7" fill="#fff"/></svg>'
+    : '<svg viewBox="0 0 24 24" aria-label="Sbloccata"><path d="M7 11V8a5 5 0 0 1 9.6-2" fill="none" stroke="#a9b4c4" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="10.5" rx="2.5" fill="none" stroke="#a9b4c4" stroke-width="2.2"/><circle cx="12" cy="16" r="1.5" fill="#a9b4c4"/></svg>';
 }
 
 // ── LUCCHETTO ─────────────────────────────────────────────────────────────────
