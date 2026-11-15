@@ -1042,12 +1042,12 @@ th:nth-child(2), td:nth-child(2) { width: 34%; }
 th:nth-child(3), td:nth-child(3) { width: 24%; }
 th:nth-child(4), td:nth-child(4) { width: 20%; }
 th:nth-child(5), td:nth-child(5) { width: 16%; }
-th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+th { background: #e5e5e5; color: #000; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 12px; text-align: left; font-size: 0.85rem; font-weight: 700; }
 th.val, td.val { text-align: right; }
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
 tr:last-child td { border-bottom: none; }
 tr:nth-child(even) td { background: #f7fafc; }
-tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none; background: white; }
+tfoot td { font-weight: 700; border-top: 2px solid #000; border-bottom: none; background: white; }
 .footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
 @media print { body { padding: 16px; } }
 </style>
@@ -1138,7 +1138,7 @@ function esportaScatole(numeriRichiesti) {
 <style>
 body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
 h1 { font-size: 1.7rem; margin-bottom: 4px; }
-h2 { font-size: 1.2rem; margin-bottom: 4px; color: #2b6cb0; }
+h2 { font-size: 1.2rem; margin-bottom: 4px; color: #000; }
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
 .blocco-scatola { margin-bottom: 28px; }
 .meta { color: #4a5568; margin-bottom: 10px; font-size: 0.85rem; }
@@ -1148,23 +1148,24 @@ th:nth-child(2), td:nth-child(2) { width: 34%; }
 th:nth-child(3), td:nth-child(3) { width: 24%; }
 th:nth-child(4), td:nth-child(4) { width: 20%; }
 th:nth-child(5), td:nth-child(5) { width: 16%; }
-th { background: #2b6cb0; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+th { background: #e5e5e5; color: #000; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 12px; text-align: left; font-size: 0.85rem; font-weight: 700; }
 th.val, td.val { text-align: right; }
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
 tr:last-child td { border-bottom: none; }
 tr:nth-child(even) td { background: #f7fafc; }
-tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none; background: white; }
+tfoot td { font-weight: 700; border-top: 2px solid #000; border-bottom: none; background: white; }
 .totale-generale {
   margin-top: 20px;
   padding: 16px 20px;
-  background: #ebf8ff;
+  background: #f2f2f2;
+  border: 2px solid #000;
   border-radius: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #2b6cb0;
+  color: #000;
 }
 .footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
 @media print {
