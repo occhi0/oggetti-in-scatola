@@ -935,6 +935,17 @@ function toggleLucchetto(num) {
   aggiornaUI();
 }
 
+// ── USA QUESTA SCATOLA ────────────────────────────────────────────────────────
+function usaScatola(num) {
+  if (stato.bloccate[num]) { mostraToast(`🔒 ${labelScatola(num)} è bloccata`); return; }
+  stato.scatolaAttiva = num;
+  salvaDati();
+  caricaMetaAttiva();
+  aggiornaUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  mostraToast(`📌 Ora stai riempiendo ${labelScatola(num)}`);
+}
+
 // ── TOGGLE APERTURA ───────────────────────────────────────────────────────────
 function toggleScatola(num) {
   const el = document.getElementById(`oggetti-${num}`);
@@ -1428,6 +1439,7 @@ function aggiornaUI() {
           </div>
         </div>
         <div style="display:flex; align-items:center; gap:6px;">
+          ${(num == stato.scatolaAttiva || stato.bloccate[num]) ? '' : `<button class="btn-stampa" onclick="event.stopPropagation(); usaScatola(${chiaveJs})" title="Usa questa scatola">📌</button>`}
           <button class="btn-lucchetto" onclick="event.stopPropagation(); toggleLucchetto(${chiaveJs})" title="${stato.bloccate[num] ? 'Sblocca' : 'Blocca'} scatola">${stato.bloccate[num] ? '🔒' : '🔓'}</button>
           <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs})" title="Esporta PDF completo">🖨️</button>
           <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs}, false)" title="Esporta PDF semplice (senza viaggio/destinazione)">🧾</button>
