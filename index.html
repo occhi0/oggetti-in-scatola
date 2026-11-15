@@ -195,6 +195,15 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 }
 .badge-viaggio { background: #ebf8ff; color: #2b6cb0; }
 .badge-stanza { background: #faf5ff; color: #6b46c1; }
+.badge-dim { background: #f0fff4; color: #276749; }
+#dim-row { display:flex; gap:6px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
+#dim-row input { width:72px; border:2px solid #e2e8f0; border-radius:10px; padding:8px 6px; font-size:0.9rem; outline:none; background:white; text-align:center; }
+#dim-row input:focus { border-color: #2b6cb0; }
+#dim-row .x { color:#a0aec0; font-weight:700; }
+#dim-volume { font-size:0.8rem; color:#276749; font-weight:700; margin-top:6px; min-height:1em; }
+#riepilogo-volume { background:white; border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:0.85rem; color:#2d3748; box-shadow:0 1px 3px rgba(0,0,0,0.08); display:none; }
+#riepilogo-volume b { color:#276749; }
+#riepilogo-volume .riga { margin-top:3px; color:#4a5568; }
 .scatola-info {
   font-size: 0.85rem;
   color: #718096;
@@ -458,6 +467,15 @@ footer {
       </select>
       <input type="text" id="stanza-input" class="meta-input" placeholder="Destinazione…" list="stanze-suggerite" />
     </div>
+    <div id="dim-row">
+      <input type="number" id="dim-l" inputmode="decimal" min="0" step="0.1" placeholder="Largh." />
+      <span class="x">×</span>
+      <input type="number" id="dim-p" inputmode="decimal" min="0" step="0.1" placeholder="Prof." />
+      <span class="x">×</span>
+      <input type="number" id="dim-h" inputmode="decimal" min="0" step="0.1" placeholder="Altez." />
+      <span class="x">cm</span>
+    </div>
+    <div id="dim-volume"></div>
     <div style="font-size:0.75rem; color:#a0aec0; margin-top:6px;">La destinazione qui sopra vale per tutti gli oggetti della scatola, a meno che uno specifico oggetto non abbia una destinazione propria.</div>
   </div>
 
@@ -502,6 +520,7 @@ footer {
     </div>
     <div id="risultati-ricerca" style="display:none; margin-bottom:12px;"></div>
 
+    <div id="riepilogo-volume"></div>
     <div id="scatole-container">
       <div id="empty-state">
         <div class="emoji">🧳</div>
@@ -572,6 +591,7 @@ const btnAggiungi = document.getElementById('btn-aggiungi');
 const feedback = document.getElementById('feedback');
 const viaggioSelect = document.getElementById('viaggio-select');
 const stanzaInput = document.getElementById('stanza-input');
+const dimL = document.getElementById('dim-l'), dimP = document.getElementById('dim-p'), dimH = document.getElementById('dim-h');
 
 function mostraFeedback(msg, tipo) {
   feedback.textContent = msg;
@@ -595,11 +615,44 @@ function mostraToast(msg, azione) {
 }
 
 // ── META SCATOLA ATTIVA (viaggio + stanza di default) ───────────────────────────
+function num0(v) { const n = parseFloat(v); return (!isNaN(n) && n > 0) ? n : 0; }
+function volumeLitri(m) {
+  if (!m) return 0;
+  const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
+  return (l && p && h) ? (l * p * h) / 1000 : 0;
+}
+function fmtLitri(v) { return v >= 1000 ? (v / 1000).toLocaleString('it-IT', { maximumFractionDigits: 2 }) + ' m³' : v.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' L'; }
+function fmtDim(m) {
+  if (!m) return '';
+  const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
+  if (!l && !p && !h) return '';
+  const f = x => x ? x.toLocaleString('it-IT', { maximumFractionDigits: 1 }) : '?';
+  return `${f(l)}×${f(p)}×${f(h)} cm`;
+}
 function caricaMetaAttiva() {
   const m = stato.meta[stato.scatolaAttiva] || { viaggio: '', stanza: '' };
   viaggioSelect.value = m.viaggio || '';
   stanzaInput.value = m.stanza || '';
+  dimL.value = m.lung || ''; dimP.value = m.prof || ''; dimH.value = m.alt || '';
+  aggiornaDimUI();
 }
+function aggiornaDimUI() {
+  const speciale = isChiaveSpeciale(stato.scatolaAttiva);
+  document.getElementById('dim-row').style.display = speciale ? 'none' : 'flex';
+  const v = speciale ? 0 : volumeLitri(stato.meta[stato.scatolaAttiva]);
+  document.getElementById('dim-volume').textContent = v ? `📐 Volume: ${fmtLitri(v)}` : '';
+}
+['lung:dimL', 'prof:dimP', 'alt:dimH'].forEach(pair => {
+  const [campo, id] = pair.split(':');
+  document.getElementById(id === 'dimL' ? 'dim-l' : id === 'dimP' ? 'dim-p' : 'dim-h').addEventListener('input', e => {
+    if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+    const n = parseFloat(e.target.value);
+    stato.meta[stato.scatolaAttiva][campo] = (!isNaN(n) && n > 0) ? n : '';
+    salvaDati();
+    aggiornaDimUI();
+    aggiornaUI();
+  });
+});
 viaggioSelect.addEventListener('change', () => {
   if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
   stato.meta[stato.scatolaAttiva].viaggio = viaggioSelect.value;
@@ -709,6 +762,7 @@ fileImporta.addEventListener('change', (e) => {
           if (!stato.meta[num]) stato.meta[num] = { viaggio: '', stanza: '' };
           if (!stato.meta[num].viaggio && importato.meta[num].viaggio) stato.meta[num].viaggio = importato.meta[num].viaggio;
           if (!stato.meta[num].stanza && importato.meta[num].stanza) stato.meta[num].stanza = importato.meta[num].stanza;
+          ['lung', 'prof', 'alt'].forEach(c => { if (!stato.meta[num][c] && importato.meta[num][c]) stato.meta[num][c] = importato.meta[num][c]; });
         }
 
         // Se la scatola era bloccata sull'altro dispositivo, mantiene il blocco anche qui
@@ -1000,7 +1054,7 @@ tfoot td { font-weight: 700; border-top: 2px solid #2b6cb0; border-bottom: none;
 </head>
 <body>
 <h1>${labelScatola(num)}</h1>
-${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
+${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel}${fmtDim(meta) ? ' &nbsp;|&nbsp; Dimensioni: ' + fmtDim(meta) + (volumeLitri(meta) ? ' (' + fmtLitri(volumeLitri(meta)) + ')' : '') : ''}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
 <table>
 <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
 <tbody>${righe}</tbody>
@@ -1064,7 +1118,7 @@ function esportaScatole(numeriRichiesti) {
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
-      <h2>${labelScatola(num)}</h2>
+      <h2>${labelScatola(num)}${(!isChiaveSpeciale(num) && fmtDim(stato.meta[num])) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtDim(stato.meta[num])}${volumeLitri(stato.meta[num]) ? ' (' + fmtLitri(volumeLitri(stato.meta[num])) + ')' : ''}</span>` : ''}</h2>
       <table>
         <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
         <tbody>${righe}</tbody>
@@ -1389,7 +1443,26 @@ function aggiornaCategorieSuggerite() {
 }
 
 // ── UI ─────────────────────────────────────────────────────────────────────────
+function aggiornaRiepilogoVolume() {
+  const el = document.getElementById('riepilogo-volume');
+  const chiavi = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k));
+  const conMisure = chiavi.filter(k => volumeLitri(stato.meta[k]) > 0);
+  if (conMisure.length === 0) { el.style.display = 'none'; return; }
+  const tot = conMisure.reduce((s, k) => s + volumeLitri(stato.meta[k]), 0);
+  const senza = chiavi.length - conMisure.length;
+  const perViaggio = {};
+  conMisure.forEach(k => {
+    const v = (stato.meta[k] && stato.meta[k].viaggio) || '';
+    perViaggio[v] = (perViaggio[v] || 0) + volumeLitri(stato.meta[k]);
+  });
+  const nomeV = v => v === '' ? 'Senza viaggio' : v === 'dopo' ? 'Da spedire dopo' : `Viaggio ${v}`;
+  const righe = Object.keys(perViaggio).sort().map(v => `<div class="riga">${nomeV(v)}: ${fmtLitri(perViaggio[v])}</div>`).join('');
+  el.innerHTML = `📐 Volume totale scatole: <b>${fmtLitri(tot)}</b> <span style="color:#718096">(${conMisure.length} scatole con misure${senza ? `, ${senza} senza` : ''})</span>${righe}`;
+  el.style.display = 'block';
+}
+
 function aggiornaUI() {
+  aggiornaRiepilogoVolume();
   aggiornaCategorieSuggerite();
   const numeroEl = document.getElementById('numero-scatola');
   if (isChiaveSpeciale(stato.scatolaAttiva)) {
@@ -1439,6 +1512,7 @@ function aggiornaUI() {
             <div class="scatola-badges">
               ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
               ${meta.stanza ? `<span class="badge badge-stanza">📍 ${meta.stanza}</span>` : ''}
+              ${(!isChiaveSpeciale(num) && fmtDim(meta)) ? `<span class="badge badge-dim">📐 ${fmtDim(meta)}${volumeLitri(meta) ? ' · ' + fmtLitri(volumeLitri(meta)) : ''}</span>` : ''}
             </div>
           </div>
         </div>
