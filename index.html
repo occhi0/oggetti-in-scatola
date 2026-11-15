@@ -469,6 +469,7 @@ footer {
       </select>
       <input type="text" id="stanza-input" class="meta-input" placeholder="Destinazione…" list="stanze-suggerite" />
     </div>
+    <div id="nome-row" style="margin-top:10px;"><input type="text" id="nome-scatola" class="meta-input" maxlength="40" placeholder="Nome scatola (opzionale, es. Cassapanca)" style="width:100%;max-width:340px;" /></div>
     <div id="dim-row">
       <input type="number" id="dim-l" inputmode="decimal" min="0" step="0.1" placeholder="Largh." />
       <span class="x">×</span>
@@ -645,10 +646,18 @@ function caricaMetaAttiva() {
 }
 function aggiornaDimUI() {
   document.getElementById('dim-row').style.display = 'flex';
+  document.getElementById('nome-row').style.display = isChiaveSpeciale(stato.scatolaAttiva) ? 'none' : 'block';
+  document.getElementById('nome-scatola').value = (stato.meta[stato.scatolaAttiva] && stato.meta[stato.scatolaAttiva].nome) || '';
   const v = volumeLitri(stato.meta[stato.scatolaAttiva]);
   const w = pesoKg(stato.meta[stato.scatolaAttiva]);
   document.getElementById('dim-volume').textContent = [v ? `📐 Volume: ${fmtLitri(v)}` : '', w ? `⚖️ Peso: ${fmtKg(w)}` : ''].filter(Boolean).join('  ·  ');
 }
+document.getElementById('nome-scatola').addEventListener('input', e => {
+  if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+  stato.meta[stato.scatolaAttiva].nome = e.target.value;
+  salvaDati();
+  aggiornaUI();
+});
 document.getElementById('dim-peso').addEventListener('input', e => {
   if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
   const n = parseFloat(e.target.value);
@@ -777,7 +786,7 @@ fileImporta.addEventListener('change', (e) => {
           if (!stato.meta[num]) stato.meta[num] = { viaggio: '', stanza: '' };
           if (!stato.meta[num].viaggio && importato.meta[num].viaggio) stato.meta[num].viaggio = importato.meta[num].viaggio;
           if (!stato.meta[num].stanza && importato.meta[num].stanza) stato.meta[num].stanza = importato.meta[num].stanza;
-          ['lung', 'prof', 'alt', 'peso'].forEach(c => { if (!stato.meta[num][c] && importato.meta[num][c]) stato.meta[num][c] = importato.meta[num][c]; });
+          ['lung', 'prof', 'alt', 'peso', 'nome'].forEach(c => { if (!stato.meta[num][c] && importato.meta[num][c]) stato.meta[num][c] = importato.meta[num][c]; });
         }
 
         // Se la scatola era bloccata sull'altro dispositivo, mantiene il blocco anche qui
@@ -801,7 +810,8 @@ function labelScatola(key) {
   if (key === 'fuori') return '📤 Fuori scatola';
   if (key === 'auto') return '🚗 Diretti in auto';
   if (key === 'bozza') return '📝 Bozza / Da valutare';
-  return `🧳 Scatola ${key}`;
+  const nome = (typeof stato !== 'undefined' && stato.meta && stato.meta[key] && stato.meta[key].nome) ? stato.meta[key].nome.trim() : '';
+  return `🧳 Scatola ${key}${nome ? ' – ' + nome : ''}`;
 }
 const CHIAVI_SPECIALI = ['bozza', 'fuori', 'auto'];
 function isChiaveSpeciale(k) { return CHIAVI_SPECIALI.includes(k); }
