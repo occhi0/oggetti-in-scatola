@@ -1079,6 +1079,7 @@ function aggiornaBottoneSelezionate() {
   const btn = document.getElementById('btn-esporta-selezionate');
   document.getElementById('conteggio-selezionate').textContent = selezionate.size;
   btn.style.display = selezionate.size > 0 ? 'inline-flex' : 'none';
+  aggiornaRiepilogoVolume();
 }
 
 // ── STAMPA / EXPORT SCATOLE (generica: tutte o selezionate) ────────────────────
@@ -1457,7 +1458,14 @@ function aggiornaRiepilogoVolume() {
   });
   const nomeV = v => v === '' ? 'Senza viaggio' : v === 'dopo' ? 'Da spedire dopo' : `Viaggio ${v}`;
   const righe = Object.keys(perViaggio).sort().map(v => `<div class="riga">${nomeV(v)}: ${fmtLitri(perViaggio[v])}</div>`).join('');
-  el.innerHTML = `📐 Volume totale scatole: <b>${fmtLitri(tot)}</b> <span style="color:#718096">(${conMisure.length} scatole con misure${senza ? `, ${senza} senza` : ''})</span>${righe}`;
+  const selNum = [...selezionate].filter(k => !isChiaveSpeciale(k) && stato.scatole[k]);
+  let rigaSel = '';
+  if (selNum.length > 0) {
+    const volSel = selNum.reduce((a, k) => a + volumeLitri(stato.meta[k]), 0);
+    const selSenza = selNum.filter(k => !(volumeLitri(stato.meta[k]) > 0)).length;
+    rigaSel = `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">✅ Selezionate (${selNum.length}): <b>${fmtLitri(volSel)}</b>${selSenza ? ` <span style="color:#c05621">(${selSenza} senza misure)</span>` : ''}</div>`;
+  }
+  el.innerHTML = `📐 Volume totale scatole: <b>${fmtLitri(tot)}</b> <span style="color:#718096">(${conMisure.length} scatole con misure${senza ? `, ${senza} senza` : ''})</span>${righe}${rigaSel}`;
   el.style.display = 'block';
 }
 
