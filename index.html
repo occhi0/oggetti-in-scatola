@@ -200,6 +200,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #dim-row input { width:72px; border:2px solid #e2e8f0; border-radius:10px; padding:8px 6px; font-size:0.9rem; outline:none; background:white; text-align:center; }
 #dim-row input:focus { border-color: #2b6cb0; }
 #dim-row .x { color:#a0aec0; font-weight:700; }
+#dim-row #dim-peso { width:84px; }
 #dim-volume { font-size:0.8rem; color:#276749; font-weight:700; margin-top:6px; min-height:1em; }
 #riepilogo-volume { background:white; border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:0.85rem; color:#2d3748; box-shadow:0 1px 3px rgba(0,0,0,0.08); display:none; }
 #riepilogo-volume b { color:#276749; }
@@ -474,6 +475,8 @@ footer {
       <span class="x">×</span>
       <input type="number" id="dim-h" inputmode="decimal" min="0" step="0.1" placeholder="Altez." />
       <span class="x">cm</span>
+      <span class="x" style="margin-left:8px">⚖️</span>
+      <input type="number" id="dim-peso" inputmode="decimal" min="0" step="0.1" placeholder="Peso kg" />
     </div>
     <div id="dim-volume"></div>
     <div style="font-size:0.75rem; color:#a0aec0; margin-top:6px;">La destinazione qui sopra vale per tutti gli oggetti della scatola, a meno che uno specifico oggetto non abbia una destinazione propria.</div>
@@ -621,6 +624,8 @@ function volumeLitri(m) {
   const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
   return (l && p && h) ? (l * p * h) / 1000 : 0;
 }
+function pesoKg(m) { return m ? num0(m.peso) : 0; }
+function fmtKg(v) { return v.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg'; }
 function fmtLitri(v) { return v >= 1000 ? (v / 1000).toLocaleString('it-IT', { maximumFractionDigits: 2 }) + ' m³' : v.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' L'; }
 function fmtDim(m) {
   if (!m) return '';
@@ -634,14 +639,24 @@ function caricaMetaAttiva() {
   viaggioSelect.value = m.viaggio || '';
   stanzaInput.value = m.stanza || '';
   dimL.value = m.lung || ''; dimP.value = m.prof || ''; dimH.value = m.alt || '';
+  document.getElementById('dim-peso').value = m.peso || '';
   aggiornaDimUI();
 }
 function aggiornaDimUI() {
   const speciale = isChiaveSpeciale(stato.scatolaAttiva);
   document.getElementById('dim-row').style.display = speciale ? 'none' : 'flex';
   const v = speciale ? 0 : volumeLitri(stato.meta[stato.scatolaAttiva]);
-  document.getElementById('dim-volume').textContent = v ? `📐 Volume: ${fmtLitri(v)}` : '';
+  const w = speciale ? 0 : pesoKg(stato.meta[stato.scatolaAttiva]);
+  document.getElementById('dim-volume').textContent = [v ? `📐 Volume: ${fmtLitri(v)}` : '', w ? `⚖️ Peso: ${fmtKg(w)}` : ''].filter(Boolean).join('  ·  ');
 }
+document.getElementById('dim-peso').addEventListener('input', e => {
+  if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+  const n = parseFloat(e.target.value);
+  stato.meta[stato.scatolaAttiva].peso = (!isNaN(n) && n > 0) ? n : '';
+  salvaDati();
+  aggiornaDimUI();
+  aggiornaUI();
+});
 ['lung:dimL', 'prof:dimP', 'alt:dimH'].forEach(pair => {
   const [campo, id] = pair.split(':');
   document.getElementById(id === 'dimL' ? 'dim-l' : id === 'dimP' ? 'dim-p' : 'dim-h').addEventListener('input', e => {
@@ -762,7 +777,7 @@ fileImporta.addEventListener('change', (e) => {
           if (!stato.meta[num]) stato.meta[num] = { viaggio: '', stanza: '' };
           if (!stato.meta[num].viaggio && importato.meta[num].viaggio) stato.meta[num].viaggio = importato.meta[num].viaggio;
           if (!stato.meta[num].stanza && importato.meta[num].stanza) stato.meta[num].stanza = importato.meta[num].stanza;
-          ['lung', 'prof', 'alt'].forEach(c => { if (!stato.meta[num][c] && importato.meta[num][c]) stato.meta[num][c] = importato.meta[num][c]; });
+          ['lung', 'prof', 'alt', 'peso'].forEach(c => { if (!stato.meta[num][c] && importato.meta[num][c]) stato.meta[num][c] = importato.meta[num][c]; });
         }
 
         // Se la scatola era bloccata sull'altro dispositivo, mantiene il blocco anche qui
@@ -1054,7 +1069,7 @@ tfoot td { font-weight: 700; border-top: 2px solid #000; border-bottom: none; ba
 </head>
 <body>
 <h1>${labelScatola(num)}</h1>
-${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel}${fmtDim(meta) ? ' &nbsp;|&nbsp; Dimensioni: ' + fmtDim(meta) + (volumeLitri(meta) ? ' (' + fmtLitri(volumeLitri(meta)) + ')' : '') : ''}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
+${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel}${fmtDim(meta) ? ' &nbsp;|&nbsp; Dimensioni: ' + fmtDim(meta) + (volumeLitri(meta) ? ' (' + fmtLitri(volumeLitri(meta)) + ')' : '') : ''}${pesoKg(meta) ? ' &nbsp;|&nbsp; Peso: ' + fmtKg(pesoKg(meta)) : ''}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
 <table>
 <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
 <tbody>${righe}</tbody>
@@ -1119,7 +1134,7 @@ function esportaScatole(numeriRichiesti) {
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
-      <h2>${labelScatola(num)}${(!isChiaveSpeciale(num) && fmtDim(stato.meta[num])) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtDim(stato.meta[num])}${volumeLitri(stato.meta[num]) ? ' (' + fmtLitri(volumeLitri(stato.meta[num])) + ')' : ''}</span>` : ''}</h2>
+      <h2>${labelScatola(num)}${(!isChiaveSpeciale(num) && fmtDim(stato.meta[num])) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtDim(stato.meta[num])}${volumeLitri(stato.meta[num]) ? ' (' + fmtLitri(volumeLitri(stato.meta[num])) + ')' : ''}${pesoKg(stato.meta[num]) ? ' — ' + fmtKg(pesoKg(stato.meta[num])) : ''}</span>` : (!isChiaveSpeciale(num) && pesoKg(stato.meta[num]) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtKg(pesoKg(stato.meta[num]))}</span>` : '')}</h2>
       <table>
         <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
         <tbody>${righe}</tbody>
@@ -1448,25 +1463,29 @@ function aggiornaCategorieSuggerite() {
 function aggiornaRiepilogoVolume() {
   const el = document.getElementById('riepilogo-volume');
   const chiavi = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k));
-  const conMisure = chiavi.filter(k => volumeLitri(stato.meta[k]) > 0);
-  if (conMisure.length === 0) { el.style.display = 'none'; return; }
-  const tot = conMisure.reduce((s, k) => s + volumeLitri(stato.meta[k]), 0);
-  const senza = chiavi.length - conMisure.length;
+  const vol = k => volumeLitri(stato.meta[k]);
+  const peso = k => pesoKg(stato.meta[k]);
+  const conDati = chiavi.filter(k => vol(k) > 0 || peso(k) > 0);
+  if (conDati.length === 0) { el.style.display = 'none'; return; }
+  const fmt = (v, w) => [v ? fmtLitri(v) : '', w ? fmtKg(w) : ''].filter(Boolean).join(' · ') || '—';
+  const somma = ks => [ks.reduce((a, k) => a + vol(k), 0), ks.reduce((a, k) => a + peso(k), 0)];
+  const [tv, tw] = somma(conDati);
+  const senzaVol = chiavi.filter(k => !(vol(k) > 0)).length;
+  const senzaPeso = chiavi.filter(k => !(peso(k) > 0)).length;
+  const note = [senzaVol ? `${senzaVol} senza misure` : '', senzaPeso ? `${senzaPeso} senza peso` : ''].filter(Boolean).join(', ');
   const perViaggio = {};
-  conMisure.forEach(k => {
-    const v = (stato.meta[k] && stato.meta[k].viaggio) || '';
-    perViaggio[v] = (perViaggio[v] || 0) + volumeLitri(stato.meta[k]);
-  });
+  conDati.forEach(k => { const v = (stato.meta[k] && stato.meta[k].viaggio) || ''; (perViaggio[v] = perViaggio[v] || []).push(k); });
   const nomeV = v => v === '' ? 'Senza viaggio' : v === 'dopo' ? 'Da spedire dopo' : `Viaggio ${v}`;
-  const righe = Object.keys(perViaggio).sort().map(v => `<div class="riga">${nomeV(v)}: ${fmtLitri(perViaggio[v])}</div>`).join('');
+  const righe = Object.keys(perViaggio).sort().map(v => { const [a, b] = somma(perViaggio[v]); return `<div class="riga">${nomeV(v)}: ${fmt(a, b)}</div>`; }).join('');
   const selNum = [...selezionate].filter(k => !isChiaveSpeciale(k) && stato.scatole[k]);
   let rigaSel = '';
   if (selNum.length > 0) {
-    const volSel = selNum.reduce((a, k) => a + volumeLitri(stato.meta[k]), 0);
-    const selSenza = selNum.filter(k => !(volumeLitri(stato.meta[k]) > 0)).length;
-    rigaSel = `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">✅ Selezionate (${selNum.length}): <b>${fmtLitri(volSel)}</b>${selSenza ? ` <span style="color:#c05621">(${selSenza} senza misure)</span>` : ''}</div>`;
+    const [sv, sw] = somma(selNum);
+    const sSenza = [selNum.filter(k => !(vol(k) > 0)).length ? 'senza misure' : '', selNum.filter(k => !(peso(k) > 0)).length ? 'senza peso' : ''].filter(Boolean);
+    const nSenza = selNum.filter(k => !(vol(k) > 0) || !(peso(k) > 0)).length;
+    rigaSel = `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">✅ Selezionate (${selNum.length}): <b>${fmt(sv, sw)}</b>${nSenza ? ` <span style="color:#c05621">(dati mancanti su ${nSenza})</span>` : ''}</div>`;
   }
-  el.innerHTML = `📐 Volume totale scatole: <b>${fmtLitri(tot)}</b> <span style="color:#718096">(${conMisure.length} scatole con misure${senza ? `, ${senza} senza` : ''})</span>${righe}${rigaSel}`;
+  el.innerHTML = `📐 Totale scatole: <b>${fmt(tv, tw)}</b> <span style="color:#718096">(${conDati.length} con dati${note ? ', ' + note : ''})</span>${righe}${rigaSel}`;
   el.style.display = 'block';
 }
 
@@ -1521,6 +1540,7 @@ function aggiornaUI() {
             <div class="scatola-badges">
               ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
               ${meta.stanza ? `<span class="badge badge-stanza">📍 ${meta.stanza}</span>` : ''}
+              ${(!isChiaveSpeciale(num) && pesoKg(meta)) ? `<span class="badge badge-dim">⚖️ ${fmtKg(pesoKg(meta))}</span>` : ''}
               ${(!isChiaveSpeciale(num) && fmtDim(meta)) ? `<span class="badge badge-dim">📐 ${fmtDim(meta)}${volumeLitri(meta) ? ' · ' + fmtLitri(volumeLitri(meta)) : ''}</span>` : ''}
             </div>
           </div>
