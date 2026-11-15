@@ -643,10 +643,9 @@ function caricaMetaAttiva() {
   aggiornaDimUI();
 }
 function aggiornaDimUI() {
-  const speciale = isChiaveSpeciale(stato.scatolaAttiva);
-  document.getElementById('dim-row').style.display = speciale ? 'none' : 'flex';
-  const v = speciale ? 0 : volumeLitri(stato.meta[stato.scatolaAttiva]);
-  const w = speciale ? 0 : pesoKg(stato.meta[stato.scatolaAttiva]);
+  document.getElementById('dim-row').style.display = 'flex';
+  const v = volumeLitri(stato.meta[stato.scatolaAttiva]);
+  const w = pesoKg(stato.meta[stato.scatolaAttiva]);
   document.getElementById('dim-volume').textContent = [v ? `📐 Volume: ${fmtLitri(v)}` : '', w ? `⚖️ Peso: ${fmtKg(w)}` : ''].filter(Boolean).join('  ·  ');
 }
 document.getElementById('dim-peso').addEventListener('input', e => {
@@ -1134,7 +1133,7 @@ function esportaScatole(numeriRichiesti) {
       </tr>`).join('');
     return `
     <div class="blocco-scatola">
-      <h2>${labelScatola(num)}${(!isChiaveSpeciale(num) && fmtDim(stato.meta[num])) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtDim(stato.meta[num])}${volumeLitri(stato.meta[num]) ? ' (' + fmtLitri(volumeLitri(stato.meta[num])) + ')' : ''}${pesoKg(stato.meta[num]) ? ' — ' + fmtKg(pesoKg(stato.meta[num])) : ''}</span>` : (!isChiaveSpeciale(num) && pesoKg(stato.meta[num]) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtKg(pesoKg(stato.meta[num]))}</span>` : '')}</h2>
+      <h2>${labelScatola(num)}${fmtDim(stato.meta[num]) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtDim(stato.meta[num])}${volumeLitri(stato.meta[num]) ? ' (' + fmtLitri(volumeLitri(stato.meta[num])) + ')' : ''}${pesoKg(stato.meta[num]) ? ' — ' + fmtKg(pesoKg(stato.meta[num])) : ''}</span>` : (pesoKg(stato.meta[num]) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtKg(pesoKg(stato.meta[num]))}</span>` : '')}</h2>
       <table>
         <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
         <tbody>${righe}</tbody>
@@ -1462,10 +1461,11 @@ function aggiornaCategorieSuggerite() {
 // ── UI ─────────────────────────────────────────────────────────────────────────
 function aggiornaRiepilogoVolume() {
   const el = document.getElementById('riepilogo-volume');
-  const chiavi = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k));
+  const chiaviTutte = Object.keys(stato.scatole);
+  const chiavi = chiaviTutte.filter(k => !isChiaveSpeciale(k));
   const vol = k => volumeLitri(stato.meta[k]);
   const peso = k => pesoKg(stato.meta[k]);
-  const conDati = chiavi.filter(k => vol(k) > 0 || peso(k) > 0);
+  const conDati = chiaviTutte.filter(k => vol(k) > 0 || peso(k) > 0);
   if (conDati.length === 0) { el.style.display = 'none'; return; }
   const fmt = (v, w) => [v ? fmtLitri(v) : '', w ? fmtKg(w) : ''].filter(Boolean).join(' · ') || '—';
   const somma = ks => [ks.reduce((a, k) => a + vol(k), 0), ks.reduce((a, k) => a + peso(k), 0)];
@@ -1477,7 +1477,7 @@ function aggiornaRiepilogoVolume() {
   conDati.forEach(k => { const v = (stato.meta[k] && stato.meta[k].viaggio) || ''; (perViaggio[v] = perViaggio[v] || []).push(k); });
   const nomeV = v => v === '' ? 'Senza viaggio' : v === 'dopo' ? 'Da spedire dopo' : `Viaggio ${v}`;
   const righe = Object.keys(perViaggio).sort().map(v => { const [a, b] = somma(perViaggio[v]); return `<div class="riga">${nomeV(v)}: ${fmt(a, b)}</div>`; }).join('');
-  const selNum = [...selezionate].filter(k => !isChiaveSpeciale(k) && stato.scatole[k]);
+  const selNum = [...selezionate].filter(k => stato.scatole[k]);
   let rigaSel = '';
   if (selNum.length > 0) {
     const [sv, sw] = somma(selNum);
@@ -1485,7 +1485,7 @@ function aggiornaRiepilogoVolume() {
     const nSenza = selNum.filter(k => !(vol(k) > 0) || !(peso(k) > 0)).length;
     rigaSel = `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">✅ Selezionate (${selNum.length}): <b>${fmt(sv, sw)}</b>${nSenza ? ` <span style="color:#c05621">(dati mancanti su ${nSenza})</span>` : ''}</div>`;
   }
-  el.innerHTML = `📐 Totale scatole: <b>${fmt(tv, tw)}</b> <span style="color:#718096">(${conDati.length} con dati${note ? ', ' + note : ''})</span>${righe}${rigaSel}`;
+  el.innerHTML = `📐 Totale: <b>${fmt(tv, tw)}</b> <span style="color:#718096">(${conDati.length} contenitori con dati${note ? ', ' + note : ''})</span>${righe}${rigaSel}`;
   el.style.display = 'block';
 }
 
@@ -1540,8 +1540,8 @@ function aggiornaUI() {
             <div class="scatola-badges">
               ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
               ${meta.stanza ? `<span class="badge badge-stanza">📍 ${meta.stanza}</span>` : ''}
-              ${(!isChiaveSpeciale(num) && pesoKg(meta)) ? `<span class="badge badge-dim">⚖️ ${fmtKg(pesoKg(meta))}</span>` : ''}
-              ${(!isChiaveSpeciale(num) && fmtDim(meta)) ? `<span class="badge badge-dim">📐 ${fmtDim(meta)}${volumeLitri(meta) ? ' · ' + fmtLitri(volumeLitri(meta)) : ''}</span>` : ''}
+              ${pesoKg(meta) ? `<span class="badge badge-dim">⚖️ ${fmtKg(pesoKg(meta))}</span>` : ''}
+              ${fmtDim(meta) ? `<span class="badge badge-dim">📐 ${fmtDim(meta)}${volumeLitri(meta) ? ' · ' + fmtLitri(volumeLitri(meta)) : ''}</span>` : ''}
             </div>
           </div>
         </div>
