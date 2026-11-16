@@ -205,6 +205,10 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #riepilogo-doppioni summary { cursor: pointer; font-weight: 700; color: #9c4221; padding: 4px 0; }
 #riepilogo-doppioni .dgrp { padding: 6px 0; border-top: 1px solid #fbd38d; color: #4a5568; }
 #riepilogo-doppioni .dgrp b { color: #2d3748; }
+#riepilogo-doppioni .drow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 8px; background: #fff; border-radius: 8px; }
+#riepilogo-doppioni .dn { flex: 1 1 100%; font-size: 0.82rem; color: #2d3748; }
+#riepilogo-doppioni .dbtn { margin-left: 0; background: #edf2f7; font-size: 0.9rem; padding: 3px 9px; }
+#riepilogo-doppioni .dbtn:disabled { opacity: .4; }
 #riepilogo-doppioni .dgrp button { border: none; background: #fbd38d; border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; margin-left: 6px; cursor: pointer; color: #744210; }
 .badge-dim { background: #f0fff4; color: #276749; }
 #dim-row { display:flex; gap:6px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
@@ -666,22 +670,31 @@ function calcolaDoppioni() {
       const pk = dupPairKey(a.key, b.key);
       if (stato.ignoraDup[pk]) continue;
       add(a, 's', b); add(b, 's', a);
-      (simili[pk] = simili[pk] || { pk, a: a.nome, b: b.nome, n: 0 }).n++;
+      const sm = simili[pk] = simili[pk] || { pk, a: a.nome, b: b.nome, n: 0, pos: new Set() };
+      sm.n++; sm.pos.add(i); sm.pos.add(j);
     }
   }
   DUP = {
     per,
-    uguali: Object.values(uguali).map(g => ({ key: g.key, nome: g.nome, dove: Array.from(g.pos).map(i => dupLabel(lista[i].k)) })),
-    simili: Object.values(simili)
+    uguali: Object.values(uguali).map(g => ({ key: g.key, nome: g.nome, ogg: Array.from(g.pos).map(i => lista[i]) })),
+    simili: Object.values(simili).map(c => ({ pk: c.pk, a: c.a, b: c.b, n: c.n, ogg: Array.from(c.pos).map(i => lista[i]) }))
   };
   const el = document.getElementById('riepilogo-doppioni');
   const n = DUP.uguali.length + DUP.simili.length;
   if (!n) { el.style.display = 'none'; el.innerHTML = ''; return; }
   const apertoPrima = el.open;
   el.style.display = 'block';
+  const riga = o => {
+    const kJs = `'${o.k}'`;
+    const bl = !!stato.bloccate[o.k];
+    return `<div class="drow"><span class="dn">«${o.nome}» · ${dupLabel(o.k)}${bl ? ' 🔒' : ''}</span>
+      <select class="select-sposta" ${bl ? 'disabled' : ''} onchange="spostaOggetto(${kJs}, ${o.idx}, this.value)">${opzioniDestinazione(o.k)}</select>
+      <button class="dbtn" ${bl ? 'disabled' : ''} onclick="modificaOggetto(${kJs}, ${o.idx})" title="Modifica">✏️</button>
+      <button class="dbtn" ${bl ? 'disabled' : ''} onclick="rimuoviOggetto(${kJs}, ${o.idx})" title="Rimuovi">✕</button></div>`;
+  };
   el.innerHTML = `<summary>⚠️ Possibili doppioni (${n})</summary>` +
-    DUP.uguali.map(g => `<div class="dgrp">Stesso nome: <b>«${g.nome}»</b> ×${g.dove.length} — ${g.dove.join(', ')}<button onclick="ignoraDoppione('${g.key}','${g.key}')">non è un doppione</button></div>`).join('') +
-    DUP.simili.map(c => `<div class="dgrp">Simili: <b>«${c.a}»</b> ≈ <b>«${c.b}»</b>${c.n > 1 ? ' (×' + c.n + ')' : ''}<button onclick="ignoraDoppione('${c.pk.split('||')[0]}','${c.pk.split('||')[1]}')">non è un doppione</button></div>`).join('');
+    DUP.uguali.map(g => `<div class="dgrp">Stesso nome: <b>«${g.nome}»</b> ×${g.ogg.length}<button onclick="ignoraDoppione('${g.key}','${g.key}')">non è un doppione</button>${g.ogg.map(riga).join('')}</div>`).join('') +
+    DUP.simili.map(c => `<div class="dgrp">Simili: <b>«${c.a}»</b> ≈ <b>«${c.b}»</b><button onclick="ignoraDoppione('${c.pk.split('||')[0]}','${c.pk.split('||')[1]}')">non è un doppione</button>${c.ogg.map(riga).join('')}</div>`).join('');
   if (apertoPrima) el.open = true;
 }
 function ignoraDoppione(a, b) {
