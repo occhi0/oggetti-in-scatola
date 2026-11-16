@@ -205,11 +205,17 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #riepilogo-doppioni summary { cursor: pointer; font-weight: 700; color: #9c4221; padding: 4px 0; }
 #riepilogo-doppioni .dgrp { padding: 6px 0; border-top: 1px solid #fbd38d; color: #4a5568; }
 #riepilogo-doppioni .dgrp b { color: #2d3748; }
-#riepilogo-doppioni .drow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 8px; background: #fff; border-radius: 8px; }
-#riepilogo-doppioni .dn { flex: 1 1 100%; font-size: 0.82rem; color: #2d3748; }
-#riepilogo-doppioni .dbtn { margin-left: 0; background: #edf2f7; font-size: 0.9rem; padding: 3px 9px; }
+#riepilogo-doppioni .drow { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 8px; background: #fff; border-radius: 8px; }
+#riepilogo-doppioni .dn { flex: 1; font-size: 0.84rem; color: #2d3748; min-width: 0; }
+#riepilogo-doppioni .dbtn { border: none; cursor: pointer; margin: 0; background: #edf2f7; color: #2d3748; font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; font-weight: 600; }
+#riepilogo-doppioni .dbtn-rim { background: #fed7d7; color: #9b2c2c; }
 #riepilogo-doppioni .dbtn:disabled { opacity: .4; }
-#riepilogo-doppioni .dgrp button { border: none; background: #fbd38d; border-radius: 6px; padding: 2px 8px; font-size: 0.72rem; margin-left: 6px; cursor: pointer; color: #744210; }
+#riepilogo-doppioni .dsez { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .4px; color: #9c4221; margin-top: 8px; }
+#riepilogo-doppioni .dnon { border: none; cursor: pointer; display: block; margin: 8px 0 0 0; background: none; color: #718096; text-decoration: underline; padding: 0; font-size: 0.74rem; }
+#riepilogo-doppioni details.dsim { margin-top: 10px; border-top: 1px solid #fbd38d; }
+#riepilogo-doppioni details.dsim > summary { font-weight: 600; font-size: 0.8rem; color: #744210; padding: 8px 0 2px; }
+@keyframes flashDup { 0%, 60% { background: #fefcbf; box-shadow: 0 0 0 3px #ecc94b; } 100% { background: transparent; box-shadow: none; } }
+.oggetto-item.flash { animation: flashDup 2.6s ease-out; border-radius: 8px; }
 .badge-dim { background: #f0fff4; color: #276749; }
 #dim-row { display:flex; gap:6px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
 #dim-row input { width:72px; border:2px solid #e2e8f0; border-radius:10px; padding:8px 6px; font-size:0.9rem; outline:none; background:white; text-align:center; }
@@ -684,18 +690,30 @@ function calcolaDoppioni() {
   if (!n) { el.style.display = 'none'; el.innerHTML = ''; return; }
   const apertoPrima = el.open;
   el.style.display = 'block';
-  const riga = o => {
-    const kJs = `'${o.k}'`;
+  const simAperto = !!(el.querySelector('.dsim') && el.querySelector('.dsim').open);
+  const riga = (o, conNome) => {
     const bl = !!stato.bloccate[o.k];
-    return `<div class="drow"><span class="dn">«${o.nome}» · ${dupLabel(o.k)}${bl ? ' 🔒' : ''}</span>
-      <select class="select-sposta" ${bl ? 'disabled' : ''} onchange="spostaOggetto(${kJs}, ${o.idx}, this.value)">${opzioniDestinazione(o.k)}</select>
-      <button class="dbtn" ${bl ? 'disabled' : ''} onclick="modificaOggetto(${kJs}, ${o.idx})" title="Modifica">✏️</button>
-      <button class="dbtn" ${bl ? 'disabled' : ''} onclick="rimuoviOggetto(${kJs}, ${o.idx})" title="Rimuovi">✕</button></div>`;
+    return `<div class="drow"><span class="dn">${conNome ? `«${o.nome}» · ` : ''}${dupLabel(o.k)}${bl ? ' 🔒' : ''}</span>
+      <button class="dbtn" onclick="vaiAOggetto('${o.k}', ${o.idx})">Vai</button>
+      <button class="dbtn dbtn-rim" ${bl ? 'disabled' : ''} onclick="rimuoviOggetto('${o.k}', ${o.idx})">Rimuovi</button></div>`;
   };
+  const gUguali = DUP.uguali.map(g => `<div class="dgrp"><b>«${g.nome}»</b> · ${g.ogg.length} volte${g.ogg.map(o => riga(o, false)).join('')}<button class="dnon" onclick="ignoraDoppione('${g.key}','${g.key}')">non è un doppione</button></div>`).join('');
+  const gSimili = DUP.simili.map(c => `<div class="dgrp"><b>«${c.a}»</b> ≈ <b>«${c.b}»</b>${c.ogg.map(o => riga(o, true)).join('')}<button class="dnon" onclick="ignoraDoppione('${c.pk.split('||')[0]}','${c.pk.split('||')[1]}')">non è un doppione</button></div>`).join('');
   el.innerHTML = `<summary>⚠️ Possibili doppioni (${n})</summary>` +
-    DUP.uguali.map(g => `<div class="dgrp">Stesso nome: <b>«${g.nome}»</b> ×${g.ogg.length}<button onclick="ignoraDoppione('${g.key}','${g.key}')">non è un doppione</button>${g.ogg.map(riga).join('')}</div>`).join('') +
-    DUP.simili.map(c => `<div class="dgrp">Simili: <b>«${c.a}»</b> ≈ <b>«${c.b}»</b><button onclick="ignoraDoppione('${c.pk.split('||')[0]}','${c.pk.split('||')[1]}')">non è un doppione</button>${c.ogg.map(riga).join('')}</div>`).join('');
+    (DUP.uguali.length ? `<div class="dsez">Stesso nome (${DUP.uguali.length})</div>${gUguali}` : '') +
+    (DUP.simili.length ? `<details class="dsim" ${simAperto ? 'open' : ''}><summary>Nomi simili (${DUP.simili.length}) · si apre con un tocco</summary>${gSimili}</details>` : '');
   if (apertoPrima) el.open = true;
+}
+function vaiAOggetto(k, idx) {
+  if (cercaInput.value.trim()) { cercaInput.value = ''; eseguiRicerca(); }
+  const cont = document.getElementById(`oggetti-${k}`);
+  if (!cont) return;
+  if (!cont.classList.contains('visibile')) toggleScatola(k);
+  const item = cont.querySelectorAll('.oggetto-item')[idx];
+  if (!item) return;
+  item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  item.classList.remove('flash'); void item.offsetWidth; item.classList.add('flash');
+  setTimeout(() => item.classList.remove('flash'), 2600);
 }
 function ignoraDoppione(a, b) {
   stato.ignoraDup[dupPairKey(a, b)] = true;
