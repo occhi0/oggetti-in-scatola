@@ -751,7 +751,7 @@ function calcolaDoppioni() {
 function vaiAOggetto(k, idx) {
   if (cercaInput.value.trim()) { cercaInput.value = ''; eseguiRicerca(); }
   const cont = document.getElementById(`oggetti-${k}`);
-  if (!cont) return;
+  if (!cont) { mostraToast(isDepositata(k) ? '📦 Questa scatola è nel box storage: la trovi nel pannello «Piano box storage»' : 'Scatola non trovata'); return; }
   if (!cont.classList.contains('visibile')) toggleScatola(k);
   const item = cont.querySelectorAll('.oggetto-item')[idx];
   if (!item) return;
@@ -1012,6 +1012,7 @@ function labelScatola(key) {
 }
 const CHIAVI_SPECIALI = ['bozza', 'fuori', 'auto'];
 function isChiaveSpeciale(k) { return CHIAVI_SPECIALI.includes(k); }
+function isDepositata(k) { return !!(stato.storage && stato.storage.box[k] && stato.storage.box[k].dep); }
 
 // ── STANZA EFFETTIVA (propria dell'oggetto, altrimenti default della scatola) ──
 function stanzaEffettiva(oggetto, containerKey) {
@@ -1024,7 +1025,7 @@ function stanzaEffettiva(oggetto, containerKey) {
 function opzioniDestinazione(correnteKey) {
   const chiavi = Object.keys(stato.scatole);
   const chiaviNumeriche = chiavi.filter(k => !isChiaveSpeciale(k)).map(Number).sort((a, b) => a - b);
-  const tutte = [...CHIAVI_SPECIALI, ...chiaviNumeriche];
+  const tutte = [...CHIAVI_SPECIALI, ...chiaviNumeriche].filter(k => !isDepositata(k) || String(k) === String(correnteKey));
   return tutte.map(k => `<option value="${k}" ${String(k) === String(correnteKey) ? 'selected' : ''}>${labelScatola(k)}</option>`).join('');
 }
 
@@ -1633,7 +1634,7 @@ function eseguiRicerca() {
         <div class="res-nome">${o.nome}</div>
         ${badgePericolo(o)}
         ${o.categoria ? `<div class="res-categoria">${o.categoria}</div>` : ''}
-        <div class="res-scatola" style="margin-top:4px;">${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</div>
+        <div class="res-scatola" style="margin-top:4px;">${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}${isDepositata(o.scatola) ? ' · 📦 nel box storage' : ''}</div>
         ${chipDoppione(o.scatola, o.idx).chip}
       </div>
       <div style="display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:3px; margin-top:6px;">
@@ -1679,7 +1680,7 @@ function aggiornaCategorieSuggerite() {
 // ── UI ─────────────────────────────────────────────────────────────────────────
 function aggiornaRiepilogoVolume() {
   const el = document.getElementById('riepilogo-volume');
-  const chiaviTutte = Object.keys(stato.scatole);
+  const chiaviTutte = Object.keys(stato.scatole).filter(k => !isDepositata(k));
   const chiavi = chiaviTutte.filter(k => !isChiaveSpeciale(k));
   const vol = k => volumeLitri(stato.meta[k]);
   const peso = k => pesoKg(stato.meta[k]);
@@ -1703,7 +1704,10 @@ function aggiornaRiepilogoVolume() {
     const nSenza = selNum.filter(k => !(vol(k) > 0) || !(peso(k) > 0)).length;
     rigaSel = `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">✅ Selezionate (${selNum.length}): <b>${fmt(sv, sw)}</b>${nSenza ? ` <span style="color:#c05621">(dati mancanti su ${nSenza})</span>` : ''}</div>`;
   }
-  el.innerHTML = `📐 Totale: <b>${fmt(tv, tw)}</b> <span style="color:#718096">(${conDati.length} contenitori con dati${note ? ', ' + note : ''})</span>${righe}${rigaSel}`;
+  const dep = Object.keys(stato.scatole).filter(isDepositata);
+  const [dv, dw] = [dep.reduce((a, k) => a + vol(k), 0), dep.reduce((a, k) => a + peso(k), 0)];
+  const rigaDep = dep.length ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">📦 Già nel box storage (${dep.length}): <b>${fmt(dv, dw)}</b></div>` : '';
+  el.innerHTML = `📐 Totale da trasportare: <b>${fmt(tv, tw)}</b> <span style="color:#718096">(${conDati.length} contenitori con dati${note ? ', ' + note : ''})</span>${righe}${rigaSel}${rigaDep}`;
   el.style.display = 'block';
 }
 
@@ -1768,7 +1772,7 @@ function psDim(campo, val) {
   psAggiornaPiano();
 }
 function psSelezionaBloccate(v) {
-  Object.keys(stato.scatole).forEach(k => {
+  psChiavi().forEach(k => {
     if (v && !(stato.bloccate[k] && !isChiaveSpeciale(k))) return;
     if (!stato.storage.box[k]) stato.storage.box[k] = { in: false, acc: 'p', fr: false };
     stato.storage.box[k].in = v;
@@ -1777,8 +1781,8 @@ function psSelezionaBloccate(v) {
   renderPianoStorage();
 }
 function psChiavi() {
-  const num = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k)).sort((a, b) => Number(a) - Number(b));
-  const spe = CHIAVI_SPECIALI.filter(k => k !== 'auto' && stato.scatole[k] && (volumeLitri(stato.meta[k]) > 0 || pesoKg(stato.meta[k]) > 0));
+  const num = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k) && !isDepositata(k)).sort((a, b) => Number(a) - Number(b));
+  const spe = CHIAVI_SPECIALI.filter(k => k !== 'auto' && !isDepositata(k) && stato.scatole[k] && (volumeLitri(stato.meta[k]) > 0 || pesoKg(stato.meta[k]) > 0));
   return [...num, ...spe];
 }
 function psCalcola() {
@@ -1869,29 +1873,73 @@ function psAggiornaPiano() {
   const sm = document.getElementById('ps-summary-n');
   if (sm) sm.textContent = psChiavi().filter(k => psBox(k).in).length;
 }
+function psDeposita() {
+  const k_da = psChiavi().filter(k => psBox(k).in);
+  if (!k_da.length) { mostraToast('Seleziona prima le scatole da depositare'); return; }
+  const per = k_da.filter(k => pericolosiInBox(k).length);
+  let msg = `Depositare ${k_da.length} scatole nel box storage?\n\nSpariranno dall'elenco delle scatole (le ritrovi nel pannello «Piano box storage», dove puoi anche riportarle fuori) e verranno bloccate.`;
+  if (per.length) msg += `\n\n⚠️ Attenzione: contengono oggetti pericolosi: ${per.map(k => labelScatola(k)).join(', ')}.`;
+  if (!confirm(msg)) return;
+  k_da.forEach(k => {
+    stato.storage.box[k].dep = true;
+    stato.bloccate[k] = true;
+    selezionate.delete(k); selezionate.delete(String(k)); selezionate.delete(Number(k));
+  });
+  if (isDepositata(stato.scatolaAttiva)) {
+    const lib = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k) && !isDepositata(k)).map(Number).sort((a, b) => b - a);
+    if (lib.length) stato.scatolaAttiva = lib[0];
+    else {
+      const nuovoNum = Math.max(...Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k)).map(Number), 0) + 1;
+      stato.scatolaAttiva = nuovoNum; stato.scatole[nuovoNum] = []; stato.meta[nuovoNum] = { viaggio: '', stanza: '' };
+    }
+    caricaMetaAttiva();
+  }
+  salvaDati(); aggiornaUI();
+  mostraToast(`📦 ${k_da.length} scatole depositate nel box storage`);
+}
+function psRiporta(k) {
+  if (!confirm(`Riportare fuori dal box ${labelScatola(k)}? Tornerà nell'elenco delle scatole (resta bloccata).`)) return;
+  stato.storage.box[k].dep = false;
+  stato.storage.box[k].in = false;
+  salvaDati(); aggiornaUI();
+  mostraToast(`↩️ ${labelScatola(k)} riportata nell'elenco`);
+}
+function psElencoOgg(k) {
+  const ogg = stato.scatole[k] || [];
+  return `<div class="ps-ogg">${ogg.length ? ogg.map(o => `<div>${escH(o.nome)}${o.categoria ? ' <span style="color:#a0aec0">· ' + escH(o.categoria) + '</span>' : ''}${PERICOLI[o.pericolo] ? ' <span style="color:#c53030;font-weight:700">' + PERICOLI[o.pericolo].ico + ' ' + PERICOLI[o.pericolo].n + '</span>' : ''}</div>`).join('') : '<div>Nessun oggetto</div>'}</div>`;
+}
 function renderPianoStorage() {
   const el = document.getElementById('piano-storage');
   if (!el) return;
   const chiavi = psChiavi();
-  if (chiavi.length === 0) { el.style.display = 'none'; return; }
+  const depositate = Object.keys(stato.scatole).filter(isDepositata).sort((a, b) => String(a).localeCompare(String(b), 'it', { numeric: true }));
+  if (chiavi.length === 0 && depositate.length === 0) { el.style.display = 'none'; return; }
   el.style.display = 'block';
   const aperto = el.open;
   const st = stato.storage;
+  const nScelte = chiavi.filter(k => psBox(k).in).length;
   const righe = chiavi.map(k => {
     const b = psBox(k), m = stato.meta[k] || {};
     const info = [fmtDim(m), pesoKg(m) ? fmtKg(pesoKg(m)) : ''].filter(Boolean).join(' · ');
     const kj = `'${k}'`;
     const ogg = stato.scatole[k] || [];
     const aperta = psAperte.has(k);
-    const elenco = aperta ? `<div class="ps-ogg">${ogg.length ? ogg.map(o => `<div>${escH(o.nome)}${o.categoria ? ' <span style="color:#a0aec0">· ' + escH(o.categoria) + '</span>' : ''}${PERICOLI[o.pericolo] ? ' <span style="color:#c53030;font-weight:700">' + PERICOLI[o.pericolo].ico + ' ' + PERICOLI[o.pericolo].n + '</span>' : ''}</div>`).join('') : '<div>Nessun oggetto</div>'}</div>` : '';
     return `<div class="ps-row">
       <input type="checkbox" ${b.in ? 'checked' : ''} onchange="psSet(${kj}, 'in', this.checked)">
       <div class="ps-n">${escH(labelScatola(k))}<small>${info ? escH(info) : '⚠️ senza misure'}${stato.bloccate[k] ? ' · 🔒' : ''}${pericolosiInBox(k).length ? ' · <b style="color:#c53030">⚠️ ' + pericolosiInBox(k).length + ' pericolosi</b>' : ''}</small><button class="ps-link" onclick="psToggleOgg(${kj})">📋 ${ogg.length} oggetti ${aperta ? '▲' : '▼'}</button></div>
       <select onchange="psSet(${kj}, 'acc', this.value)">${Object.keys(PS_ACC).map(a => `<option value="${a}" ${(b.acc || 'p') === a ? 'selected' : ''}>${PS_ACC[a]}</option>`).join('')}</select>
       <label class="ps-fr"><input type="checkbox" ${b.fr ? 'checked' : ''} onchange="psSet(${kj}, 'fr', this.checked)"> 🥚 fragile</label>
-    </div>${elenco}`;
+    </div>${aperta ? psElencoOgg(k) : ''}`;
   }).join('');
-  el.innerHTML = `<summary>📦 Piano box storage (<span id="ps-summary-n">${chiavi.filter(k => psBox(k).in).length}</span> scatole scelte)</summary>
+  const righeDep = depositate.map(k => {
+    const m = stato.meta[k] || {}, kj = `'${k}'`, ogg = stato.scatole[k] || [], aperta = psAperte.has(k);
+    const info = [fmtDim(m), pesoKg(m) ? fmtKg(pesoKg(m)) : ''].filter(Boolean).join(' · ');
+    return `<div class="ps-row">
+      <div class="ps-n">${escH(labelScatola(k))}<small>${escH(info) || '—'}${pericolosiInBox(k).length ? ' · <b style="color:#c53030">⚠️ ' + pericolosiInBox(k).length + ' pericolosi</b>' : ''}</small><button class="ps-link" onclick="psToggleOgg(${kj})">📋 ${ogg.length} oggetti ${aperta ? '▲' : '▼'}</button></div>
+      <button class="ps-btn" style="margin:0" onclick="psRiporta(${kj})">↩️ Riporta fuori</button>
+    </div>${aperta ? psElencoOgg(k) : ''}`;
+  }).join('');
+  el.innerHTML = `<summary>📦 Piano box storage (<span id="ps-summary-n">${nScelte}</span> da depositare${depositate.length ? ' · ' + depositate.length + ' depositate' : ''})</summary>
     <div class="ps-sez">Misure del box (cm)</div>
     <div class="ps-dim">
       <input type="number" min="0" inputmode="decimal" placeholder="Largh." value="${st.l || ''}" oninput="psDim('l', this.value)"> ×
@@ -1902,7 +1950,9 @@ function renderPianoStorage() {
     <div class="ps-dim" style="margin-top:6px">Altezza massima di una colonna (cm): <input type="number" min="0" inputmode="decimal" placeholder="facolt." value="${st.mh || ''}" oninput="psDim('mh', this.value)"> cm <span style="color:#718096">(in centimetri: 2,5 m = 250. Se vuoto: altezza del box)</span></div>
     <div class="ps-sez">Quali scatole vanno nel box?</div>
     <button class="ps-btn" onclick="psSelezionaBloccate(true)">🔒 Scegli tutte le bloccate</button><button class="ps-btn" onclick="psSelezionaBloccate(false)">Deseleziona tutte</button>
-    ${righe}
+    ${righe || '<div class="ps-avv">Nessuna scatola disponibile da scegliere.</div>'}
+    <button class="ps-btn" style="background:#2b6cb0;color:#fff;font-size:0.84rem;padding:8px 14px" onclick="psDeposita()">📥 Deposita nel box le ${nScelte} scelte</button>
+    ${depositate.length ? `<div class="ps-sez">Già nel box storage (${depositate.length})</div>${righeDep}` : ''}
     <div class="ps-sez">Piano</div>
     <div id="ps-piano">${psPianoHtml()}</div>`;
   el.open = aperto;
@@ -1949,7 +1999,7 @@ function aggiornaUI() {
   const n = (stato.scatole[stato.scatolaAttiva] || []).length;
   document.getElementById('conteggio-scatola').textContent = n === 1 ? '1 oggetto' : `${n} oggetti`;
 
-  const chiavi = Object.keys(stato.scatole);
+  const chiavi = Object.keys(stato.scatole).filter(k => !isDepositata(k));
   const chiaviNumeriche = chiavi.filter(k => !isChiaveSpeciale(k)).map(Number).sort((a, b) => {
     const aBloccata = stato.bloccate[a] ? 1 : 0;
     const bBloccata = stato.bloccate[b] ? 1 : 0;
@@ -1969,6 +2019,11 @@ function aggiornaUI() {
     return;
   }
 
+  if (ordineChiavi.length === 0) {
+    scatoleContainer.innerHTML = `<div id="empty-state"><div class="emoji">📦</div><p>Tutte le scatole sono nel box storage.<br>Le trovi nel pannello «Piano box storage».</p></div>`;
+    aggiornaBottoneSelezionate();
+    return;
+  }
   scatoleContainer.innerHTML = ordineChiavi.map(num => {
     const oggetti = stato.scatole[num] || [];
     const meta = stato.meta[num] || {};
