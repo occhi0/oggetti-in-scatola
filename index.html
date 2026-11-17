@@ -639,6 +639,7 @@ if (!stato.meta) stato.meta = {};
 if (!stato.ignoraDup) stato.ignoraDup = {};
 if (!stato.storage) stato.storage = { l: '', p: '', h: '', box: {} };
 if (!stato.storage.box) stato.storage.box = {};
+if (!stato.storage.fisse) stato.storage.fisse = [];
 if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = { viaggio: '', stanza: '' };
 
 const selezionate = new Set();
@@ -990,6 +991,7 @@ fileImporta.addEventListener('change', (e) => {
         const is = importato.storage;
         ['l', 'p', 'h', 'mh', 'a'].forEach(c => { if (!stato.storage[c] && is[c]) stato.storage[c] = is[c]; });
         Object.keys(is.box || {}).forEach(k => { if (!stato.storage.box[k]) stato.storage.box[k] = is.box[k]; });
+        if (!stato.storage.fisse.length && Array.isArray(is.fisse)) stato.storage.fisse = is.fisse;
       }
       if (importato.ignoraDup) { stato.ignoraDup = Object.assign({}, importato.ignoraDup, stato.ignoraDup || {}); }
       salvaDati();
@@ -1794,17 +1796,25 @@ function psCalcola() {
     const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
     if (!(l && p && h)) { senzaMisure.push(k); return; }
     const b = psBox(k);
-    items.push({ k, label: labelScatola(k), l, p, h, fp: [Math.min(l, p), Math.max(l, p)], peso: pesoKg(m), accPeso: !!pesoKg(m), acc: b.acc || 'p', fr: !!b.fr });
+    items.push({ k, label: labelScatola(k), l, p, h, fp: [Math.min(l, p), Math.max(l, p)], peso: pesoKg(m), accPeso: !!pesoKg(m), acc: b.acc || 'p', fr: !!b.fr, dep: isDepositata(k) });
   });
   const senzaPeso = items.filter(i => !i.accPeso).map(i => i.label);
   const A = (L && P) ? L * P : num0(stato.storage.a) * 10000;
   const HC = Math.min(H || Infinity, num0(stato.storage.mh) || Infinity);
-  const res = { L, P, H, A, HC, scelte, items, senzaMisure, senzaPeso, colonne: [], nonEntra: [], avvisi: [] };
+  const fisseK = new Set();
+  const fisse = [];
+  (stato.storage.fisse || []).forEach((col, idx) => {
+    const box = (col.keys || []).map(k => items.find(i => String(i.k) === String(k))).filter(Boolean);
+    (col.keys || []).forEach(k => fisseK.add(String(k)));
+    if (box.length) fisse.push({ idx, g: col.g || 'p', base: box[0].fp, box, h: box.reduce((a, i) => a + i.h, 0), peso: box.reduce((a, i) => a + i.peso, 0) });
+  });
+  const liberi = items.filter(i => !fisseK.has(String(i.k)));
+  const res = { L, P, H, A, HC, scelte, items, senzaMisure, senzaPeso, colonne: [], fisse, nonEntra: [], avvisi: [] };
   if (!A || HC === Infinity) return res;
   const fpL = (L && P) ? [Math.min(L, P), Math.max(L, P)] : [Infinity, Infinity];
   const sta = (fp, base) => fp[0] <= base[0] + 1e-9 && fp[1] <= base[1] + 1e-9;
   ['s', 'p', 'm'].forEach(g => {
-    const gi = items.filter(i => i.acc === g);
+    const gi = liberi.filter(i => i.acc === g);
     const normali = gi.filter(i => !i.fr).sort((a, b) => b.peso - a.peso || (b.fp[0] * b.fp[1]) - (a.fp[0] * a.fp[1]));
     const fragili = gi.filter(i => i.fr).sort((a, b) => b.peso - a.peso);
     const stacks = [];
@@ -1818,7 +1828,7 @@ function psCalcola() {
     fragili.forEach(i => piazza(i, true));
     res.colonne.push(...stacks);
   });
-  res.areaUsata = res.colonne.reduce((a, c) => a + c.base[0] * c.base[1], 0);
+  res.areaUsata = [...res.colonne, ...res.fisse].reduce((a, c) => a + c.base[0] * c.base[1], 0);
   res.areaBox = A;
   res.volScatole = items.reduce((a, i) => a + i.l * i.p * i.h / 1000, 0);
   res.volBox = H ? (A * H / 1000) : 0;
@@ -1855,13 +1865,22 @@ function psPianoHtml() {
   if (r.nonEntra.length) h += `<div class="ps-avv">⛔ Non entrano per misure: ${r.nonEntra.map(i => escH(i.label)).join(', ')}</div>`;
   const gruppi = { s: 'Subito (vicino alla porta)', p: 'Prima o poi', m: 'In fondo' };
   let n = 0, ultimoG = '';
+  const righeCol = c => psFmtColonna(c).map(x => `<div class="ps-liv">${x.pos}: ${escH(x.i.label)}${x.i.fr ? ' 🥚' : ''}${x.i.dep ? ' <span title="già depositata: se la colonna cambia va spostata">📦</span>' : ''} <span style="color:#718096">${x.i.accPeso ? kg(x.i.peso) + ' · ' : ''}${escH(fmtDim({ lung: x.i.l, prof: x.i.p, alt: x.i.h }))}</span></div>`).join('');
+  if (r.fisse.length) {
+    h += `<div class="ps-sez">🔒 Colonne finite (non cambiano)</div>`;
+    r.fisse.forEach(c => {
+      n++;
+      h += `<div class="ps-col" style="border-left:4px solid #38a169"><b>Colonna ${n}</b> — ${kg(c.peso)} · alta ${c.h.toLocaleString('it-IT', { maximumFractionDigits: 0 })} cm · <span style="color:#718096">${gruppi[c.g]}</span>${righeCol(c)}<button class="ps-btn" onclick="psRiapri(${c.idx})">↩️ Riapri colonna</button></div>`;
+    });
+  }
   r.colonne.forEach(c => {
-    if (c.g !== ultimoG) { h += `<div class="ps-sez">${gruppi[c.g]}</div>`; ultimoG = c.g; }
+    if (c.g !== ultimoG) { h += `<div class="ps-sez">${gruppi[c.g]}${r.fisse.length ? ' — da sistemare' : ''}</div>`; ultimoG = c.g; }
     n++;
     h += `<div class="ps-col"><b>Colonna ${n}</b> — ${kg(c.peso)} · alta ${c.h.toLocaleString('it-IT', { maximumFractionDigits: 0 })} cm`;
-    psFmtColonna(c).forEach(x => { h += `<div class="ps-liv">${x.pos}: ${escH(x.i.label)}${x.i.fr ? ' 🥚' : ''} <span style="color:#718096">${x.i.accPeso ? kg(x.i.peso) + ' · ' : ''}${escH(fmtDim({ lung: x.i.l, prof: x.i.p, alt: x.i.h }))}</span></div>`; });
+    h += righeCol(c);
     const inv = c.box.some((x, idx) => idx > 0 && x.peso > c.box[idx - 1].peso + 1e-9);
     if (inv) h += `<div class="ps-avv">⚠️ Una scatola più pesante sta sopra una più leggera (di solito per la spunta fragile): controlla.</div>`;
+    h += `<button class="ps-btn" onclick="psFinita('${c.box.map(i => i.k).join('|')}', '${c.g}')">✅ Colonna finita</button>`;
     h += '</div>';
   });
   h += '<button class="ps-btn" onclick="psStampa()">🖨️ Stampa piano</button>';
@@ -1880,7 +1899,14 @@ function psDeposita() {
   let msg = `Depositare ${k_da.length} scatole nel box storage?\n\nSpariranno dall'elenco delle scatole (le ritrovi nel pannello «Piano box storage», dove puoi anche riportarle fuori) e verranno bloccate.`;
   if (per.length) msg += `\n\n⚠️ Attenzione: contengono oggetti pericolosi: ${per.map(k => labelScatola(k)).join(', ')}.`;
   if (!confirm(msg)) return;
-  k_da.forEach(k => {
+  psMettiInBox(k_da);
+  salvaDati(); aggiornaUI();
+  mostraToast(`📦 ${k_da.length} scatole depositate nel box storage`);
+}
+function psMettiInBox(keys) {
+  keys.forEach(k => {
+    if (!stato.storage.box[k]) stato.storage.box[k] = { in: true, acc: 'p', fr: false };
+    stato.storage.box[k].in = true;
     stato.storage.box[k].dep = true;
     stato.bloccate[k] = true;
     selezionate.delete(k); selezionate.delete(String(k)); selezionate.delete(Number(k));
@@ -1894,13 +1920,31 @@ function psDeposita() {
     }
     caricaMetaAttiva();
   }
+}
+function psFinita(str, g) {
+  const keys = str.split('|');
+  const nuove = keys.filter(k => !isDepositata(k));
+  const per = keys.filter(k => pericolosiInBox(k).length);
+  let msg = `Segnare questa colonna come finita?\n\n${keys.map(labelScatola).join('\n')}\n\nNon verrà più ricalcolata.`;
+  if (nuove.length) msg += `\nLe ${nuove.length} scatole non ancora depositate verranno depositate nel box (spariscono dall'elenco e vengono bloccate).`;
+  if (per.length) msg += `\n\n⚠️ Contiene oggetti pericolosi: ${per.map(labelScatola).join(', ')}.`;
+  if (!confirm(msg)) return;
+  psMettiInBox(keys);
+  stato.storage.fisse.push({ g: g || 'p', keys });
   salvaDati(); aggiornaUI();
-  mostraToast(`📦 ${k_da.length} scatole depositate nel box storage`);
+  mostraToast('✅ Colonna finita');
+}
+function psRiapri(idx) {
+  if (!confirm('Riaprire la colonna? Le sue scatole torneranno a essere ridistribuite dal piano (restano depositate).')) return;
+  stato.storage.fisse.splice(idx, 1);
+  salvaDati(); aggiornaUI();
+  mostraToast('↩️ Colonna riaperta');
 }
 function psRiporta(k) {
   if (!confirm(`Riportare fuori dal box ${labelScatola(k)}? Tornerà nell'elenco delle scatole (resta bloccata).`)) return;
   stato.storage.box[k].dep = false;
   stato.storage.box[k].in = false;
+  stato.storage.fisse = stato.storage.fisse.map(c => ({ g: c.g, keys: c.keys.filter(x => String(x) !== String(k)) })).filter(c => c.keys.length);
   salvaDati(); aggiornaUI();
   mostraToast(`↩️ ${labelScatola(k)} riportata nell'elenco`);
 }
@@ -1960,9 +2004,9 @@ function renderPianoStorage() {
 function psStampa() {
   const r = psCalcola();
   let n = 0, corpo = '';
-  const gruppi = { s: 'Subito (vicino alla porta)', p: 'Prima o poi', m: 'In fondo' };
+  const gruppi = { s: 'Subito (vicino alla porta)', p: 'Prima o poi', m: 'In fondo', F: 'Colonne finite (non cambiano)' };
   let ultimoG = '';
-  r.colonne.forEach(c => {
+  [...r.fisse.map(c => Object.assign({}, c, { g: 'F' })), ...r.colonne].forEach(c => {
     if (c.g !== ultimoG) { corpo += `<tr><th colspan="4" class="g">${gruppi[c.g]}</th></tr>`; ultimoG = c.g; }
     n++;
     psFmtColonna(c).forEach((x, idx, arr) => {
