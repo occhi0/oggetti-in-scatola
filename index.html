@@ -232,6 +232,10 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #piano-storage .ps-row .ps-n { flex: 1; min-width: 0; color: #2d3748; font-size: 0.83rem; }
 #piano-storage .ps-row .ps-n small { display: block; color: #718096; }
 #piano-storage select { font-size: 0.78rem; padding: 4px; border-radius: 6px; border: 1px solid #cbd5e0; }
+#piano-storage .ps-link { border: none; background: none; color: #2b6cb0; font-size: 0.76rem; padding: 3px 0 0; cursor: pointer; text-decoration: underline; }
+#piano-storage .ps-ogg { background: #f7fafc; border-radius: 8px; margin: 2px 0 0 26px; padding: 6px 10px; font-size: 0.8rem; color: #2d3748; }
+#piano-storage .ps-ogg div { padding: 2px 0; border-bottom: 1px dashed #e2e8f0; }
+#piano-storage .ps-ogg div:last-child { border-bottom: none; }
 #piano-storage .ps-fr { font-size: 0.75rem; color: #4a5568; white-space: nowrap; }
 #piano-storage .ps-btn { border: none; cursor: pointer; background: #bee3f8; color: #2c5282; font-size: 0.78rem; padding: 5px 10px; border-radius: 8px; font-weight: 600; margin: 6px 6px 0 0; }
 #piano-storage .ps-col { background: #fff; border-radius: 8px; padding: 8px 10px; margin-top: 6px; }
@@ -1748,6 +1752,8 @@ function renderPericolosi() {
 // ── PIANO BOX STORAGE ────────────────────────────────────────────────────────
 const PS_ACC = { s: 'Subito (davanti)', p: 'Prima o poi', m: 'In fondo' };
 function escH(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+const psAperte = new Set();
+function psToggleOgg(k) { if (psAperte.has(k)) psAperte.delete(k); else psAperte.add(k); renderPianoStorage(); }
 function psBox(k) { return stato.storage.box[k] || { in: false, acc: 'p', fr: false }; }
 function psSet(k, campo, val) {
   if (!stato.storage.box[k]) stato.storage.box[k] = { in: false, acc: 'p', fr: false };
@@ -1875,12 +1881,15 @@ function renderPianoStorage() {
     const b = psBox(k), m = stato.meta[k] || {};
     const info = [fmtDim(m), pesoKg(m) ? fmtKg(pesoKg(m)) : ''].filter(Boolean).join(' · ');
     const kj = `'${k}'`;
+    const ogg = stato.scatole[k] || [];
+    const aperta = psAperte.has(k);
+    const elenco = aperta ? `<div class="ps-ogg">${ogg.length ? ogg.map(o => `<div>${escH(o.nome)}${o.categoria ? ' <span style="color:#a0aec0">· ' + escH(o.categoria) + '</span>' : ''}${PERICOLI[o.pericolo] ? ' <span style="color:#c53030;font-weight:700">' + PERICOLI[o.pericolo].ico + ' ' + PERICOLI[o.pericolo].n + '</span>' : ''}</div>`).join('') : '<div>Nessun oggetto</div>'}</div>` : '';
     return `<div class="ps-row">
       <input type="checkbox" ${b.in ? 'checked' : ''} onchange="psSet(${kj}, 'in', this.checked)">
-      <div class="ps-n">${escH(labelScatola(k))}<small>${info ? escH(info) : '⚠️ senza misure'}${stato.bloccate[k] ? ' · 🔒' : ''}${pericolosiInBox(k).length ? ' · <b style="color:#c53030">⚠️ ' + pericolosiInBox(k).length + ' pericolosi</b>' : ''}</small></div>
+      <div class="ps-n">${escH(labelScatola(k))}<small>${info ? escH(info) : '⚠️ senza misure'}${stato.bloccate[k] ? ' · 🔒' : ''}${pericolosiInBox(k).length ? ' · <b style="color:#c53030">⚠️ ' + pericolosiInBox(k).length + ' pericolosi</b>' : ''}</small><button class="ps-link" onclick="psToggleOgg(${kj})">📋 ${ogg.length} oggetti ${aperta ? '▲' : '▼'}</button></div>
       <select onchange="psSet(${kj}, 'acc', this.value)">${Object.keys(PS_ACC).map(a => `<option value="${a}" ${(b.acc || 'p') === a ? 'selected' : ''}>${PS_ACC[a]}</option>`).join('')}</select>
       <label class="ps-fr"><input type="checkbox" ${b.fr ? 'checked' : ''} onchange="psSet(${kj}, 'fr', this.checked)"> 🥚 fragile</label>
-    </div>`;
+    </div>${elenco}`;
   }).join('');
   el.innerHTML = `<summary>📦 Piano box storage (<span id="ps-summary-n">${chiavi.filter(k => psBox(k).in).length}</span> scatole scelte)</summary>
     <div class="ps-sez">Misure del box (cm)</div>
