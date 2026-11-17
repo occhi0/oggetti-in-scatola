@@ -240,6 +240,16 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #piano-storage .ps-avv { margin-top: 4px; color: #c05621; }
 #piano-storage .ps-ok { color: #276749; font-weight: 700; }
 #piano-storage .ps-bad { color: #c53030; font-weight: 700; }
+#riepilogo-pericolosi { background: #fff5f5; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: none; }
+#riepilogo-pericolosi summary { cursor: pointer; font-weight: 700; color: #9b2c2c; padding: 4px 0; }
+#riepilogo-pericolosi .prow { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 8px; background: #fff; border-radius: 8px; }
+#riepilogo-pericolosi .pn { flex: 1; min-width: 0; color: #2d3748; font-size: 0.84rem; }
+#riepilogo-pericolosi .pn small { display: block; color: #718096; }
+#riepilogo-pericolosi .pbtn { border: none; cursor: pointer; background: #edf2f7; color: #2d3748; font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; font-weight: 600; }
+.badge-pericolo { display: inline-block; background: #fed7d7; color: #9b2c2c; border-radius: 6px; padding: 1px 7px; font-size: 0.75rem; font-weight: 700; margin-top: 3px; }
+.btn-pericolo { border: none; cursor: pointer; background: #edf2f7; border-radius: 8px; font-size: 0.95rem; padding: 4px 7px; opacity: .55; }
+.btn-pericolo.attivo { background: #fed7d7; opacity: 1; }
+#pericolo-input { width: 100%; box-sizing: border-box; margin-top: 8px; }
 #riepilogo-volume { background:white; border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:0.85rem; color:#2d3748; box-shadow:0 1px 3px rgba(0,0,0,0.08); display:none; }
 #riepilogo-volume b { color:#276749; }
 #riepilogo-volume .riga { margin-top:3px; color:#4a5568; }
@@ -529,6 +539,12 @@ footer {
     <input id="categoria-input" type="text" placeholder="Categoria (opzionale, es. Cucina)…" list="categorie-suggerite" />
     <input id="stanza-oggetto-input" type="text" placeholder="Destinazione (opzionale, es. Cucina)…" list="stanze-suggerite" />
     <input id="valore-input" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Valore stimato in CHF (opzionale)…" />
+    <select id="pericolo-input" title="Oggetto pericoloso (non può andare nel box storage)">
+      <option value="">Non pericoloso</option>
+      <option value="b">🔋 Pericoloso: batterie</option>
+      <option value="i">🔥 Pericoloso: infiammabile</option>
+      <option value="a">⚠️ Pericoloso: altro</option>
+    </select>
     <datalist id="categorie-suggerite">
       <option value="Cucina">
       <option value="Vestiti">
@@ -565,6 +581,7 @@ footer {
 
     <div id="riepilogo-volume"></div>
     <details id="riepilogo-doppioni"></details>
+    <details id="riepilogo-pericolosi"></details>
     <details id="piano-storage"></details>
     <div id="scatole-container">
       <div id="empty-state">
@@ -849,6 +866,7 @@ function aggiungiOggetto() {
   const stanza = stanzaOggettoInput.value.trim();
   const valoreRaw = valoreInput.value.trim();
   const valore = valoreRaw ? parseFloat(valoreRaw) : null;
+  const pericolo = document.getElementById('pericolo-input').value;
   if (!nome) {
     mostraFeedback('Scrivi il nome dell\'oggetto.', 'errore');
     return;
@@ -858,7 +876,10 @@ function aggiungiOggetto() {
     return;
   }
   const doppi = doppioniPerNuovo(nome);
-  stato.scatole[stato.scatolaAttiva].push({ nome, categoria, stanza, valore });
+  const nuovo = { nome, categoria, stanza, valore };
+  if (pericolo) nuovo.pericolo = pericolo;
+  stato.scatole[stato.scatolaAttiva].push(nuovo);
+  const chiaveAttiva = stato.scatolaAttiva;
   stato.scatole[stato.scatolaAttiva].sort((a, b) =>
     a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' })
   );
@@ -868,8 +889,11 @@ function aggiungiOggetto() {
   categoriaInput.value = '';
   stanzaOggettoInput.value = '';
   valoreInput.value = '';
+  document.getElementById('pericolo-input').value = '';
   oggettoInput.focus();
-  if (doppi.u.length || doppi.s.length) {
+  if (!pericolo && RE_PERICOLO.test(nome)) {
+    mostraToast(`🔋 "${nome}" potrebbe essere pericoloso`, { label: 'Segna ⚠️', onClick: () => { const idx = stato.scatole[chiaveAttiva].indexOf(nuovo); if (idx >= 0) { nuovo.pericolo = 'a'; salvaDati(); aggiornaUI(); mostraToast('⚠️ Segnato come pericoloso (tocca ⚠️ sulla riga per cambiare tipo)'); } } });
+  } else if (doppi.u.length || doppi.s.length) {
     const dove = doppi.u.length
       ? `⚠️ stesso nome già in ${Array.from(new Set(doppi.u.map(x => dupLabel(x.k)))).join(', ')}`
       : `≈ simile a «${doppi.s[0].nome}» in ${dupLabel(doppi.s[0].k)}`;
@@ -1600,6 +1624,7 @@ function eseguiRicerca() {
     <div class="res-item">
       <div>
         <div class="res-nome">${o.nome}</div>
+        ${badgePericolo(o)}
         ${o.categoria ? `<div class="res-categoria">${o.categoria}</div>` : ''}
         <div class="res-scatola" style="margin-top:4px;">${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</div>
         ${chipDoppione(o.scatola, o.idx).chip}
@@ -1614,6 +1639,7 @@ function eseguiRicerca() {
         <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${o.idx}, this.value)" ${stato.bloccate[chiaveOriginale] ? 'disabled' : ''}>
           ${opzioniDestinazione(o.scatola)}
         </select>
+        ${btnPericolo(chiaveJs, o.idx, o)}
         <button class="btn-modifica" onclick="event.stopPropagation(); modificaOggetto(${chiaveJs}, ${o.idx})" title="Modifica nome/valore">✏️</button>
         <button class="btn-rimuovi" onclick="event.stopPropagation(); rimuoviOggetto(${chiaveJs}, ${o.idx})" title="Rimuovi">✕</button>
       </div>
@@ -1675,6 +1701,47 @@ function aggiornaRiepilogoVolume() {
 }
 
 
+
+// ── OGGETTI PERICOLOSI (batterie, infiammabili…): non vanno nel box storage ──
+const PERICOLI = { b: { ico: '🔋', n: 'Batterie' }, i: { ico: '🔥', n: 'Infiammabile' }, a: { ico: '⚠️', n: 'Altro' } };
+const RE_PERICOLO = /batteri|\bpil[ae]\b|accumulator|power ?bank|benzina|gasolio|diesel|solvent|vernic|acetone|alcol|accendin|fiammifer|bombolett|spray|aerosol|bombola|\bgas\b|petrolio|diluente|trielina|lacca|antigelo|candeggina|detergente per|olio motore|carburante/i;
+function badgePericolo(o) {
+  const p = PERICOLI[o && o.pericolo];
+  return p ? `<div class="badge-pericolo">${p.ico} ${p.n}</div>` : '';
+}
+function btnPericolo(chiaveJs, idx, o) {
+  const p = PERICOLI[o && o.pericolo];
+  return `<button class="btn-pericolo${p ? ' attivo' : ''}" onclick="event.stopPropagation(); cambiaPericolo(${chiaveJs}, ${idx})" title="Pericoloso (batterie, infiammabili…): tocca per cambiare">${p ? p.ico : '⚠️'}</button>`;
+}
+function cambiaPericolo(key, idx) {
+  if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); return; }
+  const o = stato.scatole[key][idx];
+  const ordine = ['', 'b', 'i', 'a'];
+  const nuovo = ordine[(ordine.indexOf(o.pericolo || '') + 1) % ordine.length];
+  if (nuovo) o.pericolo = nuovo; else delete o.pericolo;
+  salvaDati(); aggiornaUI();
+  mostraToast(nuovo ? `${PERICOLI[nuovo].ico} "${o.nome}": pericoloso (${PERICOLI[nuovo].n})` : `"${o.nome}": non più pericoloso`);
+}
+function oggettiPericolosi() {
+  const out = [];
+  Object.keys(stato.scatole).forEach(k => stato.scatole[k].forEach((o, idx) => { if (PERICOLI[o.pericolo]) out.push({ k, idx, o }); }));
+  const ord = { b: 0, i: 1, a: 2 };
+  return out.sort((x, y) => ord[x.o.pericolo] - ord[y.o.pericolo] || String(x.k).localeCompare(String(y.k), 'it', { numeric: true }));
+}
+function pericolosiInBox(k) { return (stato.scatole[k] || []).filter(o => PERICOLI[o.pericolo]); }
+function renderPericolosi() {
+  const el = document.getElementById('riepilogo-pericolosi');
+  const lista = oggettiPericolosi();
+  if (!lista.length) { el.style.display = 'none'; return; }
+  const aperto = el.open;
+  el.style.display = 'block';
+  el.innerHTML = `<summary>⚠️ Oggetti pericolosi (${lista.length}) — non vanno nel box</summary>` + lista.map(x => {
+    const nelBox = stato.storage && stato.storage.box[x.k] && stato.storage.box[x.k].in;
+    return `<div class="prow"><div class="pn">${PERICOLI[x.o.pericolo].ico} ${escH(x.o.nome)}<small>${escH(labelScatola(x.k))} · ${PERICOLI[x.o.pericolo].n}${nelBox ? ' · <b style="color:#c53030">⛔ scatola scelta per il box</b>' : ''}</small></div><button class="pbtn" onclick="vaiAOggetto('${x.k}', ${x.idx})">Vai</button></div>`;
+  }).join('');
+  el.open = aperto;
+}
+
 // ── PIANO BOX STORAGE ────────────────────────────────────────────────────────
 const PS_ACC = { s: 'Subito (davanti)', p: 'Prima o poi', m: 'In fondo' };
 function escH(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
@@ -1684,6 +1751,7 @@ function psSet(k, campo, val) {
   stato.storage.box[k][campo] = val;
   salvaDati();
   renderPianoStorage();
+  renderPericolosi();
 }
 function psDim(campo, val) {
   stato.storage[campo] = val;
@@ -1756,6 +1824,8 @@ function psPianoHtml() {
   if (r.scelte.length === 0) return '<div class="ps-avv">Seleziona sopra le scatole che vanno nel box.</div>';
   const kg = v => fmtKg(v);
   let h = '';
+  const conPer = r.scelte.filter(k => pericolosiInBox(k).length);
+  if (conPer.length) h += `<div class="ps-avv">⛔ Contengono oggetti pericolosi (non possono andare nel box): ${conPer.map(k => escH(labelScatola(k)) + ' (' + pericolosiInBox(k).map(o => escH(o.nome)).join(', ') + ')').join('; ')}</div>`;
   const mh0 = num0(stato.storage.mh), hh0 = num0(stato.storage.h);
   if ((mh0 && mh0 < 30) || (hh0 && hh0 < 30)) h += `<div class="ps-avv">⚠️ Altezza di ${mh0 && mh0 < 30 ? mh0 : hh0}: le misure sono in <b>cm</b>. Se intendevi metri, scrivi ${Math.round((mh0 && mh0 < 30 ? mh0 : hh0) * 100)}.</div>`;
   if (r.senzaMisure.length) h += `<div class="ps-avv">⚠️ Senza misure (escluse dal piano): ${r.senzaMisure.map(k => escH(labelScatola(k))).join(', ')}</div>`;
@@ -1804,7 +1874,7 @@ function renderPianoStorage() {
     const kj = `'${k}'`;
     return `<div class="ps-row">
       <input type="checkbox" ${b.in ? 'checked' : ''} onchange="psSet(${kj}, 'in', this.checked)">
-      <div class="ps-n">${escH(labelScatola(k))}<small>${info ? escH(info) : '⚠️ senza misure'}${stato.bloccate[k] ? ' · 🔒' : ''}</small></div>
+      <div class="ps-n">${escH(labelScatola(k))}<small>${info ? escH(info) : '⚠️ senza misure'}${stato.bloccate[k] ? ' · 🔒' : ''}${pericolosiInBox(k).length ? ' · <b style="color:#c53030">⚠️ ' + pericolosiInBox(k).length + ' pericolosi</b>' : ''}</small></div>
       <select onchange="psSet(${kj}, 'acc', this.value)">${Object.keys(PS_ACC).map(a => `<option value="${a}" ${(b.acc || 'p') === a ? 'selected' : ''}>${PS_ACC[a]}</option>`).join('')}</select>
       <label class="ps-fr"><input type="checkbox" ${b.fr ? 'checked' : ''} onchange="psSet(${kj}, 'fr', this.checked)"> 🥚 fragile</label>
     </div>`;
@@ -1854,6 +1924,7 @@ function aggiornaUI() {
   calcolaDoppioni();
   aggiornaRiepilogoVolume();
   renderPianoStorage();
+  renderPericolosi();
   aggiornaCategorieSuggerite();
   const numeroEl = document.getElementById('numero-scatola');
   if (isChiaveSpeciale(stato.scatolaAttiva)) {
@@ -1923,6 +1994,7 @@ function aggiornaUI() {
             <div class="oggetto-item ${chipDoppione(num, idx).cls}">
               <div>
                 <div class="oggetto-nome">${o.nome}</div>
+                ${badgePericolo(o)}
                 ${chipDoppione(num, idx).chip}
                 ${o.categoria ? `<div class="oggetto-categoria">${o.categoria}</div>` : ''}
                 ${(() => {
@@ -1943,6 +2015,7 @@ function aggiornaUI() {
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
                   ${opzioniDestinazione(num)}
                 </select>
+                ${btnPericolo(chiaveJs, idx, o)}
                 <button class="btn-modifica" onclick="event.stopPropagation(); modificaOggetto(${chiaveJs}, ${idx})" title="Modifica nome/valore">✏️</button>
                 <button class="btn-rimuovi" onclick="rimuoviOggetto(${chiaveJs}, ${idx})" title="Rimuovi">✕</button>
               </div>
