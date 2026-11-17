@@ -1756,6 +1756,8 @@ function psPianoHtml() {
   if (r.scelte.length === 0) return '<div class="ps-avv">Seleziona sopra le scatole che vanno nel box.</div>';
   const kg = v => fmtKg(v);
   let h = '';
+  const mh0 = num0(stato.storage.mh), hh0 = num0(stato.storage.h);
+  if ((mh0 && mh0 < 30) || (hh0 && hh0 < 30)) h += `<div class="ps-avv">⚠️ Altezza di ${mh0 && mh0 < 30 ? mh0 : hh0}: le misure sono in <b>cm</b>. Se intendevi metri, scrivi ${Math.round((mh0 && mh0 < 30 ? mh0 : hh0) * 100)}.</div>`;
   if (r.senzaMisure.length) h += `<div class="ps-avv">⚠️ Senza misure (escluse dal piano): ${r.senzaMisure.map(k => escH(labelScatola(k))).join(', ')}</div>`;
   if (r.senzaPeso.length) h += `<div class="ps-avv">⚠️ Senza peso (trattate come le più leggere): ${r.senzaPeso.map(escH).join(', ')}</div>`;
   if (!r.A || r.HC === Infinity) {
@@ -1815,7 +1817,7 @@ function renderPianoStorage() {
       <input type="number" min="0" inputmode="decimal" placeholder="Alt." value="${st.h || ''}" oninput="psDim('h', this.value)">
     </div>
     <div class="ps-dim" style="margin-top:6px">oppure solo la superficie: <input type="number" min="0" step="0.1" inputmode="decimal" placeholder="m²" value="${st.a || ''}" oninput="psDim('a', this.value)"> m² <span style="color:#718096">(usata se larghezza e profondità sono vuote)</span></div>
-    <div class="ps-dim" style="margin-top:6px">Altezza massima di una colonna: <input type="number" min="0" inputmode="decimal" placeholder="facolt." value="${st.mh || ''}" oninput="psDim('mh', this.value)"> cm <span style="color:#718096">(se vuoto: altezza del box)</span></div>
+    <div class="ps-dim" style="margin-top:6px">Altezza massima di una colonna (cm): <input type="number" min="0" inputmode="decimal" placeholder="facolt." value="${st.mh || ''}" oninput="psDim('mh', this.value)"> cm <span style="color:#718096">(in centimetri: 2,5 m = 250. Se vuoto: altezza del box)</span></div>
     <div class="ps-sez">Quali scatole vanno nel box?</div>
     <button class="ps-btn" onclick="psSelezionaBloccate(true)">🔒 Scegli tutte le bloccate</button><button class="ps-btn" onclick="psSelezionaBloccate(false)">Deseleziona tutte</button>
     ${righe}
@@ -1840,7 +1842,7 @@ function psStampa() {
 <style>body{font-family:Arial,sans-serif;padding:24px;color:#000}h1{font-size:1.3rem;margin:0 0 4px}.sub{color:#444;font-size:.85rem;margin-bottom:14px}table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:top}th.g{background:#e5e5e5;border-top:2px solid #000;border-bottom:2px solid #000}td.c{font-weight:700;width:90px}small{font-weight:400}</style></head><body>
 <h1>📦 Piano box storage</h1>
 <div class="sub">Box ${(r.L && r.P) ? r.L + ' × ' + r.P + ' cm' : (r.A ? (r.A / 10000).toLocaleString('it-IT') + ' m²' : '?')}${r.H ? ' × h ' + r.H + ' cm' : ''}${(num0(stato.storage.mh)) ? ' — colonne max ' + num0(stato.storage.mh) + ' cm' : ''} — dalla porta verso il fondo — ${new Date().toLocaleDateString('it-IT')}${r.pesoTot ? ' — peso totale ' + fmtKg(r.pesoTot) : ''}</div>
-<table>${corpo || '<tr><td>Nessuna colonna: inserisci le misure del box e seleziona le scatole.</td></tr>'}</table>
+<table>${corpo || '<tr><td>Nessuna colonna: seleziona le scatole e inserisci superficie (o larghezza × profondità) e altezza massima delle colonne, in cm.</td></tr>'}</table>
 ${extra ? `<p style="font-size:.85rem">${extra}</p>` : ''}
 <script>window.onload=()=>window.print()<\/script></body></html>`;
   const w = window.open('', '_blank');
