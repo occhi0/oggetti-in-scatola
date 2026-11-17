@@ -223,6 +223,23 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #dim-row .x { color:#a0aec0; font-weight:700; }
 #dim-row #dim-peso { width:84px; }
 #dim-volume { font-size:0.8rem; color:#276749; font-weight:700; margin-top:6px; min-height:1em; }
+#piano-storage { background: #ebf8ff; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+#piano-storage summary { cursor: pointer; font-weight: 700; color: #2c5282; padding: 4px 0; }
+#piano-storage .ps-sez { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .4px; color: #2c5282; margin: 10px 0 4px; }
+#piano-storage .ps-dim { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+#piano-storage input[type=number] { width: 70px; padding: 6px; border: 1px solid #bee3f8; border-radius: 8px; font-size: 0.85rem; }
+#piano-storage .ps-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin-top: 4px; background: #fff; border-radius: 8px; }
+#piano-storage .ps-row .ps-n { flex: 1; min-width: 0; color: #2d3748; font-size: 0.83rem; }
+#piano-storage .ps-row .ps-n small { display: block; color: #718096; }
+#piano-storage select { font-size: 0.78rem; padding: 4px; border-radius: 6px; border: 1px solid #cbd5e0; }
+#piano-storage .ps-fr { font-size: 0.75rem; color: #4a5568; white-space: nowrap; }
+#piano-storage .ps-btn { border: none; cursor: pointer; background: #bee3f8; color: #2c5282; font-size: 0.78rem; padding: 5px 10px; border-radius: 8px; font-weight: 600; margin: 6px 6px 0 0; }
+#piano-storage .ps-col { background: #fff; border-radius: 8px; padding: 8px 10px; margin-top: 6px; }
+#piano-storage .ps-col b { color: #2c5282; }
+#piano-storage .ps-liv { margin-top: 3px; color: #2d3748; }
+#piano-storage .ps-avv { margin-top: 4px; color: #c05621; }
+#piano-storage .ps-ok { color: #276749; font-weight: 700; }
+#piano-storage .ps-bad { color: #c53030; font-weight: 700; }
 #riepilogo-volume { background:white; border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:0.85rem; color:#2d3748; box-shadow:0 1px 3px rgba(0,0,0,0.08); display:none; }
 #riepilogo-volume b { color:#276749; }
 #riepilogo-volume .riga { margin-top:3px; color:#4a5568; }
@@ -548,6 +565,7 @@ footer {
 
     <div id="riepilogo-volume"></div>
     <details id="riepilogo-doppioni"></details>
+    <details id="piano-storage"></details>
     <div id="scatole-container">
       <div id="empty-state">
         <div class="emoji">🧳</div>
@@ -595,6 +613,8 @@ if (!stato.scatole[stato.scatolaAttiva]) stato.scatole[stato.scatolaAttiva] = []
 if (!stato.bloccate) stato.bloccate = {};
 if (!stato.meta) stato.meta = {};
 if (!stato.ignoraDup) stato.ignoraDup = {};
+if (!stato.storage) stato.storage = { l: '', p: '', h: '', box: {} };
+if (!stato.storage.box) stato.storage.box = {};
 if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = { viaggio: '', stanza: '' };
 
 const selezionate = new Set();
@@ -935,6 +955,11 @@ fileImporta.addEventListener('change', (e) => {
         }
       }
 
+      if (importato.storage) {
+        const is = importato.storage;
+        ['l', 'p', 'h', 'mh'].forEach(c => { if (!stato.storage[c] && is[c]) stato.storage[c] = is[c]; });
+        Object.keys(is.box || {}).forEach(k => { if (!stato.storage.box[k]) stato.storage.box[k] = is.box[k]; });
+      }
       if (importato.ignoraDup) { stato.ignoraDup = Object.assign({}, importato.ignoraDup, stato.ignoraDup || {}); }
       salvaDati();
       aggiornaUI();
@@ -1649,9 +1674,182 @@ function aggiornaRiepilogoVolume() {
   el.style.display = 'block';
 }
 
+
+// ── PIANO BOX STORAGE ────────────────────────────────────────────────────────
+const PS_ACC = { s: 'Subito (davanti)', p: 'Prima o poi', m: 'In fondo' };
+function escH(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function psBox(k) { return stato.storage.box[k] || { in: false, acc: 'p', fr: false }; }
+function psSet(k, campo, val) {
+  if (!stato.storage.box[k]) stato.storage.box[k] = { in: false, acc: 'p', fr: false };
+  stato.storage.box[k][campo] = val;
+  salvaDati();
+  renderPianoStorage();
+}
+function psDim(campo, val) {
+  stato.storage[campo] = val;
+  salvaDati();
+  psAggiornaPiano();
+}
+function psSelezionaBloccate(v) {
+  Object.keys(stato.scatole).forEach(k => {
+    if (v && !(stato.bloccate[k] && !isChiaveSpeciale(k))) return;
+    if (!stato.storage.box[k]) stato.storage.box[k] = { in: false, acc: 'p', fr: false };
+    stato.storage.box[k].in = v;
+  });
+  salvaDati();
+  renderPianoStorage();
+}
+function psChiavi() {
+  const num = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k)).sort((a, b) => Number(a) - Number(b));
+  const spe = CHIAVI_SPECIALI.filter(k => k !== 'auto' && stato.scatole[k] && (volumeLitri(stato.meta[k]) > 0 || pesoKg(stato.meta[k]) > 0));
+  return [...num, ...spe];
+}
+function psCalcola() {
+  const L = num0(stato.storage.l), P = num0(stato.storage.p), H = num0(stato.storage.h);
+  const scelte = Object.keys(stato.scatole).filter(k => psBox(k).in);
+  const items = [], senzaMisure = [];
+  scelte.forEach(k => {
+    const m = stato.meta[k] || {};
+    const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
+    if (!(l && p && h)) { senzaMisure.push(k); return; }
+    const b = psBox(k);
+    items.push({ k, label: labelScatola(k), l, p, h, fp: [Math.min(l, p), Math.max(l, p)], peso: pesoKg(m), accPeso: !!pesoKg(m), acc: b.acc || 'p', fr: !!b.fr });
+  });
+  const senzaPeso = items.filter(i => !i.accPeso).map(i => i.label);
+  const HC = Math.min(H || Infinity, num0(stato.storage.mh) || Infinity);
+  const res = { L, P, H, scelte, items, senzaMisure, senzaPeso, colonne: [], nonEntra: [], avvisi: [] };
+  if (!(L && P && H)) return res;
+  const fpL = [Math.min(L, P), Math.max(L, P)];
+  const sta = (fp, base) => fp[0] <= base[0] + 1e-9 && fp[1] <= base[1] + 1e-9;
+  ['s', 'p', 'm'].forEach(g => {
+    const gi = items.filter(i => i.acc === g);
+    const normali = gi.filter(i => !i.fr).sort((a, b) => b.peso - a.peso || (b.fp[0] * b.fp[1]) - (a.fp[0] * a.fp[1]));
+    const fragili = gi.filter(i => i.fr).sort((a, b) => b.peso - a.peso);
+    const stacks = [];
+    const piazza = (i, ultimo) => {
+      if (!sta(i.fp, fpL) || i.h > HC) { res.nonEntra.push(i); return; }
+      const s = stacks.find(st => !st.chiusa && st.h + i.h <= HC && sta(i.fp, st.base));
+      if (s) { s.box.push(i); s.h += i.h; s.peso += i.peso; if (ultimo) s.chiusa = true; }
+      else stacks.push({ g, base: i.fp, box: [i], h: i.h, peso: i.peso, chiusa: !!ultimo });
+    };
+    normali.forEach(i => piazza(i, false));
+    fragili.forEach(i => piazza(i, true));
+    res.colonne.push(...stacks);
+  });
+  res.areaUsata = res.colonne.reduce((a, c) => a + c.base[0] * c.base[1], 0);
+  res.areaBox = L * P;
+  res.volScatole = items.reduce((a, i) => a + i.l * i.p * i.h / 1000, 0);
+  res.volBox = L * P * H / 1000;
+  res.pesoTot = items.reduce((a, i) => a + i.peso, 0);
+  return res;
+}
+function psFmtColonna(c, n) {
+  const righe = c.box.slice().reverse().map((i, idx, arr) => {
+    const pos = idx === arr.length - 1 ? 'A terra' : (idx === 0 && arr.length > 1 ? 'In cima' : 'Sopra');
+    return { pos, i };
+  });
+  return righe;
+}
+function psPianoHtml() {
+  const r = psCalcola();
+  if (r.scelte.length === 0) return '<div class="ps-avv">Seleziona sopra le scatole che vanno nel box.</div>';
+  const kg = v => fmtKg(v);
+  let h = '';
+  if (r.senzaMisure.length) h += `<div class="ps-avv">⚠️ Senza misure (escluse dal piano): ${r.senzaMisure.map(k => escH(labelScatola(k))).join(', ')}</div>`;
+  if (r.senzaPeso.length) h += `<div class="ps-avv">⚠️ Senza peso (trattate come le più leggere): ${r.senzaPeso.map(escH).join(', ')}</div>`;
+  if (!(r.L && r.P && r.H)) {
+    const v = r.items.reduce((a, i) => a + i.l * i.p * i.h / 1000, 0), w = r.items.reduce((a, i) => a + i.peso, 0);
+    return h + `<div style="margin-top:6px">Selezionate ${r.scelte.length}: <b>${fmtLitri(v)}</b>${w ? ' · <b>' + kg(w) + '</b>' : ''}. Inserisci le misure del box per ottenere il piano.</div>`;
+  }
+  const perc = r.areaUsata / r.areaBox * 100, pv = r.volScatole / r.volBox * 100;
+  const clsA = perc > 100 ? 'ps-bad' : (perc > 85 ? '' : 'ps-ok');
+  h += `<div style="margin-top:6px">Volume scatole: <b>${fmtLitri(r.volScatole)}</b> su ${fmtLitri(r.volBox)} (${pv.toFixed(0)}%) · Peso: <b>${kg(r.pesoTot)}</b><br>Pavimento occupato dalle colonne: <span class="${clsA}">${perc.toFixed(0)}%</span> <span style="color:#718096">(indicativo: gli spazi tra le scatole non si recuperano)</span></div>`;
+  if (perc > 100) h += `<div class="ps-avv">⛔ Le colonne non entrano nel pavimento del box: servono meno scatole o un box più grande.</div>`;
+  else if (perc > 85) h += `<div class="ps-avv">⚠️ Pavimento quasi pieno: nella pratica potrebbe non bastare.</div>`;
+  if (r.nonEntra.length) h += `<div class="ps-avv">⛔ Non entrano per misure: ${r.nonEntra.map(i => escH(i.label)).join(', ')}</div>`;
+  const gruppi = { s: 'Subito (vicino alla porta)', p: 'Prima o poi', m: 'In fondo' };
+  let n = 0, ultimoG = '';
+  r.colonne.forEach(c => {
+    if (c.g !== ultimoG) { h += `<div class="ps-sez">${gruppi[c.g]}</div>`; ultimoG = c.g; }
+    n++;
+    h += `<div class="ps-col"><b>Colonna ${n}</b> — ${kg(c.peso)} · alta ${c.h.toLocaleString('it-IT', { maximumFractionDigits: 0 })} cm`;
+    psFmtColonna(c).forEach(x => { h += `<div class="ps-liv">${x.pos}: ${escH(x.i.label)}${x.i.fr ? ' 🥚' : ''} <span style="color:#718096">${x.i.accPeso ? kg(x.i.peso) + ' · ' : ''}${escH(fmtDim({ lung: x.i.l, prof: x.i.p, alt: x.i.h }))}</span></div>`; });
+    const inv = c.box.some((x, idx) => idx > 0 && x.peso > c.box[idx - 1].peso + 1e-9);
+    if (inv) h += `<div class="ps-avv">⚠️ Una scatola più pesante sta sopra una più leggera (di solito per la spunta fragile): controlla.</div>`;
+    h += '</div>';
+  });
+  h += '<button class="ps-btn" onclick="psStampa()">🖨️ Stampa piano</button>';
+  return h;
+}
+function psAggiornaPiano() {
+  const el = document.getElementById('ps-piano');
+  if (el) el.innerHTML = psPianoHtml();
+  const sm = document.getElementById('ps-summary-n');
+  if (sm) sm.textContent = psChiavi().filter(k => psBox(k).in).length;
+}
+function renderPianoStorage() {
+  const el = document.getElementById('piano-storage');
+  if (!el) return;
+  const chiavi = psChiavi();
+  if (chiavi.length === 0) { el.style.display = 'none'; return; }
+  el.style.display = 'block';
+  const aperto = el.open;
+  const st = stato.storage;
+  const righe = chiavi.map(k => {
+    const b = psBox(k), m = stato.meta[k] || {};
+    const info = [fmtDim(m), pesoKg(m) ? fmtKg(pesoKg(m)) : ''].filter(Boolean).join(' · ');
+    const kj = `'${k}'`;
+    return `<div class="ps-row">
+      <input type="checkbox" ${b.in ? 'checked' : ''} onchange="psSet(${kj}, 'in', this.checked)">
+      <div class="ps-n">${escH(labelScatola(k))}<small>${info ? escH(info) : '⚠️ senza misure'}${stato.bloccate[k] ? ' · 🔒' : ''}</small></div>
+      <select onchange="psSet(${kj}, 'acc', this.value)">${Object.keys(PS_ACC).map(a => `<option value="${a}" ${(b.acc || 'p') === a ? 'selected' : ''}>${PS_ACC[a]}</option>`).join('')}</select>
+      <label class="ps-fr"><input type="checkbox" ${b.fr ? 'checked' : ''} onchange="psSet(${kj}, 'fr', this.checked)"> 🥚 fragile</label>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<summary>📦 Piano box storage (<span id="ps-summary-n">${chiavi.filter(k => psBox(k).in).length}</span> scatole scelte)</summary>
+    <div class="ps-sez">Misure del box (cm)</div>
+    <div class="ps-dim">
+      <input type="number" min="0" inputmode="decimal" placeholder="Largh." value="${st.l || ''}" oninput="psDim('l', this.value)"> ×
+      <input type="number" min="0" inputmode="decimal" placeholder="Prof." value="${st.p || ''}" oninput="psDim('p', this.value)"> ×
+      <input type="number" min="0" inputmode="decimal" placeholder="Alt." value="${st.h || ''}" oninput="psDim('h', this.value)">
+    </div>
+    <div class="ps-dim" style="margin-top:6px">Altezza massima di una colonna: <input type="number" min="0" inputmode="decimal" placeholder="facolt." value="${st.mh || ''}" oninput="psDim('mh', this.value)"> cm <span style="color:#718096">(se vuoto: altezza del box)</span></div>
+    <div class="ps-sez">Quali scatole vanno nel box?</div>
+    <button class="ps-btn" onclick="psSelezionaBloccate(true)">🔒 Scegli tutte le bloccate</button><button class="ps-btn" onclick="psSelezionaBloccate(false)">Deseleziona tutte</button>
+    ${righe}
+    <div class="ps-sez">Piano</div>
+    <div id="ps-piano">${psPianoHtml()}</div>`;
+  el.open = aperto;
+}
+function psStampa() {
+  const r = psCalcola();
+  let n = 0, corpo = '';
+  const gruppi = { s: 'Subito (vicino alla porta)', p: 'Prima o poi', m: 'In fondo' };
+  let ultimoG = '';
+  r.colonne.forEach(c => {
+    if (c.g !== ultimoG) { corpo += `<tr><th colspan="4" class="g">${gruppi[c.g]}</th></tr>`; ultimoG = c.g; }
+    n++;
+    psFmtColonna(c).forEach((x, idx, arr) => {
+      corpo += `<tr>${idx === 0 ? `<td rowspan="${arr.length}" class="c">Colonna ${n}<br><small>${fmtKg(c.peso)}</small></td>` : ''}<td>${x.pos}</td><td>${escH(x.i.label)}${x.i.fr ? ' (fragile)' : ''}</td><td>${x.i.accPeso ? fmtKg(x.i.peso) : '—'} · ${escH(fmtDim({ lung: x.i.l, prof: x.i.p, alt: x.i.h }))}</td></tr>`;
+    });
+  });
+  const extra = [r.senzaMisure.length ? 'Senza misure (escluse): ' + r.senzaMisure.map(k => escH(labelScatola(k))).join(', ') : '', r.nonEntra.length ? 'Non entrano: ' + r.nonEntra.map(i => escH(i.label)).join(', ') : ''].filter(Boolean).join('<br>');
+  const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Piano box storage</title>
+<style>body{font-family:Arial,sans-serif;padding:24px;color:#000}h1{font-size:1.3rem;margin:0 0 4px}.sub{color:#444;font-size:.85rem;margin-bottom:14px}table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:top}th.g{background:#e5e5e5;border-top:2px solid #000;border-bottom:2px solid #000}td.c{font-weight:700;width:90px}small{font-weight:400}</style></head><body>
+<h1>📦 Piano box storage</h1>
+<div class="sub">Box ${r.L || '?'} × ${r.P || '?'} × ${r.H || '?'} cm — dalla porta verso il fondo — ${new Date().toLocaleDateString('it-IT')}${r.pesoTot ? ' — peso totale ' + fmtKg(r.pesoTot) : ''}</div>
+<table>${corpo || '<tr><td>Nessuna colonna: inserisci le misure del box e seleziona le scatole.</td></tr>'}</table>
+${extra ? `<p style="font-size:.85rem">${extra}</p>` : ''}
+<script>window.onload=()=>window.print()<\/script></body></html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+
 function aggiornaUI() {
   calcolaDoppioni();
   aggiornaRiepilogoVolume();
+  renderPianoStorage();
   aggiornaCategorieSuggerite();
   const numeroEl = document.getElementById('numero-scatola');
   if (isChiaveSpeciale(stato.scatolaAttiva)) {
