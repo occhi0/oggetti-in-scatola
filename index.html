@@ -1748,7 +1748,7 @@ function renderPericolosi() {
   if (!lista.length) { el.style.display = 'none'; return; }
   const aperto = el.open;
   el.style.display = 'block';
-  el.innerHTML = `<summary>⚠️ Oggetti pericolosi (${lista.length}) — non vanno nel box</summary><button class="pbtn" style="margin-top:6px" onclick="stampaPericolose()">🖨️ Stampa le scatole con pericolosi</button>` + lista.map(x => {
+  el.innerHTML = `<summary>⚠️ Oggetti pericolosi (${lista.length}) — non vanno nel box</summary>` + lista.map(x => {
     const nelBox = stato.storage && stato.storage.box[x.k] && stato.storage.box[x.k].in;
     return `<div class="prow"><div class="pn">${PERICOLI[x.o.pericolo].ico} ${escH(x.o.nome)}<small>${escH(labelScatola(x.k))} · ${PERICOLI[x.o.pericolo].n}${nelBox ? ' · <b style="color:#c53030">⛔ scatola scelta per il box</b>' : ''}</small></div><button class="pbtn" onclick="vaiAOggetto('${x.k}', ${x.idx})">Vai</button></div>`;
   }).join('');
@@ -1937,11 +1937,6 @@ function psFinita(str, g) {
 function psStampaDepositate() {
   const keys = Object.keys(stato.scatole).filter(isDepositata).map(k => isChiaveSpeciale(k) ? k : Number(k));
   if (!keys.length) { mostraToast('Nessuna scatola nel box storage'); return; }
-  esportaScatole(keys);
-}
-function stampaPericolose() {
-  const keys = Array.from(new Set(oggettiPericolosi().map(x => x.k))).map(k => isChiaveSpeciale(k) ? k : Number(k));
-  if (!keys.length) { mostraToast('Nessun oggetto pericoloso'); return; }
   esportaScatole(keys);
 }
 function psRiapri(idx) {
