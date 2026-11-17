@@ -1748,7 +1748,7 @@ function renderPericolosi() {
   if (!lista.length) { el.style.display = 'none'; return; }
   const aperto = el.open;
   el.style.display = 'block';
-  el.innerHTML = `<summary>⚠️ Oggetti pericolosi (${lista.length}) — non vanno nel box</summary>` + lista.map(x => {
+  el.innerHTML = `<summary>⚠️ Oggetti pericolosi (${lista.length}) — non vanno nel box</summary><button class="pbtn" style="margin-top:6px" onclick="stampaPericolose()">🖨️ Stampa le scatole con pericolosi</button>` + lista.map(x => {
     const nelBox = stato.storage && stato.storage.box[x.k] && stato.storage.box[x.k].in;
     return `<div class="prow"><div class="pn">${PERICOLI[x.o.pericolo].ico} ${escH(x.o.nome)}<small>${escH(labelScatola(x.k))} · ${PERICOLI[x.o.pericolo].n}${nelBox ? ' · <b style="color:#c53030">⛔ scatola scelta per il box</b>' : ''}</small></div><button class="pbtn" onclick="vaiAOggetto('${x.k}', ${x.idx})">Vai</button></div>`;
   }).join('');
@@ -1934,6 +1934,16 @@ function psFinita(str, g) {
   salvaDati(); aggiornaUI();
   mostraToast('✅ Colonna finita');
 }
+function psStampaDepositate() {
+  const keys = Object.keys(stato.scatole).filter(isDepositata).map(k => isChiaveSpeciale(k) ? k : Number(k));
+  if (!keys.length) { mostraToast('Nessuna scatola nel box storage'); return; }
+  esportaScatole(keys);
+}
+function stampaPericolose() {
+  const keys = Array.from(new Set(oggettiPericolosi().map(x => x.k))).map(k => isChiaveSpeciale(k) ? k : Number(k));
+  if (!keys.length) { mostraToast('Nessun oggetto pericoloso'); return; }
+  esportaScatole(keys);
+}
 function psRiapri(idx) {
   if (!confirm('Riaprire la colonna? Le sue scatole torneranno a essere ridistribuite dal piano (restano depositate).')) return;
   stato.storage.fisse.splice(idx, 1);
@@ -1996,7 +2006,7 @@ function renderPianoStorage() {
     <button class="ps-btn" onclick="psSelezionaBloccate(true)">🔒 Scegli tutte le bloccate</button><button class="ps-btn" onclick="psSelezionaBloccate(false)">Deseleziona tutte</button>
     ${righe || '<div class="ps-avv">Nessuna scatola disponibile da scegliere.</div>'}
     <button class="ps-btn" style="background:#2b6cb0;color:#fff;font-size:0.84rem;padding:8px 14px" onclick="psDeposita()">📥 Deposita nel box le ${nScelte} scelte</button>
-    ${depositate.length ? `<div class="ps-sez">Già nel box storage (${depositate.length})</div>${righeDep}` : ''}
+    ${depositate.length ? `<div class="ps-sez">Già nel box storage (${depositate.length})</div><button class="ps-btn" onclick="psStampaDepositate()">🖨️ Stampa le scatole nel box storage</button>${righeDep}` : ''}
     <div class="ps-sez">Piano</div>
     <div id="ps-piano">${psPianoHtml()}</div>`;
   el.open = aperto;
