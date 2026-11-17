@@ -246,6 +246,9 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #riepilogo-pericolosi .pn { flex: 1; min-width: 0; color: #2d3748; font-size: 0.84rem; }
 #riepilogo-pericolosi .pn small { display: block; color: #718096; }
 #riepilogo-pericolosi .pbtn { border: none; cursor: pointer; background: #edf2f7; color: #2d3748; font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; font-weight: 600; }
+.scatola-card.pericolosa { box-shadow: 0 0 0 3px #e53e3e, 0 2px 8px rgba(229,62,62,0.35); }
+.banda-pericolo { background: #e53e3e; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 6px 14px; letter-spacing: .2px; }
+.banda-pericolo span { font-weight: 600; }
 .badge-pericolo { display: inline-block; background: #fed7d7; color: #9b2c2c; border-radius: 6px; padding: 1px 7px; font-size: 0.75rem; font-weight: 700; margin-top: 3px; }
 .btn-pericolo { border: none; cursor: pointer; background: #edf2f7; border-radius: 8px; font-size: 0.95rem; padding: 4px 7px; opacity: .55; }
 .btn-pericolo.attivo { background: #fed7d7; opacity: 1; }
@@ -1963,8 +1966,14 @@ function aggiornaUI() {
     const isAttiva = num === stato.scatolaAttiva;
     const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '';
     const chiaveJs = (typeof num === 'string') ? `'${num}'` : num;
+    const per = pericolosiInBox(num);
+    const bandaPer = per.length ? (() => {
+      const c = {}; per.forEach(o => { c[o.pericolo] = (c[o.pericolo] || 0) + 1; });
+      return `<div class="banda-pericolo">⚠️ PERICOLO — non va nel box: <span>${Object.keys(c).map(t => PERICOLI[t].ico + ' ' + PERICOLI[t].n + (c[t] > 1 ? ' ×' + c[t] : '')).join(' · ')}</span></div>`;
+    })() : '';
     return `
-    <div class="scatola-card${stato.bloccate[num] ? ' bloccata' : ''}${num === 'fuori' ? ' fuori-scatola' : ''}${num === 'auto' ? ' diretti-auto' : ''}${num === 'bozza' ? ' bozza' : ''}">
+    <div class="scatola-card${per.length ? ' pericolosa' : ''}${stato.bloccate[num] ? ' bloccata' : ''}${num === 'fuori' ? ' fuori-scatola' : ''}${num === 'auto' ? ' diretti-auto' : ''}${num === 'bozza' ? ' bozza' : ''}">
+      ${bandaPer}
       <div class="scatola-header" onclick="toggleScatola(${chiaveJs})">
         <div style="display:flex; align-items:flex-start;">
           <input type="checkbox" class="checkbox-scatola" data-num="${num}" ${selezionate.has(num) ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelezione(${chiaveJs})" />
