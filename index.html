@@ -514,7 +514,7 @@ footer {
     <div class="numero" id="numero-scatola">1</div>
     <div class="conteggio" id="conteggio-scatola">0 oggetti</div>
     <div class="meta-row">
-      <select id="viaggio-select">
+      <select id="viaggio-select" style="display:none" aria-hidden="true" tabindex="-1">
         <option value="">Viaggio…</option>
         <option value="1">Viaggio 1</option>
         <option value="2">Viaggio 2</option>
@@ -1286,7 +1286,7 @@ tfoot td { font-weight: 700; border-top: 2px solid #000; border-bottom: none; ba
 </head>
 <body>
 <h1>${labelScatola(num)}</h1>
-${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'} &nbsp;|&nbsp; Viaggio: ${viaggioLabel}${fmtDim(meta) ? ' &nbsp;|&nbsp; Dimensioni: ' + fmtDim(meta) + (volumeLitri(meta) ? ' (' + fmtLitri(volumeLitri(meta)) + ')' : '') : ''}${pesoKg(meta) ? ' &nbsp;|&nbsp; Peso: ' + fmtKg(pesoKg(meta)) : ''}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
+${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'}${fmtDim(meta) ? ' &nbsp;|&nbsp; Dimensioni: ' + fmtDim(meta) + (volumeLitri(meta) ? ' (' + fmtLitri(volumeLitri(meta)) + ')' : '') : ''}${pesoKg(meta) ? ' &nbsp;|&nbsp; Peso: ' + fmtKg(pesoKg(meta)) : ''}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
 <table>
 <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
 <tbody>${righe}</tbody>
@@ -1697,7 +1697,7 @@ function aggiornaRiepilogoVolume() {
   const perViaggio = {};
   conDati.forEach(k => { const v = (stato.meta[k] && stato.meta[k].viaggio) || ''; (perViaggio[v] = perViaggio[v] || []).push(k); });
   const nomeV = v => v === '' ? 'Senza viaggio' : v === 'dopo' ? 'Da spedire dopo' : `Viaggio ${v}`;
-  const righe = Object.keys(perViaggio).sort().map(v => { const [a, b] = somma(perViaggio[v]); return `<div class="riga">${nomeV(v)}: ${fmt(a, b)}</div>`; }).join('');
+  const righe = '';
   const selNum = [...selezionate].filter(k => stato.scatole[k]);
   let rigaSel = '';
   if (selNum.length > 0) {
@@ -2094,7 +2094,7 @@ function aggiornaUI() {
             <div class="scatola-titolo">${labelScatola(num)}${isAttiva ? ' ✏️' : ''}</div>
             <div class="scatola-info">${oggetti.length === 1 ? '1 oggetto' : `${oggetti.length} oggetti`}</div>
             <div class="scatola-badges">
-              ${viaggioLabel ? `<span class="badge badge-viaggio">${viaggioLabel}</span>` : ''}
+              
               ${meta.stanza ? `<span class="badge badge-stanza">📍 ${meta.stanza}</span>` : ''}
               ${pesoKg(meta) ? `<span class="badge badge-dim">⚖️ ${fmtKg(pesoKg(meta))}</span>` : ''}
               ${fmtDim(meta) ? `<span class="badge badge-dim">📐 ${fmtDim(meta)}${volumeLitri(meta) ? ' · ' + fmtLitri(volumeLitri(meta)) : ''}</span>` : ''}
