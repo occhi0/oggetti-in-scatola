@@ -574,6 +574,7 @@ footer {
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
       <h2 style="margin-bottom:0;">Tutte le scatole</h2>
       <div style="display:flex; gap:6px;">
+        <button id="btn-etichette" style="background:#dd6b20; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🏷️ Etichette <span id="etichette-sub"></span></button>
         <button id="btn-esporta-selezionate" style="display:none; background:#38a169; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta selezionate (<span id="conteggio-selezionate">0</span>)</button>
         <button id="btn-esporta-categoria" style="background:#9f7aea; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Per categoria</button>
         <button id="btn-esporta-tutto" style="background:#2b6cb0; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta tutto</button>
@@ -1311,6 +1312,8 @@ function aggiornaBottoneSelezionate() {
   const btn = document.getElementById('btn-esporta-selezionate');
   document.getElementById('conteggio-selezionate').textContent = selezionate.size;
   btn.style.display = selezionate.size > 0 ? 'inline-flex' : 'none';
+  const es = document.getElementById('etichette-sub');
+  if (es) es.textContent = selezionate.size > 0 ? '(' + [...selezionate].filter(k => !isChiaveSpeciale(k)).length + ' selez.)' : '(tutte)';
   aggiornaRiepilogoVolume();
 }
 
@@ -1432,6 +1435,47 @@ function esportaSelezionate() {
   esportaScatole(Array.from(selezionate));
 }
 document.getElementById('btn-esporta-selezionate').addEventListener('click', esportaSelezionate);
+
+// ── ETICHETTE DA ATTACCARE (una per pagina: numero e peso in caratteri grandi) ──
+function stampaEtichette() {
+  let chiavi = (selezionate.size > 0 ? [...selezionate] : Object.keys(stato.scatole))
+    .map(String)
+    .filter(k => !isChiaveSpeciale(k) && (stato.scatole[k] || []).length > 0)
+    .sort((a, b) => Number(a) - Number(b));
+  if (!chiavi.length) { mostraToast('⚠️ Nessuna scatola numerata da etichettare'); return; }
+  const pagine = chiavi.map(k => {
+    const m = stato.meta[k] || {};
+    const w = pesoKg(m);
+    const nome = (m.nome || '').trim();
+    const per = (typeof pericolosiInBox === 'function' ? pericolosiInBox(k) : []);
+    const tipi = [...new Set(per.map(o => PERICOLI[o.pericolo].ico + ' ' + PERICOLI[o.pericolo].n))];
+    return `<section>
+${per.length ? `<div class="pericolo">PERICOLO: ${tipi.join(' · ')}</div>` : ''}
+<div class="lbl">SCATOLA</div>
+<div class="num">${escH(k)}</div>
+${nome ? `<div class="nome">${escH(nome)}</div>` : ''}
+<div class="peso">${w ? escH(fmtKg(w)) : 'Peso: ________ kg'}</div>
+</section>`;
+  }).join('');
+  const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"/><title>Etichette scatole</title>
+<style>
+@page { size: A4 landscape; margin: 10mm; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #000; }
+section { height: 190mm; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 4px solid #000; border-radius: 12px; page-break-after: always; break-after: page; position: relative; }
+section:last-child { page-break-after: auto; break-after: auto; }
+.lbl { font-size: 36pt; font-weight: 700; letter-spacing: 8px; }
+.num { font-size: 260pt; font-weight: 900; line-height: 1; }
+.nome { font-size: 32pt; margin-top: 4mm; }
+.peso { font-size: 80pt; font-weight: 800; margin-top: 6mm; }
+.pericolo { position: absolute; top: 0; left: 0; right: 0; background: #000; color: #fff; font-size: 30pt; font-weight: 800; padding: 4mm; border-radius: 8px 8px 0 0; }
+</style></head><body>${pagine}
+<script>window.onload=()=>window.print()<\/script></body></html>`;
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+}
+document.getElementById('btn-etichette').addEventListener('click', stampaEtichette);
 
 // ── RAGGRUPPAMENTO OGGETTI PER CATEGORIA ────────────────────────────────────────
 function raggruppaPerCategoria() {
