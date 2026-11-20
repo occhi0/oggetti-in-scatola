@@ -575,6 +575,7 @@ footer {
       <h2 style="margin-bottom:0;">Tutte le scatole</h2>
       <div style="display:flex; gap:6px;">
         <select id="etichette-per-foglio" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Etichette per foglio"><option value="1">1 per foglio</option><option value="4">4 per foglio</option></select>
+        <select id="etichette-copie" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Copie per scatola"><option value="1">1 copia</option><option value="2">2 copie</option><option value="3">3 copie</option></select>
         <button id="btn-etichette" style="background:#dd6b20; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🏷️ Etichette <span id="etichette-sub"></span></button>
         <button id="btn-esporta-selezionate" style="display:none; background:#38a169; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta selezionate (<span id="conteggio-selezionate">0</span>)</button>
         <button id="btn-esporta-categoria" style="background:#9f7aea; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Per categoria</button>
@@ -1445,6 +1446,7 @@ function stampaEtichette() {
     .sort((a, b) => Number(a) - Number(b));
   if (!chiavi.length) { mostraToast('⚠️ Nessuna scatola numerata da etichettare'); return; }
   const per4 = document.getElementById('etichette-per-foglio').value === '4';
+  const copie = Number(document.getElementById('etichette-copie').value) || 1;
   const sezioni = chiavi.map(k => {
     const m = stato.meta[k] || {};
     const w = pesoKg(m);
@@ -1458,7 +1460,7 @@ ${per.length ? `<div class="pericolo">PERICOLO: ${tipi.join(' · ')}</div>` : ''
 ${nome ? `<div class="nome">${escH(nome)}</div>` : ''}
 <div class="peso">${w ? escH(fmtKg(w)) : 'Peso: ________ kg'}</div>
 </section>`;
-  });
+  }).flatMap(x => Array(copie).fill(x));
   const n = per4 ? 4 : 1, gruppi = [];
   for (let i = 0; i < sezioni.length; i += n) gruppi.push(`<div class="pag">${sezioni.slice(i, i + n).join('')}</div>`);
   const pagine = gruppi.join('');
