@@ -204,7 +204,7 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #riepilogo-doppioni { background: #fffaf0; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: none; }
 #riepilogo-doppioni summary { cursor: pointer; font-weight: 700; color: #9c4221; padding: 4px 0; }
 #riepilogo-doppioni .dgrp { padding: 6px 0; border-top: 1px solid #fbd38d; color: #4a5568; }
-#riepilogo-doppioni .dgrp b { color: #2d3748; }
+#riepilogo-doppioni .dgrp b { color: #1a202c; font-weight: 800; }
 #riepilogo-doppioni .drow { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 8px; background: #fff; border-radius: 8px; }
 #riepilogo-doppioni .dn { flex: 1; font-size: 0.84rem; color: #2d3748; min-width: 0; }
 #riepilogo-doppioni .dbtn { border: none; cursor: pointer; margin: 0; background: #edf2f7; color: #2d3748; font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; font-weight: 600; }
@@ -698,6 +698,14 @@ function dupTok(nome) {
   const t = base.split(' ').filter(x => x.length >= 2 && !/^\d+$/.test(x) && !STOP_DUP.has(x)).map(dupStem);
   return { tok: Array.from(new Set(t)), base };
 }
+// grassetto sulle parole del nome che coincidono (stessa radice) con quelle condivise tra i due nomi simili
+function dupEvidenzia(nome, condivisi) {
+  return String(nome).split(/([^\p{L}\p{N}]+)/u).map(w => {
+    if (!w) return '';
+    const n = w.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    return /[\p{L}\p{N}]/u.test(w) && condivisi.has(dupStem(n)) ? `<b>${escH(w)}</b>` : escH(w);
+  }).join('');
+}
 function dupLabel(k) { return isChiaveSpeciale(k) ? labelScatola(k) : labelScatola(Number(k)); }
 function dupPairKey(a, b) { return [a, b].sort().join('||'); }
 let DUP = { per: {}, uguali: [], simili: [] };
@@ -739,14 +747,18 @@ function calcolaDoppioni() {
   const apertoPrima = el.open;
   el.style.display = 'block';
   const simAperto = !!(el.querySelector('.dsim') && el.querySelector('.dsim').open);
-  const riga = (o, conNome) => {
+  const riga = (o, conNome, cond) => {
     const bl = !!stato.bloccate[o.k];
-    return `<div class="drow"><span class="dn">${conNome ? `«${o.nome}» · ` : ''}${dupLabel(o.k)}${bl ? ' 🔒' : ''}</span>
+    return `<div class="drow"><span class="dn">${conNome ? `«${cond ? dupEvidenzia(o.nome, cond) : escH(o.nome)}» · ` : ''}${dupLabel(o.k)}${bl ? ' 🔒' : ''}</span>
       <button class="dbtn" onclick="vaiAOggetto('${o.k}', ${o.idx})">Vai</button>
       <button class="dbtn dbtn-rim" ${bl ? 'disabled' : ''} onclick="rimuoviOggetto('${o.k}', ${o.idx})">Rimuovi</button></div>`;
   };
-  const gUguali = DUP.uguali.map(g => `<div class="dgrp"><b>«${g.nome}»</b> · ${g.ogg.length} volte${g.ogg.map(o => riga(o, false)).join('')}<button class="dnon" onclick="ignoraDoppione('${g.key}','${g.key}')">non è un doppione</button></div>`).join('');
-  const gSimili = DUP.simili.map(c => `<div class="dgrp"><b>«${c.a}»</b> ≈ <b>«${c.b}»</b>${c.ogg.map(o => riga(o, true)).join('')}<button class="dnon" onclick="ignoraDoppione('${c.pk.split('||')[0]}','${c.pk.split('||')[1]}')">non è un doppione</button></div>`).join('');
+  const gUguali = DUP.uguali.map(g => `<div class="dgrp"><b>«${escH(g.nome)}»</b> · ${g.ogg.length} volte${g.ogg.map(o => riga(o, false)).join('')}<button class="dnon" onclick="ignoraDoppione('${g.key}','${g.key}')">non è un doppione</button></div>`).join('');
+  const gSimili = DUP.simili.map(c => {
+    const [ka, kb] = c.pk.split('||'), tb = kb.split(' ');
+    const cond = new Set(ka.split(' ').filter(t => tb.includes(t)));
+    return `<div class="dgrp">«${dupEvidenzia(c.a, cond)}» ≈ «${dupEvidenzia(c.b, cond)}»${c.ogg.map(o => riga(o, true, cond)).join('')}<button class="dnon" onclick="ignoraDoppione('${c.pk.split('||')[0]}','${c.pk.split('||')[1]}')">non è un doppione</button></div>`;
+  }).join('');
   el.innerHTML = `<summary>⚠️ Possibili doppioni (${n})</summary>` +
     (DUP.uguali.length ? `<div class="dsez">Stesso nome (${DUP.uguali.length})</div>${gUguali}` : '') +
     (DUP.simili.length ? `<details class="dsim" ${simAperto ? 'open' : ''}><summary>Nomi simili (${DUP.simili.length}) · si apre con un tocco</summary>${gSimili}</details>` : '');
