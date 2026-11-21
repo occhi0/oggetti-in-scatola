@@ -792,7 +792,7 @@ function chipDoppione(num, idx) {
   if (d.s.length) {
     const visti = new Set();
     const righe = d.s.filter(x => { const t = x.nome + '|' + x.k; if (visti.has(t)) return false; visti.add(t); return true; }).slice(0, 3);
-    chip += `<div class="dup dup-s">≈ Simile a: ${righe.map(x => `«${x.nome}» (${dupLabel(x.k)})`).join(', ')}${d.s.length > righe.length ? '…' : ''}</div>`;
+    chip += `<div class="dup dup-s">≈ Simile a: ${righe.map(x => { const tx = dupTok(x.nome).tok; return `«${dupEvidenzia(x.nome, new Set(key.filter(t => tx.includes(t))))}» (${dupLabel(x.k)})`; }).join(', ')}${d.s.length > righe.length ? '…' : ''}</div>`;
   }
   return { chip, cls: d.u.length ? 'is-dup-u' : 'is-dup-s' };
 }
