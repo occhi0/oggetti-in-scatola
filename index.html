@@ -2103,7 +2103,19 @@ ${extra ? `<p style="font-size:.85rem">${extra}</p>` : ''}
   w.document.close();
 }
 
+// Ridisegna tutto ma mantiene aperti gli elenchi che l'utente ha aperto (si chiudono solo a mano)
 function aggiornaUI() {
+  const aperte = Array.from(document.querySelectorAll('.scatola-oggetti.visibile')).map(e => e.id.replace(/^oggetti-/, ''));
+  const y = window.scrollY;
+  aggiornaUIInterna();
+  aperte.forEach(k => {
+    const el = document.getElementById('oggetti-' + k), t = document.getElementById('toggle-' + k);
+    if (el) el.classList.add('visibile');
+    if (t) t.classList.add('aperta');
+  });
+  if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+}
+function aggiornaUIInterna() {
   calcolaDoppioni();
   aggiornaRiepilogoVolume();
   renderPianoStorage();
