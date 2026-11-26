@@ -1,2333 +1,4666 @@
 <!DOCTYPE html>
+pp</th>#
 <html lang="it">
+pp</th>#
 <head>
+pp</th>#
 <meta charset="UTF-8" />
+pp</th>#
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+pp</th>#
 <title>Oggetti in Scatola</title>
+pp</th>#
 <link rel="icon" type="image/svg+xml" href="icon.svg" />
+pp</th>#
 <link rel="apple-touch-icon" href="icon-180.png" />
+pp</th>#
 <link rel="manifest" href="manifest.webmanifest" />
+pp</th>#
 <meta name="theme-color" content="#2b6cb0" />
+pp</th>#
 <style>
+pp</th>#
 * { box-sizing: border-box; margin: 0; padding: 0; }
+pp</th>#
 body {
+pp</th>#
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+pp</th>#
   background: #f0f4f8;
+pp</th>#
   color: #1a202c;
+pp</th>#
   min-height: 100vh;
+pp</th>#
 }
+pp</th>#
 header {
+pp</th>#
   background: #2b6cb0;
+pp</th>#
   color: white;
+pp</th>#
   padding: 16px 20px;
+pp</th>#
   display: flex;
+pp</th>#
   flex-direction: column;
+pp</th>#
   align-items: flex-start;
+pp</th>#
   gap: 10px;
+pp</th>#
   position: sticky;
+pp</th>#
   top: 0;
+pp</th>#
   z-index: 100;
+pp</th>#
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+pp</th>#
 }
+pp</th>#
 header h1 { font-size: 1.3rem; font-weight: 700; }
+pp</th>#
 header .header-azioni {
+pp</th>#
   display: flex;
+pp</th>#
   gap: 6px;
+pp</th>#
   flex-wrap: wrap;
+pp</th>#
   justify-content: flex-end;
+pp</th>#
   align-self: stretch;
+pp</th>#
 }
+pp</th>#
 #btn-nuova-scatola {
+pp</th>#
   background: #f6ad55;
+pp</th>#
   color: #1a202c;
+pp</th>#
   border: none;
+pp</th>#
   border-radius: 8px;
+pp</th>#
   padding: 8px 14px;
+pp</th>#
   font-size: 0.9rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   cursor: pointer;
+pp</th>#
   white-space: nowrap;
+pp</th>#
 }
+pp</th>#
 #btn-nuova-scatola:active { background: #ed8936; }
+pp</th>#
 main { padding: 16px; max-width: 600px; margin: 0 auto; }
+pp</th>#
 
+pp</th>#
 /* Scatola attiva */
+pp</th>#
 #scatola-attiva {
+pp</th>#
   background: white;
+pp</th>#
   border-radius: 16px;
+pp</th>#
   padding: 20px;
+pp</th>#
   margin-bottom: 20px;
+pp</th>#
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+pp</th>#
   text-align: center;
+pp</th>#
 }
+pp</th>#
 #scatola-attiva .label {
+pp</th>#
   font-size: 0.85rem;
+pp</th>#
   color: #718096;
+pp</th>#
   text-transform: uppercase;
+pp</th>#
   letter-spacing: 0.05em;
+pp</th>#
   margin-bottom: 4px;
+pp</th>#
 }
+pp</th>#
 #scatola-attiva .numero {
+pp</th>#
   font-size: 3.5rem;
+pp</th>#
   font-weight: 900;
+pp</th>#
   color: #2b6cb0;
+pp</th>#
   line-height: 1;
+pp</th>#
 }
+pp</th>#
 #scatola-attiva .numero.testo {
+pp</th>#
   font-size: 1.7rem;
+pp</th>#
 }
+pp</th>#
 #scatola-attiva .conteggio {
+pp</th>#
   font-size: 0.95rem;
+pp</th>#
   color: #718096;
+pp</th>#
   margin-top: 6px;
+pp</th>#
 }
+pp</th>#
 #scatola-attiva .meta-row {
+pp</th>#
   display: flex;
+pp</th>#
   gap: 8px;
+pp</th>#
   margin-top: 14px;
+pp</th>#
   justify-content: center;
+pp</th>#
   flex-wrap: wrap;
+pp</th>#
 }
+pp</th>#
 #scatola-attiva select, #scatola-attiva input.meta-input {
+pp</th>#
   border: 2px solid #e2e8f0;
+pp</th>#
   border-radius: 10px;
+pp</th>#
   padding: 8px 10px;
+pp</th>#
   font-size: 0.9rem;
+pp</th>#
   outline: none;
+pp</th>#
   background: white;
+pp</th>#
 }
+pp</th>#
 #scatola-attiva select:focus, #scatola-attiva input.meta-input:focus { border-color: #2b6cb0; }
+pp</th>#
 
+pp</th>#
 /* Form aggiunta oggetto */
+pp</th>#
 #form-section {
+pp</th>#
   background: white;
+pp</th>#
   border-radius: 16px;
+pp</th>#
   padding: 20px;
+pp</th>#
   margin-bottom: 20px;
+pp</th>#
   box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+pp</th>#
 }
+pp</th>#
 #form-section h2 {
+pp</th>#
   font-size: 1rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   margin-bottom: 14px;
+pp</th>#
   color: #2d3748;
+pp</th>#
 }
+pp</th>#
 #oggetto-input, #categoria-input, #stanza-oggetto-input, #valore-input {
+pp</th>#
   width: 100%;
+pp</th>#
   border: 2px solid #e2e8f0;
+pp</th>#
   border-radius: 10px;
+pp</th>#
   padding: 12px 14px;
+pp</th>#
   font-size: 1rem;
+pp</th>#
   outline: none;
+pp</th>#
   margin-bottom: 10px;
+pp</th>#
   -webkit-appearance: none;
+pp</th>#
   background: white;
+pp</th>#
 }
+pp</th>#
 #oggetto-input:focus, #categoria-input:focus, #stanza-oggetto-input:focus, #valore-input:focus { border-color: #2b6cb0; }
+pp</th>#
 #btn-aggiungi {
+pp</th>#
   width: 100%;
+pp</th>#
   background: #38a169;
+pp</th>#
   color: white;
+pp</th>#
   border: none;
+pp</th>#
   border-radius: 12px;
+pp</th>#
   padding: 14px;
+pp</th>#
   font-size: 1.05rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   cursor: pointer;
+pp</th>#
 }
+pp</th>#
 #btn-aggiungi:active { background: #276749; }
+pp</th>#
 #feedback {
+pp</th>#
   margin-top: 10px;
+pp</th>#
   padding: 10px 14px;
+pp</th>#
   border-radius: 10px;
+pp</th>#
   font-size: 0.95rem;
+pp</th>#
   font-weight: 600;
+pp</th>#
   display: none;
+pp</th>#
   text-align: center;
+pp</th>#
 }
+pp</th>#
 #feedback.ok { background: #c6f6d5; color: #22543d; display: block; }
+pp</th>#
 #feedback.errore { background: #fed7d7; color: #742a2a; display: block; }
+pp</th>#
 
+pp</th>#
 /* Lista scatole */
+pp</th>#
 #lista-scatole h2 {
+pp</th>#
   font-size: 1rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   margin-bottom: 12px;
+pp</th>#
   color: #2d3748;
+pp</th>#
 }
+pp</th>#
 .scatola-card {
+pp</th>#
   background: white;
+pp</th>#
   border-radius: 14px;
+pp</th>#
   margin-bottom: 12px;
+pp</th>#
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+pp</th>#
   overflow: hidden;
+pp</th>#
 }
+pp</th>#
 .scatola-header {
+pp</th>#
   display: flex;
+pp</th>#
   align-items: center;
+pp</th>#
   justify-content: space-between;
+pp</th>#
   padding: 14px 18px;
+pp</th>#
   cursor: pointer;
+pp</th>#
   user-select: none;
+pp</th>#
   -webkit-user-select: none;
+pp</th>#
 }
+pp</th>#
 .scatola-header:active { background: #f7fafc; }
+pp</th>#
 .checkbox-scatola {
+pp</th>#
   width: 20px;
+pp</th>#
   height: 20px;
+pp</th>#
   margin-right: 12px;
+pp</th>#
   flex-shrink: 0;
+pp</th>#
   accent-color: #2b6cb0;
+pp</th>#
   cursor: pointer;
+pp</th>#
 }
+pp</th>#
 .scatola-titolo {
+pp</th>#
   font-weight: 700;
+pp</th>#
   font-size: 1rem;
+pp</th>#
   color: #2b6cb0;
+pp</th>#
 }
+pp</th>#
 .scatola-badges { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
+pp</th>#
 .badge {
+pp</th>#
   display: inline-block;
+pp</th>#
   font-size: 0.75rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   padding: 2px 9px;
+pp</th>#
   border-radius: 20px;
+pp</th>#
 }
+pp</th>#
 .badge-viaggio { background: #ebf8ff; color: #2b6cb0; }
+pp</th>#
 .badge-stanza { background: #faf5ff; color: #6b46c1; }
+pp</th>#
 .dup { font-size: 0.74rem; margin-top: 4px; padding: 3px 8px; border-radius: 8px; display: inline-block; line-height: 1.35; }
+pp</th>#
 .dup-u { background: #feebc8; color: #9c4221; }
+pp</th>#
 .dup-s { background: #fefcbf; color: #744210; }
+pp</th>#
 .dup button { border: none; background: rgba(0,0,0,.08); border-radius: 6px; padding: 1px 7px; font-size: 0.7rem; margin-left: 4px; cursor: pointer; color: inherit; }
+pp</th>#
 .oggetto-item.is-dup-u { border-left: 4px solid #ed8936; }
+pp</th>#
 .oggetto-item.is-dup-s { border-left: 4px solid #ecc94b; }
+pp</th>#
 #riepilogo-doppioni { background: #fffaf0; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: none; }
+pp</th>#
 #riepilogo-doppioni summary { cursor: pointer; font-weight: 700; color: #9c4221; padding: 4px 0; }
+pp</th>#
 #riepilogo-doppioni .dgrp { padding: 6px 0; border-top: 1px solid #fbd38d; color: #4a5568; }
+pp</th>#
 #riepilogo-doppioni .dgrp b { color: #1a202c; font-weight: 800; }
+pp</th>#
 #riepilogo-doppioni .drow { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 8px; background: #fff; border-radius: 8px; }
+pp</th>#
 #riepilogo-doppioni .dn { flex: 1; font-size: 0.84rem; color: #2d3748; min-width: 0; }
+pp</th>#
 #riepilogo-doppioni .dbtn { border: none; cursor: pointer; margin: 0; background: #edf2f7; color: #2d3748; font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; font-weight: 600; }
+pp</th>#
 #riepilogo-doppioni .dbtn-rim { background: #fed7d7; color: #9b2c2c; }
+pp</th>#
 #riepilogo-doppioni .dbtn:disabled { opacity: .4; }
+pp</th>#
 #riepilogo-doppioni .dsez { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .4px; color: #9c4221; margin-top: 8px; }
+pp</th>#
 #riepilogo-doppioni .dnon { border: none; cursor: pointer; display: block; margin: 8px 0 0 0; background: none; color: #718096; text-decoration: underline; padding: 0; font-size: 0.74rem; }
+pp</th>#
 #riepilogo-doppioni details.dsim { margin-top: 10px; border-top: 1px solid #fbd38d; }
+pp</th>#
 #riepilogo-doppioni details.dsim > summary { font-weight: 600; font-size: 0.8rem; color: #744210; padding: 8px 0 2px; }
+pp</th>#
 @keyframes flashDup { 0%, 60% { background: #fefcbf; box-shadow: 0 0 0 3px #ecc94b; } 100% { background: transparent; box-shadow: none; } }
+pp</th>#
 .oggetto-item.flash { animation: flashDup 2.6s ease-out; border-radius: 8px; }
+pp</th>#
 .badge-dim { background: #f0fff4; color: #276749; }
+pp</th>#
 #dim-row { display:flex; gap:6px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
+pp</th>#
 #dim-row input { width:72px; border:2px solid #e2e8f0; border-radius:10px; padding:8px 6px; font-size:0.9rem; outline:none; background:white; text-align:center; }
+pp</th>#
 #dim-row input:focus { border-color: #2b6cb0; }
+pp</th>#
 #dim-row .x { color:#a0aec0; font-weight:700; }
+pp</th>#
 #dim-row #dim-peso { width:84px; }
+pp</th>#
 #dim-volume { font-size:0.8rem; color:#276749; font-weight:700; margin-top:6px; min-height:1em; }
+pp</th>#
 #piano-storage { background: #ebf8ff; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+pp</th>#
 #piano-storage summary { cursor: pointer; font-weight: 700; color: #2c5282; padding: 4px 0; }
+pp</th>#
 #piano-storage .ps-sez { font-weight: 700; font-size: 0.78rem; text-transform: uppercase; letter-spacing: .4px; color: #2c5282; margin: 10px 0 4px; }
+pp</th>#
 #piano-storage .ps-dim { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+pp</th>#
 #piano-storage input[type=number] { width: 70px; padding: 6px; border: 1px solid #bee3f8; border-radius: 8px; font-size: 0.85rem; }
+pp</th>#
 #piano-storage .ps-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; margin-top: 4px; background: #fff; border-radius: 8px; }
+pp</th>#
 #piano-storage .ps-row .ps-n { flex: 1; min-width: 0; color: #2d3748; font-size: 0.83rem; }
+pp</th>#
 #piano-storage .ps-row .ps-n small { display: block; color: #718096; }
+pp</th>#
 #piano-storage select { font-size: 0.78rem; padding: 4px; border-radius: 6px; border: 1px solid #cbd5e0; }
+pp</th>#
 #piano-storage .ps-link { border: none; background: none; color: #2b6cb0; font-size: 0.76rem; padding: 3px 0 0; cursor: pointer; text-decoration: underline; }
+pp</th>#
 #piano-storage .ps-ogg { background: #f7fafc; border-radius: 8px; margin: 2px 0 0 26px; padding: 6px 10px; font-size: 0.8rem; color: #2d3748; }
+pp</th>#
 #piano-storage .ps-ogg div { padding: 2px 0; border-bottom: 1px dashed #e2e8f0; }
+pp</th>#
 #piano-storage .ps-ogg div:last-child { border-bottom: none; }
+pp</th>#
 #piano-storage .ps-fr { font-size: 0.75rem; color: #4a5568; white-space: nowrap; }
+pp</th>#
 #piano-storage .ps-casa { background: #f0fff4; border: 2px solid #38a169; border-radius: 10px; padding: 10px; margin: 8px 0; font-size: 0.85rem; }
+pp</th>#
 #piano-storage .ps-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+pp</th>#
 #piano-storage .ps-chip { border: 2px solid #a0aec0; background: #fff; color: #2d3748; border-radius: 10px; min-width: 52px; padding: 10px 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+pp</th>#
 #piano-storage .ps-chip.qui { background: #38a169; border-color: #276749; color: #fff; }
+pp</th>#
 #piano-storage .ps-casa-conta { margin: 4px 0 2px; }
+pp</th>#
 #piano-storage .ps-btn { border: none; cursor: pointer; background: #bee3f8; color: #2c5282; font-size: 0.78rem; padding: 5px 10px; border-radius: 8px; font-weight: 600; margin: 6px 6px 0 0; }
+pp</th>#
 #piano-storage .ps-col { background: #fff; border-radius: 8px; padding: 8px 10px; margin-top: 6px; }
+pp</th>#
 #piano-storage .ps-col b { color: #2c5282; }
+pp</th>#
 #piano-storage .ps-liv { margin-top: 3px; color: #2d3748; }
+pp</th>#
 #piano-storage .ps-avv { margin-top: 4px; color: #c05621; }
+pp</th>#
 #piano-storage .ps-ok { color: #276749; font-weight: 700; }
+pp</th>#
 #piano-storage .ps-bad { color: #c53030; font-weight: 700; }
+pp</th>#
 #riepilogo-pericolosi { background: #fff5f5; border-radius: 12px; padding: 8px 14px; margin-bottom: 12px; font-size: 0.85rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); display: none; }
+pp</th>#
 #riepilogo-pericolosi summary { cursor: pointer; font-weight: 700; color: #9b2c2c; padding: 4px 0; }
+pp</th>#
 #riepilogo-pericolosi .prow { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 8px; background: #fff; border-radius: 8px; }
+pp</th>#
 #riepilogo-pericolosi .pn { flex: 1; min-width: 0; color: #2d3748; font-size: 0.84rem; }
+pp</th>#
 #riepilogo-pericolosi .pn small { display: block; color: #718096; }
+pp</th>#
 #riepilogo-pericolosi .pbtn { border: none; cursor: pointer; background: #edf2f7; color: #2d3748; font-size: 0.8rem; padding: 5px 12px; border-radius: 8px; font-weight: 600; }
+pp</th>#
 .scatola-card.pericolosa { box-shadow: 0 0 0 3px #e53e3e, 0 2px 8px rgba(229,62,62,0.35); }
+pp</th>#
 .banda-pericolo { background: #e53e3e; color: #fff; font-weight: 800; font-size: 0.82rem; padding: 6px 14px; letter-spacing: .2px; }
+pp</th>#
 .banda-pericolo span { font-weight: 600; }
+pp</th>#
 .badge-pericolo { display: inline-block; background: #fed7d7; color: #9b2c2c; border-radius: 6px; padding: 1px 7px; font-size: 0.75rem; font-weight: 700; margin-top: 3px; }
+pp</th>#
 .btn-pericolo { border: none; cursor: pointer; background: #edf2f7; border-radius: 8px; font-size: 0.95rem; padding: 4px 7px; opacity: .55; }
+pp</th>#
 .btn-pericolo.attivo { background: #fed7d7; opacity: 1; }
+pp</th>#
 #pericolo-input { width: 100%; box-sizing: border-box; margin-top: 8px; }
+pp</th>#
 #riepilogo-volume { background:white; border-radius:12px; padding:10px 14px; margin-bottom:12px; font-size:0.85rem; color:#2d3748; box-shadow:0 1px 3px rgba(0,0,0,0.08); display:none; }
+pp</th>#
 #riepilogo-volume b { color:#276749; }
+pp</th>#
 #riepilogo-volume .riga { margin-top:3px; color:#4a5568; }
+pp</th>#
 .scatola-info {
+pp</th>#
   font-size: 0.85rem;
+pp</th>#
   color: #718096;
+pp</th>#
 }
+pp</th>#
 .scatola-toggle {
+pp</th>#
   font-size: 1.1rem;
+pp</th>#
   color: #a0aec0;
+pp</th>#
   transition: transform 0.2s;
+pp</th>#
 }
+pp</th>#
 .scatola-toggle.aperta { transform: rotate(180deg); }
+pp</th>#
 .scatola-oggetti {
+pp</th>#
   display: none;
+pp</th>#
   padding: 0 18px 14px;
+pp</th>#
   border-top: 1px solid #f0f4f8;
+pp</th>#
 }
+pp</th>#
 .scatola-oggetti.visibile { display: block; }
+pp</th>#
 .oggetto-item {
+pp</th>#
   display: flex;
+pp</th>#
   align-items: center;
+pp</th>#
   justify-content: space-between;
+pp</th>#
   padding: 8px 0;
+pp</th>#
   border-bottom: 1px solid #f0f4f8;
+pp</th>#
   font-size: 0.9rem;
+pp</th>#
 }
+pp</th>#
 .oggetto-item:last-child { border-bottom: none; }
+pp</th>#
 .oggetto-nome { color: #2d3748; font-weight: 600; font-size: 0.9rem; }
+pp</th>#
 .oggetto-categoria { color: #718096; font-size: 0.82rem; }
+pp</th>#
 .oggetto-valore { color: #2b6cb0; font-weight: 700; font-size: 0.82rem; margin-top: 1px; }
+pp</th>#
 .oggetto-stanza { color: #6b46c1; font-size: 0.8rem; margin-top: 1px; }
+pp</th>#
 .scatola-totale {
+pp</th>#
   display: flex;
+pp</th>#
   justify-content: space-between;
+pp</th>#
   align-items: center;
+pp</th>#
   padding: 10px 0 4px;
+pp</th>#
   margin-top: 6px;
+pp</th>#
   border-top: 2px solid #e2e8f0;
+pp</th>#
   font-size: 0.9rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   color: #2d3748;
+pp</th>#
 }
+pp</th>#
 .scatola-totale .importo { color: #2b6cb0; font-size: 1rem; }
+pp</th>#
 .btn-rimuovi {
+pp</th>#
   background: none;
+pp</th>#
   border: none;
+pp</th>#
   font-size: 1.1rem;
+pp</th>#
   cursor: pointer;
+pp</th>#
   padding: 4px 8px;
+pp</th>#
   border-radius: 6px;
+pp</th>#
   color: #e53e3e;
+pp</th>#
   flex-shrink: 0;
+pp</th>#
 }
+pp</th>#
 .btn-rimuovi:active { background: #fff5f5; }
+pp</th>#
 .btn-modifica {
+pp</th>#
   background: none;
+pp</th>#
   border: none;
+pp</th>#
   font-size: 1.1rem;
+pp</th>#
   cursor: pointer;
+pp</th>#
   padding: 4px 8px;
+pp</th>#
   border-radius: 6px;
+pp</th>#
   color: #2b6cb0;
+pp</th>#
   flex-shrink: 0;
+pp</th>#
 }
+pp</th>#
 .btn-modifica:active { background: #ebf8ff; }
+pp</th>#
 .scatola-card.bloccata .btn-modifica { opacity: 0.3; pointer-events: none; }
+pp</th>#
 .select-sposta {
+pp</th>#
   border: 1px solid #e2e8f0;
+pp</th>#
   border-radius: 6px;
+pp</th>#
   font-size: 0.7rem;
+pp</th>#
   padding: 3px 3px;
+pp</th>#
   background: white;
+pp</th>#
   color: #4a5568;
+pp</th>#
   max-width: 82px;
+pp</th>#
   margin-right: 4px;
+pp</th>#
 }
+pp</th>#
 .modal-cat-riga {
+pp</th>#
   display: flex;
+pp</th>#
   align-items: center;
+pp</th>#
   gap: 12px;
+pp</th>#
   padding: 10px 0;
+pp</th>#
   border-bottom: 1px solid #f7fafc;
+pp</th>#
 }
+pp</th>#
 .modal-cat-riga input[type="checkbox"] {
+pp</th>#
   width: 20px;
+pp</th>#
   height: 20px;
+pp</th>#
   accent-color: #9f7aea;
+pp</th>#
   flex-shrink: 0;
+pp</th>#
 }
+pp</th>#
 .modal-cat-riga .nome { font-weight: 600; color: #2d3748; font-size: 0.92rem; flex: 1; }
+pp</th>#
 .modal-cat-riga .dettagli { color: #718096; font-size: 0.8rem; }
+pp</th>#
 .btn-stampa, .btn-lucchetto {
+pp</th>#
   background: none;
+pp</th>#
   border: none;
+pp</th>#
   font-size: 1.1rem;
+pp</th>#
   cursor: pointer;
+pp</th>#
   padding: 4px 8px;
+pp</th>#
   border-radius: 6px;
+pp</th>#
   color: #718096;
+pp</th>#
 }
+pp</th>#
 .btn-stampa:active, .btn-lucchetto:active { background: #f0f4f8; }
+pp</th>#
 .btn-lucchetto svg { width: 22px; height: 22px; display: block; }
+pp</th>#
 .scatola-card.bloccata .scatola-header { background: #f7fafc; }
+pp</th>#
 .scatola-card.bloccata .scatola-titolo { color: #718096; }
+pp</th>#
 .scatola-card.bloccata .btn-rimuovi { opacity: 0.3; pointer-events: none; }
+pp</th>#
 .scatola-card.fuori-scatola { border-left: 4px solid #f6ad55; }
+pp</th>#
 .scatola-card.diretti-auto { border-left: 4px solid #38a169; }
+pp</th>#
 .scatola-card.bozza { border-left: 4px solid #9f7aea; }
+pp</th>#
 
+pp</th>#
 .nessun-oggetto {
+pp</th>#
   color: #a0aec0;
+pp</th>#
   font-size: 0.85rem;
+pp</th>#
   padding: 8px 0;
+pp</th>#
   font-style: italic;
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 /* Ricerca */
+pp</th>#
 #cerca-container { margin-bottom: 14px; position: relative; }
+pp</th>#
 #cerca-input {
+pp</th>#
   width: 100%;
+pp</th>#
   border: 2px solid #e2e8f0;
+pp</th>#
   border-radius: 12px;
+pp</th>#
   padding: 12px 40px 12px 14px;
+pp</th>#
   font-size: 1rem;
+pp</th>#
   outline: none;
+pp</th>#
   background: white;
+pp</th>#
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+pp</th>#
 }
+pp</th>#
 #cerca-clear {
+pp</th>#
   display: none;
+pp</th>#
   position: absolute;
+pp</th>#
   right: 10px;
+pp</th>#
   top: 50%;
+pp</th>#
   transform: translateY(-50%);
+pp</th>#
   background: none;
+pp</th>#
   border: none;
+pp</th>#
   font-size: 1.2rem;
+pp</th>#
   color: #a0aec0;
+pp</th>#
   cursor: pointer;
+pp</th>#
   padding: 4px;
+pp</th>#
 }
+pp</th>#
 #risultati-ricerca .res-item {
+pp</th>#
   background: white;
+pp</th>#
   border-radius: 12px;
+pp</th>#
   padding: 12px 16px;
+pp</th>#
   margin-bottom: 8px;
+pp</th>#
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+pp</th>#
   display: flex;
+pp</th>#
   align-items: flex-start;
+pp</th>#
   justify-content: space-between;
+pp</th>#
   flex-wrap: wrap;
+pp</th>#
   gap: 8px;
+pp</th>#
 }
+pp</th>#
 #risultati-ricerca .res-nome { font-weight: 600; font-size: 0.9rem; color: #2d3748; }
+pp</th>#
 #risultati-ricerca .res-categoria { font-size: 0.82rem; color: #718096; }
+pp</th>#
 #risultati-ricerca .res-scatola {
+pp</th>#
   background: #2b6cb0;
+pp</th>#
   color: white;
+pp</th>#
   border-radius: 20px;
+pp</th>#
   padding: 4px 12px;
+pp</th>#
   font-size: 0.82rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   white-space: nowrap;
+pp</th>#
   margin-left: 10px;
+pp</th>#
 }
+pp</th>#
 #nessun-risultato {
+pp</th>#
   text-align: center;
+pp</th>#
   color: #a0aec0;
+pp</th>#
   padding: 20px;
+pp</th>#
   font-size: 0.95rem;
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 footer {
+pp</th>#
   text-align: center;
+pp</th>#
   padding: 24px 16px;
+pp</th>#
   color: #a0aec0;
+pp</th>#
   font-size: 0.8rem;
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 #toast {
+pp</th>#
   position: fixed;
+pp</th>#
   bottom: 24px;
+pp</th>#
   left: 50%;
+pp</th>#
   transform: translateX(-50%) translateY(80px);
+pp</th>#
   background: #2d3748;
+pp</th>#
   color: white;
+pp</th>#
   padding: 12px 20px;
+pp</th>#
   border-radius: 24px;
+pp</th>#
   font-size: 0.95rem;
+pp</th>#
   font-weight: 600;
+pp</th>#
   z-index: 1000;
+pp</th>#
   transition: transform 0.3s ease;
+pp</th>#
   white-space: nowrap;
+pp</th>#
   pointer-events: none;
+pp</th>#
   display: flex;
+pp</th>#
   align-items: center;
+pp</th>#
   gap: 12px;
+pp</th>#
 }
+pp</th>#
 #toast.visibile { transform: translateX(-50%) translateY(0); pointer-events: auto; }
+pp</th>#
 
+pp</th>#
 #empty-state {
+pp</th>#
   text-align: center;
+pp</th>#
   padding: 32px 16px;
+pp</th>#
   color: #a0aec0;
+pp</th>#
 }
+pp</th>#
 #toggle-valore-slider::before {
+pp</th>#
   content: "";
+pp</th>#
   position: absolute;
+pp</th>#
   height: 18px;
+pp</th>#
   width: 18px;
+pp</th>#
   left: 3px;
+pp</th>#
   bottom: 3px;
+pp</th>#
   background: white;
+pp</th>#
   border-radius: 50%;
+pp</th>#
   transition: 0.2s;
+pp</th>#
 }
+pp</th>#
 #toggle-valore-stampa:checked + #toggle-valore-slider::before { transform: translateX(20px); }
+pp</th>#
 #toggle-valore-stampa:checked + #toggle-valore-slider { background: #38a169 !important; }
+pp</th>#
 #toggle-valore-stampa:not(:checked) + #toggle-valore-slider { background: #e53e3e !important; }
+pp</th>#
 </style>
+pp</th>#
 </head>
+pp</th>#
 <body>
+pp</th>#
 
+pp</th>#
 <header>
+pp</th>#
   <h1>🧳 Oggetti in Scatola</h1>
+pp</th>#
   <div class="header-azioni">
+pp</th>#
     <button id="btn-bozza" style="background:white; color:#2b6cb0; border:none; border-radius:8px; padding:8px 12px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">📝 Bozza</button>
+pp</th>#
     <button id="btn-fuori-scatola" style="background:white; color:#2b6cb0; border:none; border-radius:8px; padding:8px 12px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">📤 Fuori scatola</button>
+pp</th>#
     <button id="btn-diretti-auto" style="background:white; color:#2b6cb0; border:none; border-radius:8px; padding:8px 12px; font-size:0.85rem; font-weight:700; cursor:pointer; white-space:nowrap;">🚗 Diretti in auto</button>
+pp</th>#
     <button id="btn-nuova-scatola">+ Nuova scatola</button>
+pp</th>#
   </div>
+pp</th>#
 </header>
+pp</th>#
 
+pp</th>#
 <main>
+pp</th>#
 
+pp</th>#
   <!-- Impostazione valore nei PDF -->
+pp</th>#
   <div id="toggle-valore-bar" style="display:flex; align-items:center; justify-content:space-between; background:white; border-radius:10px; padding:10px 14px; margin-bottom:12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+pp</th>#
     <span style="font-size:0.85rem; color:#2d3748; font-weight:600;">💰 Includi valore nei PDF</span>
+pp</th>#
     <label style="position:relative; display:inline-block; width:44px; height:24px;">
+pp</th>#
       <input type="checkbox" id="toggle-valore-stampa" checked style="opacity:0; width:0; height:0;">
+pp</th>#
       <span id="toggle-valore-slider" style="position:absolute; cursor:pointer; inset:0; background:#38a169; border-radius:24px; transition:0.2s;"></span>
+pp</th>#
     </label>
+pp</th>#
   </div>
+pp</th>#
 
+pp</th>#
   <!-- Sincronizzazione tra dispositivi -->
+pp</th>#
   <div id="sync-bar" style="display:flex; gap:8px; margin-bottom:16px;">
+pp</th>#
     <button id="btn-esporta-dati" style="flex:1; background:white; color:#2b6cb0; border:2px solid #2b6cb0; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">⬇️ Esporta dati</button>
+pp</th>#
     <button id="btn-importa-dati" style="flex:1; background:white; color:#2b6cb0; border:2px solid #2b6cb0; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">⬆️ Unisci dati</button>
+pp</th>#
     <input type="file" id="file-importa" accept="application/json" style="display:none;" />
+pp</th>#
   </div>
+pp</th>#
 
+pp</th>#
   <!-- Scatola attiva -->
+pp</th>#
   <div id="scatola-attiva">
+pp</th>#
     <div class="label">Stai riempiendo</div>
+pp</th>#
     <div class="numero" id="numero-scatola">1</div>
+pp</th>#
     <div class="conteggio" id="conteggio-scatola">0 oggetti</div>
+pp</th>#
     <div class="meta-row">
+pp</th>#
       <select id="viaggio-select" style="display:none" aria-hidden="true" tabindex="-1">
+pp</th>#
         <option value="">Viaggio…</option>
+pp</th>#
         <option value="1">Viaggio 1</option>
+pp</th>#
         <option value="2">Viaggio 2</option>
+pp</th>#
         <option value="3">Viaggio 3</option>
+pp</th>#
         <option value="4">Viaggio 4</option>
+pp</th>#
         <option value="dopo">Da spedire dopo</option>
+pp</th>#
       </select>
+pp</th>#
       <input type="text" id="stanza-input" class="meta-input" placeholder="Destinazione…" list="stanze-suggerite" />
+pp</th>#
     </div>
+pp</th>#
     <div id="nome-row" style="margin-top:10px;"><input type="text" id="nome-scatola" class="meta-input" maxlength="40" placeholder="Nome scatola (opzionale, es. Cassapanca)" style="width:100%;max-width:340px;" /></div>
+pp</th>#
     <div id="dim-row">
+pp</th>#
       <input type="number" id="dim-l" inputmode="decimal" min="0" step="0.1" placeholder="Largh." />
+pp</th>#
       <span class="x">×</span>
+pp</th>#
       <input type="number" id="dim-p" inputmode="decimal" min="0" step="0.1" placeholder="Prof." />
+pp</th>#
       <span class="x">×</span>
+pp</th>#
       <input type="number" id="dim-h" inputmode="decimal" min="0" step="0.1" placeholder="Altez." />
+pp</th>#
       <span class="x">cm</span>
+pp</th>#
       <span class="x" style="margin-left:8px">⚖️</span>
+pp</th>#
       <input type="number" id="dim-peso" inputmode="decimal" min="0" step="0.1" placeholder="Peso kg" />
+pp</th>#
     </div>
+pp</th>#
     <div id="dim-volume"></div>
+pp</th>#
     <div style="font-size:0.75rem; color:#a0aec0; margin-top:6px;">La destinazione qui sopra vale per tutti gli oggetti della scatola, a meno che uno specifico oggetto non abbia una destinazione propria.</div>
+pp</th>#
   </div>
+pp</th>#
 
+pp</th>#
   <!-- Form aggiunta -->
+pp</th>#
   <div id="form-section">
+pp</th>#
     <h2>Aggiungi oggetto</h2>
+pp</th>#
     <input id="oggetto-input" type="text" placeholder="Nome oggetto (es. Pentola grande)…" />
+pp</th>#
     <input id="categoria-input" type="text" placeholder="Categoria (opzionale, es. Cucina)…" list="categorie-suggerite" />
+pp</th>#
     <input id="stanza-oggetto-input" type="text" placeholder="Destinazione (opzionale, es. Cucina)…" list="stanze-suggerite" />
+pp</th>#
     <input id="valore-input" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Valore stimato in CHF (opzionale)…" />
+pp</th>#
     <select id="pericolo-input" title="Oggetto pericoloso (non può andare nel box storage)">
+pp</th>#
       <option value="">Non pericoloso</option>
+pp</th>#
       <option value="b">🔋 Pericoloso: batterie</option>
+pp</th>#
       <option value="i">🔥 Pericoloso: infiammabile</option>
+pp</th>#
       <option value="a">⚠️ Pericoloso: altro</option>
+pp</th>#
     </select>
+pp</th>#
     <datalist id="categorie-suggerite">
+pp</th>#
       <option value="Cucina">
+pp</th>#
       <option value="Vestiti">
+pp</th>#
       <option value="Elettronica">
+pp</th>#
       <option value="Bagno">
+pp</th>#
       <option value="Documenti">
+pp</th>#
       <option value="Decorazioni">
+pp</th>#
       <option value="Attrezzi">
+pp</th>#
       <option value="Giocattoli">
+pp</th>#
       <option value="Sport">
+pp</th>#
       <option value="Varie">
+pp</th>#
     </datalist>
+pp</th>#
     <datalist id="stanze-suggerite"></datalist>
+pp</th>#
     <button id="btn-aggiungi">Aggiungi alla scatola attiva</button>
+pp</th>#
     <div id="feedback"></div>
+pp</th>#
   </div>
+pp</th>#
 
+pp</th>#
   <!-- Lista scatole -->
+pp</th>#
   <div id="lista-scatole">
+pp</th>#
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
+pp</th>#
       <h2 style="margin-bottom:0;">Tutte le scatole</h2>
+pp</th>#
       <div style="display:flex; gap:6px;">
+pp</th>#
         <button id="btn-lista-scatole" style="background:#718096; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">📋 Lista scatole</button>
+pp</th>#
         <select id="etichette-per-foglio" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Etichette per foglio"><option value="1">1 per foglio</option><option value="4">4 per foglio</option></select>
+pp</th>#
         <select id="etichette-copie" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Copie per scatola"><option value="1">1 copia</option><option value="2">2 copie</option><option value="3">3 copie</option></select>
+pp</th>#
         <button id="btn-etichette" style="background:#dd6b20; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🏷️ Etichette <span id="etichette-sub"></span></button>
+pp</th>#
         <button id="btn-esporta-selezionate" style="display:none; background:#38a169; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta selezionate (<span id="conteggio-selezionate">0</span>)</button>
+pp</th>#
         <button id="btn-esporta-categoria" style="background:#9f7aea; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Per categoria</button>
+pp</th>#
         <button id="btn-esporta-tutto" style="background:#2b6cb0; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta tutto</button>
+pp</th>#
       </div>
+pp</th>#
     </div>
+pp</th>#
 
+pp</th>#
     <div id="cerca-container">
+pp</th>#
       <input id="cerca-input" type="text" placeholder="🔍 Cerca per nome o categoria…" />
+pp</th>#
       <button id="cerca-clear">✕</button>
+pp</th>#
     </div>
+pp</th>#
     <div id="risultati-ricerca" style="display:none; margin-bottom:12px;"></div>
+pp</th>#
 
+pp</th>#
     <div id="riepilogo-volume"></div>
+pp</th>#
     <details id="riepilogo-doppioni"></details>
+pp</th>#
     <details id="riepilogo-pericolosi"></details>
+pp</th>#
     <details id="piano-storage"></details>
+pp</th>#
     <div id="scatole-container">
+pp</th>#
       <div id="empty-state">
+pp</th>#
         <div class="emoji">🧳</div>
+pp</th>#
         <p>Nessun oggetto ancora.<br>Aggiungi il primo qui sopra!</p>
+pp</th>#
       </div>
+pp</th>#
     </div>
+pp</th>#
   </div>
+pp</th>#
 
+pp</th>#
 </main>
+pp</th>#
 
+pp</th>#
 <footer>Dati salvati su questo dispositivo — usa Esporta/Importa per sincronizzare con altri</footer>
+pp</th>#
 <div id="toast"></div>
+pp</th>#
 
+pp</th>#
 <!-- Modal selezione categorie -->
+pp</th>#
 <div id="modal-categorie" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:2000; align-items:flex-end; justify-content:center;">
+pp</th>#
   <div style="background:white; border-radius:20px 20px 0 0; max-width:600px; width:100%; max-height:80vh; display:flex; flex-direction:column;">
+pp</th>#
     <div style="padding:18px 20px 10px; border-bottom:1px solid #f0f4f8; display:flex; justify-content:space-between; align-items:center;">
+pp</th>#
       <div style="font-weight:700; font-size:1.05rem; color:#2d3748;">Scegli le categorie</div>
+pp</th>#
       <button id="modal-cat-chiudi" style="background:none; border:none; font-size:1.3rem; color:#a0aec0; cursor:pointer; padding:4px;">✕</button>
+pp</th>#
     </div>
+pp</th>#
     <div id="modal-cat-lista" style="overflow-y:auto; padding:8px 20px; flex:1;"></div>
+pp</th>#
     <div style="padding:14px 20px; border-top:1px solid #f0f4f8; display:flex; gap:8px;">
+pp</th>#
       <button id="modal-cat-tutte" style="flex:1; background:white; color:#9f7aea; border:2px solid #9f7aea; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">Seleziona tutte</button>
+pp</th>#
       <button id="modal-cat-esporta" style="flex:1; background:#9f7aea; color:white; border:none; border-radius:10px; padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">🖨️ Esporta</button>
+pp</th>#
     </div>
+pp</th>#
   </div>
+pp</th>#
 </div>
+pp</th>#
 
+pp</th>#
 <script>
+pp</th>#
 // ── STATO ─────────────────────────────────────────────────────────────────────
+pp</th>#
 const STORAGE_KEY = 'oggetti-in-scatola-v1';
+pp</th>#
 
+pp</th>#
 function caricaDati() {
+pp</th>#
   try {
+pp</th>#
     const raw = localStorage.getItem(STORAGE_KEY);
+pp</th>#
     if (raw) return JSON.parse(raw);
+pp</th>#
   } catch(e) {}
+pp</th>#
   return { scatolaAttiva: 1, scatole: {}, bloccate: {}, meta: {} };
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function salvaDati() { localStorage.setItem(STORAGE_KEY, JSON.stringify(stato)); }
+pp</th>#
 
+pp</th>#
 let stato = caricaDati();
+pp</th>#
 if (!stato.scatole[stato.scatolaAttiva]) stato.scatole[stato.scatolaAttiva] = [];
+pp</th>#
 if (!stato.bloccate) stato.bloccate = {};
+pp</th>#
 if (!stato.meta) stato.meta = {};
+pp</th>#
 if (!stato.ignoraDup) stato.ignoraDup = {};
+pp</th>#
 if (!stato.storage) stato.storage = { l: '', p: '', h: '', box: {} };
+pp</th>#
 if (!stato.storage.box) stato.storage.box = {};
+pp</th>#
 if (!stato.storage.fisse) stato.storage.fisse = [];
+pp</th>#
 if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = { viaggio: '', stanza: '' };
+pp</th>#
 
+pp</th>#
 const selezionate = new Set();
+pp</th>#
 
+pp</th>#
 // ── TOGGLE VALORE NEI PDF ────────────────────────────────────────────────────
+pp</th>#
 const TOGGLE_VALORE_KEY = 'oggetti-in-scatola-mostra-valore';
+pp</th>#
 let mostraValoreStampa = localStorage.getItem(TOGGLE_VALORE_KEY) !== 'no';
+pp</th>#
 const toggleValoreCheckbox = document.getElementById('toggle-valore-stampa');
+pp</th>#
 toggleValoreCheckbox.checked = mostraValoreStampa;
+pp</th>#
 toggleValoreCheckbox.addEventListener('change', () => {
+pp</th>#
   mostraValoreStampa = toggleValoreCheckbox.checked;
+pp</th>#
   localStorage.setItem(TOGGLE_VALORE_KEY, mostraValoreStampa ? 'si' : 'no');
+pp</th>#
   mostraToast(mostraValoreStampa ? '💰 Valore incluso nei PDF' : '🚫 Valore nascosto nei PDF');
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── ELEMENTI ──────────────────────────────────────────────────────────────────
+pp</th>#
 const oggettoInput = document.getElementById('oggetto-input');
+pp</th>#
 const categoriaInput = document.getElementById('categoria-input');
+pp</th>#
 const stanzaOggettoInput = document.getElementById('stanza-oggetto-input');
+pp</th>#
 const valoreInput = document.getElementById('valore-input');
+pp</th>#
 const btnAggiungi = document.getElementById('btn-aggiungi');
+pp</th>#
 const feedback = document.getElementById('feedback');
+pp</th>#
 const viaggioSelect = document.getElementById('viaggio-select');
+pp</th>#
 const stanzaInput = document.getElementById('stanza-input');
+pp</th>#
 const dimL = document.getElementById('dim-l'), dimP = document.getElementById('dim-p'), dimH = document.getElementById('dim-h');
+pp</th>#
 
+pp</th>#
 function mostraFeedback(msg, tipo) {
+pp</th>#
   feedback.textContent = msg;
+pp</th>#
   feedback.className = tipo ? tipo : '';
+pp</th>#
   if (!tipo) feedback.style.display = 'none';
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 let toastTimeout = null;
+pp</th>#
 function mostraToast(msg, azione) {
+pp</th>#
   const t = document.getElementById('toast');
+pp</th>#
   t.innerHTML = `<span>${msg}</span>` + (azione ? `<button id="toast-azione" style="background:none; border:none; color:#63b3ed; font-weight:700; cursor:pointer; font-size:0.9rem; padding:0;">${azione.label}</button>` : '');
+pp</th>#
   t.classList.add('visibile');
+pp</th>#
   clearTimeout(toastTimeout);
+pp</th>#
   toastTimeout = setTimeout(() => t.classList.remove('visibile'), azione ? 5000 : 2200);
+pp</th>#
   if (azione) {
+pp</th>#
     document.getElementById('toast-azione').addEventListener('click', () => {
+pp</th>#
       azione.onClick();
+pp</th>#
       t.classList.remove('visibile');
+pp</th>#
     });
+pp</th>#
   }
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── DOPPIONI (segnalazione, mai bloccante) ───────────────────────────────────
+pp</th>#
 const STOP_DUP = new Set(['di','da','il','lo','la','le','li','un','in','al','ai','del','dei','dal','sul','nel','per','con','una','uno','gli','pezzi','pezzo','pz','tra','fra','n','nr','e']);
+pp</th>#
 function dupStem(t) { return (t.length >= 5 && /[aeio]$/.test(t)) ? t.slice(0, -1) : t; }
+pp</th>#
 function dupTok(nome) {
+pp</th>#
   const base = String(nome || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+pp</th>#
   const t = base.split(' ').filter(x => x.length >= 2 && !/^\d+$/.test(x) && !STOP_DUP.has(x)).map(dupStem);
+pp</th>#
   return { tok: Array.from(new Set(t)), base };
+pp</th>#
 }
+pp</th>#
 // grassetto sulle parole del nome che coincidono (stessa radice) con quelle condivise tra i due nomi simili
+pp</th>#
 function dupEvidenzia(nome, condivisi) {
+pp</th>#
   return String(nome).split(/([^\p{L}\p{N}]+)/u).map(w => {
+pp</th>#
     if (!w) return '';
+pp</th>#
     const n = w.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+pp</th>#
     return /[\p{L}\p{N}]/u.test(w) && condivisi.has(dupStem(n)) ? `<b>${escH(w)}</b>` : escH(w);
+pp</th>#
   }).join('');
+pp</th>#
 }
+pp</th>#
 function dupLabel(k) { return isChiaveSpeciale(k) ? labelScatola(k) : labelScatola(Number(k)); }
+pp</th>#
 function dupPairKey(a, b) { return [a, b].sort().join('||'); }
+pp</th>#
 let DUP = { per: {}, uguali: [], simili: [] };
+pp</th>#
 function calcolaDoppioni() {
+pp</th>#
   const lista = [];
+pp</th>#
   for (const [k, ogg] of Object.entries(stato.scatole)) {
+pp</th>#
     ogg.forEach((o, idx) => { const d = dupTok(o.nome); lista.push({ k, idx, nome: o.nome, tok: d.tok, key: d.tok.length ? d.tok.slice().sort().join(' ') : d.base }); });
+pp</th>#
   }
+pp</th>#
   const per = {}, uguali = {}, simili = {};
+pp</th>#
   const add = (x, tipo, y) => { const p = x.k + '|' + x.idx; (per[p] = per[p] || { u: [], s: [] })[tipo].push({ k: y.k, nome: y.nome }); };
+pp</th>#
   for (let i = 0; i < lista.length; i++) for (let j = i + 1; j < lista.length; j++) {
+pp</th>#
     const a = lista[i], b = lista[j];
+pp</th>#
     if (!a.key || !b.key) continue;
+pp</th>#
     if (a.key === b.key) {
+pp</th>#
       if (stato.ignoraDup[dupPairKey(a.key, a.key)]) continue;
+pp</th>#
       add(a, 'u', b); add(b, 'u', a);
+pp</th>#
       const g = uguali[a.key] = uguali[a.key] || { key: a.key, nome: a.nome, pos: new Set() };
+pp</th>#
       g.pos.add(i); g.pos.add(j);
+pp</th>#
       continue;
+pp</th>#
     }
+pp</th>#
     const sh = a.tok.filter(t => b.tok.includes(t));
+pp</th>#
     const sub = a.tok.length && b.tok.length && (a.tok.every(t => b.tok.includes(t)) || b.tok.every(t => a.tok.includes(t)));
+pp</th>#
     if (sh.some(t => t.length >= 4) || sub) {
+pp</th>#
       const pk = dupPairKey(a.key, b.key);
+pp</th>#
       if (stato.ignoraDup[pk]) continue;
+pp</th>#
       add(a, 's', b); add(b, 's', a);
+pp</th>#
       const sm = simili[pk] = simili[pk] || { pk, a: a.nome, b: b.nome, n: 0, pos: new Set() };
+pp</th>#
       sm.n++; sm.pos.add(i); sm.pos.add(j);
+pp</th>#
     }
+pp</th>#
   }
+pp</th>#
   DUP = {
+pp</th>#
     per,
+pp</th>#
     uguali: Object.values(uguali).map(g => ({ key: g.key, nome: g.nome, ogg: Array.from(g.pos).map(i => lista[i]) })),
+pp</th>#
     simili: Object.values(simili).map(c => ({ pk: c.pk, a: c.a, b: c.b, n: c.n, ogg: Array.from(c.pos).map(i => lista[i]) }))
+pp</th>#
   };
+pp</th>#
   const el = document.getElementById('riepilogo-doppioni');
+pp</th>#
   const n = DUP.uguali.length + DUP.simili.length;
+pp</th>#
   if (!n) { el.style.display = 'none'; el.innerHTML = ''; return; }
+pp</th>#
   const apertoPrima = el.open;
+pp</th>#
   el.style.display = 'block';
+pp</th>#
   const simAperto = !!(el.querySelector('.dsim') && el.querySelector('.dsim').open);
+pp</th>#
   const riga = (o, conNome, cond) => {
+pp</th>#
     const bl = !!stato.bloccate[o.k];
+pp</th>#
     return `<div class="drow"><span class="dn">${conNome ? `«${cond ? dupEvidenzia(o.nome, cond) : escH(o.nome)}» · ` : ''}${dupLabel(o.k)}${bl ? ' 🔒' : ''}</span>
+pp</th>#
       <button class="dbtn" onclick="vaiAOggetto('${o.k}', ${o.idx})">Vai</button>
+pp</th>#
       <button class="dbtn dbtn-rim" ${bl ? 'disabled' : ''} onclick="rimuoviOggetto('${o.k}', ${o.idx})">Rimuovi</button></div>`;
+pp</th>#
   };
+pp</th>#
   const gUguali = DUP.uguali.map(g => `<div class="dgrp"><b>«${escH(g.nome)}»</b> · ${g.ogg.length} volte${g.ogg.map(o => riga(o, false)).join('')}<button class="dnon" onclick="ignoraDoppione('${g.key}','${g.key}')">non è un doppione</button></div>`).join('');
+pp</th>#
   const gSimili = DUP.simili.map(c => {
+pp</th>#
     const [ka, kb] = c.pk.split('||'), tb = kb.split(' ');
+pp</th>#
     const cond = new Set(ka.split(' ').filter(t => tb.includes(t)));
+pp</th>#
     return `<div class="dgrp">«${dupEvidenzia(c.a, cond)}» ≈ «${dupEvidenzia(c.b, cond)}»${c.ogg.map(o => riga(o, true, cond)).join('')}<button class="dnon" onclick="ignoraDoppione('${c.pk.split('||')[0]}','${c.pk.split('||')[1]}')">non è un doppione</button></div>`;
+pp</th>#
   }).join('');
+pp</th>#
   el.innerHTML = `<summary>⚠️ Possibili doppioni (${n})</summary>` +
+pp</th>#
     (DUP.uguali.length ? `<div class="dsez">Stesso nome (${DUP.uguali.length})</div>${gUguali}` : '') +
+pp</th>#
     (DUP.simili.length ? `<details class="dsim" ${simAperto ? 'open' : ''}><summary>Nomi simili (${DUP.simili.length}) · si apre con un tocco</summary>${gSimili}</details>` : '');
+pp</th>#
   if (apertoPrima) el.open = true;
+pp</th>#
 }
+pp</th>#
 function vaiAOggetto(k, idx) {
+pp</th>#
   if (cercaInput.value.trim()) { cercaInput.value = ''; eseguiRicerca(); }
+pp</th>#
   const cont = document.getElementById(`oggetti-${k}`);
+pp</th>#
   if (!cont) { mostraToast(isDepositata(k) ? '📦 Questa scatola è nel box storage: la trovi nel pannello «Piano box storage»' : 'Scatola non trovata'); return; }
+pp</th>#
   if (!cont.classList.contains('visibile')) toggleScatola(k);
+pp</th>#
   const item = cont.querySelectorAll('.oggetto-item')[idx];
+pp</th>#
   if (!item) return;
+pp</th>#
   item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+pp</th>#
   item.classList.remove('flash'); void item.offsetWidth; item.classList.add('flash');
+pp</th>#
   setTimeout(() => item.classList.remove('flash'), 2600);
+pp</th>#
 }
+pp</th>#
 function ignoraDoppione(a, b) {
+pp</th>#
   stato.ignoraDup[dupPairKey(a, b)] = true;
+pp</th>#
   salvaDati(); aggiornaUI();
+pp</th>#
   mostraToast('👍 Non verrà più segnalato');
+pp</th>#
 }
+pp</th>#
 function chipDoppione(num, idx) {
+pp</th>#
   const d = DUP.per[num + '|' + idx];
+pp</th>#
   if (!d) return { chip: '', cls: '' };
+pp</th>#
   const key = dupTok(((stato.scatole[num] || [])[idx] || {}).nome).tok;
+pp</th>#
   const k1 = key.length ? key.slice().sort().join(' ') : '';
+pp</th>#
   let chip = '';
+pp</th>#
   if (d.u.length) {
+pp</th>#
     chip += `<div class="dup dup-u">⚠️ Stesso nome anche in: ${Array.from(new Set(d.u.map(x => dupLabel(x.k)))).join(', ')}<button onclick="event.stopPropagation(); ignoraDoppione('${k1}','${k1}')">ok</button></div>`;
+pp</th>#
   }
+pp</th>#
   if (d.s.length) {
+pp</th>#
     const visti = new Set();
+pp</th>#
     const righe = d.s.filter(x => { const t = x.nome + '|' + x.k; if (visti.has(t)) return false; visti.add(t); return true; }).slice(0, 3);
+pp</th>#
     chip += `<div class="dup dup-s">≈ Simile a: ${righe.map(x => { const tx = dupTok(x.nome).tok; return `«${dupEvidenzia(x.nome, new Set(key.filter(t => tx.includes(t))))}» (${dupLabel(x.k)})`; }).join(', ')}${d.s.length > righe.length ? '…' : ''}</div>`;
+pp</th>#
   }
+pp</th>#
   return { chip, cls: d.u.length ? 'is-dup-u' : 'is-dup-s' };
+pp</th>#
 }
+pp</th>#
 function doppioniPerNuovo(nome) {
+pp</th>#
   const nuovo = dupTok(nome);
+pp</th>#
   const keyN = nuovo.tok.length ? nuovo.tok.slice().sort().join(' ') : nuovo.base;
+pp</th>#
   const esito = { u: [], s: [] };
+pp</th>#
   for (const [k, ogg] of Object.entries(stato.scatole)) ogg.forEach(o => {
+pp</th>#
     const d = dupTok(o.nome), key = d.tok.length ? d.tok.slice().sort().join(' ') : d.base;
+pp</th>#
     if (!key || !keyN) return;
+pp</th>#
     if (key === keyN) { if (!stato.ignoraDup[dupPairKey(key, key)]) esito.u.push({ k, nome: o.nome }); return; }
+pp</th>#
     const sh = nuovo.tok.filter(t => d.tok.includes(t));
+pp</th>#
     const sub = nuovo.tok.length && d.tok.length && (nuovo.tok.every(t => d.tok.includes(t)) || d.tok.every(t => nuovo.tok.includes(t)));
+pp</th>#
     if ((sh.some(t => t.length >= 4) || sub) && !stato.ignoraDup[dupPairKey(key, keyN)]) esito.s.push({ k, nome: o.nome });
+pp</th>#
   });
+pp</th>#
   return esito;
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── META SCATOLA ATTIVA (viaggio + stanza di default) ───────────────────────────
+pp</th>#
 function num0(v) { const n = parseFloat(v); return (!isNaN(n) && n > 0) ? n : 0; }
+pp</th>#
 function volumeLitri(m) {
+pp</th>#
   if (!m) return 0;
+pp</th>#
   const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
+pp</th>#
   return (l && p && h) ? (l * p * h) / 1000 : 0;
+pp</th>#
 }
+pp</th>#
 function pesoKg(m) { return m ? num0(m.peso) : 0; }
+pp</th>#
 function fmtKg(v) { return v.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' kg'; }
+pp</th>#
 function fmtLitri(v) { return v >= 1000 ? (v / 1000).toLocaleString('it-IT', { maximumFractionDigits: 2 }) + ' m³' : v.toLocaleString('it-IT', { maximumFractionDigits: 1 }) + ' L'; }
+pp</th>#
 function fmtDim(m) {
+pp</th>#
   if (!m) return '';
+pp</th>#
   const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
+pp</th>#
   if (!l && !p && !h) return '';
+pp</th>#
   const f = x => x ? x.toLocaleString('it-IT', { maximumFractionDigits: 1 }) : '?';
+pp</th>#
   return `${f(l)}×${f(p)}×${f(h)} cm`;
+pp</th>#
 }
+pp</th>#
 function caricaMetaAttiva() {
+pp</th>#
   const m = stato.meta[stato.scatolaAttiva] || { viaggio: '', stanza: '' };
+pp</th>#
   viaggioSelect.value = m.viaggio || '';
+pp</th>#
   stanzaInput.value = m.stanza || '';
+pp</th>#
   dimL.value = m.lung || ''; dimP.value = m.prof || ''; dimH.value = m.alt || '';
+pp</th>#
   document.getElementById('dim-peso').value = m.peso || '';
+pp</th>#
   aggiornaDimUI();
+pp</th>#
 }
+pp</th>#
 function aggiornaDimUI() {
+pp</th>#
   document.getElementById('dim-row').style.display = 'flex';
+pp</th>#
   document.getElementById('nome-row').style.display = isChiaveSpeciale(stato.scatolaAttiva) ? 'none' : 'block';
+pp</th>#
   document.getElementById('nome-scatola').value = (stato.meta[stato.scatolaAttiva] && stato.meta[stato.scatolaAttiva].nome) || '';
+pp</th>#
   const v = volumeLitri(stato.meta[stato.scatolaAttiva]);
+pp</th>#
   const w = pesoKg(stato.meta[stato.scatolaAttiva]);
+pp</th>#
   document.getElementById('dim-volume').textContent = [v ? `📐 Volume: ${fmtLitri(v)}` : '', w ? `⚖️ Peso: ${fmtKg(w)}` : ''].filter(Boolean).join('  ·  ');
+pp</th>#
 }
+pp</th>#
 document.getElementById('nome-scatola').addEventListener('input', e => {
+pp</th>#
   if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+pp</th>#
   stato.meta[stato.scatolaAttiva].nome = e.target.value;
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
 });
+pp</th>#
 document.getElementById('dim-peso').addEventListener('input', e => {
+pp</th>#
   if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+pp</th>#
   const n = parseFloat(e.target.value);
+pp</th>#
   stato.meta[stato.scatolaAttiva].peso = (!isNaN(n) && n > 0) ? n : '';
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaDimUI();
+pp</th>#
   aggiornaUI();
+pp</th>#
 });
+pp</th>#
 ['lung:dimL', 'prof:dimP', 'alt:dimH'].forEach(pair => {
+pp</th>#
   const [campo, id] = pair.split(':');
+pp</th>#
   document.getElementById(id === 'dimL' ? 'dim-l' : id === 'dimP' ? 'dim-p' : 'dim-h').addEventListener('input', e => {
+pp</th>#
     if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+pp</th>#
     const n = parseFloat(e.target.value);
+pp</th>#
     stato.meta[stato.scatolaAttiva][campo] = (!isNaN(n) && n > 0) ? n : '';
+pp</th>#
     salvaDati();
+pp</th>#
     aggiornaDimUI();
+pp</th>#
     aggiornaUI();
+pp</th>#
   });
+pp</th>#
 });
+pp</th>#
 viaggioSelect.addEventListener('change', () => {
+pp</th>#
   if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+pp</th>#
   stato.meta[stato.scatolaAttiva].viaggio = viaggioSelect.value;
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
 });
+pp</th>#
 stanzaInput.addEventListener('input', () => {
+pp</th>#
   if (!stato.meta[stato.scatolaAttiva]) stato.meta[stato.scatolaAttiva] = {};
+pp</th>#
   stato.meta[stato.scatolaAttiva].stanza = stanzaInput.value;
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── AGGIUNTA OGGETTO ────────────────────────────────────────────────────────────
+pp</th>#
 function aggiungiOggetto() {
+pp</th>#
   const nome = oggettoInput.value.trim();
+pp</th>#
   const categoria = categoriaInput.value.trim();
+pp</th>#
   const stanza = stanzaOggettoInput.value.trim();
+pp</th>#
   const valoreRaw = valoreInput.value.trim();
+pp</th>#
   const valore = valoreRaw ? parseFloat(valoreRaw) : null;
+pp</th>#
   const pericolo = document.getElementById('pericolo-input').value;
+pp</th>#
   if (!nome) {
+pp</th>#
     mostraFeedback('Scrivi il nome dell\'oggetto.', 'errore');
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
   if (stato.bloccate[stato.scatolaAttiva]) {
+pp</th>#
     mostraFeedback(`🔒 ${labelScatola(stato.scatolaAttiva)} è bloccata!`, 'errore');
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
   const doppi = doppioniPerNuovo(nome);
+pp</th>#
   const nuovo = { nome, categoria, stanza, valore };
+pp</th>#
   if (pericolo) nuovo.pericolo = pericolo;
+pp</th>#
   stato.scatole[stato.scatolaAttiva].push(nuovo);
+pp</th>#
   const chiaveAttiva = stato.scatolaAttiva;
+pp</th>#
   stato.scatole[stato.scatolaAttiva].sort((a, b) =>
+pp</th>#
     a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' })
+pp</th>#
   );
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
   oggettoInput.value = '';
+pp</th>#
   categoriaInput.value = '';
+pp</th>#
   stanzaOggettoInput.value = '';
+pp</th>#
   valoreInput.value = '';
+pp</th>#
   document.getElementById('pericolo-input').value = '';
+pp</th>#
   oggettoInput.focus();
+pp</th>#
   if (!pericolo && RE_PERICOLO.test(nome)) {
+pp</th>#
     mostraToast(`🔋 "${nome}" potrebbe essere pericoloso`, { label: 'Segna ⚠️', onClick: () => { const idx = stato.scatole[chiaveAttiva].indexOf(nuovo); if (idx >= 0) { nuovo.pericolo = 'a'; salvaDati(); aggiornaUI(); mostraToast('⚠️ Segnato come pericoloso (tocca ⚠️ sulla riga per cambiare tipo)'); } } });
+pp</th>#
   } else if (doppi.u.length || doppi.s.length) {
+pp</th>#
     const dove = doppi.u.length
+pp</th>#
       ? `⚠️ stesso nome già in ${Array.from(new Set(doppi.u.map(x => dupLabel(x.k)))).join(', ')}`
+pp</th>#
       : `≈ simile a «${doppi.s[0].nome}» in ${dupLabel(doppi.s[0].k)}`;
+pp</th>#
     mostraToast(`📦 "${nome}" aggiunto · ${dove}`, { label: 'Vedi', onClick: () => { cercaInput.value = nome; eseguiRicerca(); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+pp</th>#
   } else {
+pp</th>#
     mostraToast(`📦 "${nome}" → ${labelScatola(stato.scatolaAttiva)}`);
+pp</th>#
   }
+pp</th>#
   mostraFeedback('', '');
+pp</th>#
 }
+pp</th>#
 btnAggiungi.addEventListener('click', aggiungiOggetto);
+pp</th>#
 oggettoInput.addEventListener('keydown', e => { if (e.key === 'Enter') categoriaInput.focus(); });
+pp</th>#
 categoriaInput.addEventListener('keydown', e => { if (e.key === 'Enter') stanzaOggettoInput.focus(); });
+pp</th>#
 stanzaOggettoInput.addEventListener('keydown', e => { if (e.key === 'Enter') valoreInput.focus(); });
+pp</th>#
 valoreInput.addEventListener('keydown', e => { if (e.key === 'Enter') aggiungiOggetto(); });
+pp</th>#
 
+pp</th>#
 // ── EXPORT / IMPORT DATI (sincronizzazione manuale tra dispositivi) ────────────
+pp</th>#
 document.getElementById('btn-esporta-dati').addEventListener('click', () => {
+pp</th>#
   const dataStr = JSON.stringify(stato, null, 2);
+pp</th>#
   const blob = new Blob([dataStr], { type: 'application/json' });
+pp</th>#
   const url = URL.createObjectURL(blob);
+pp</th>#
   const a = document.createElement('a');
+pp</th>#
   const oggi = new Date().toISOString().slice(0, 10);
+pp</th>#
   a.href = url;
+pp</th>#
   a.download = `oggetti-in-scatola-${oggi}.json`;
+pp</th>#
   document.body.appendChild(a);
+pp</th>#
   a.click();
+pp</th>#
   document.body.removeChild(a);
+pp</th>#
   URL.revokeObjectURL(url);
+pp</th>#
   mostraToast('⬇️ Dati esportati');
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 const fileImporta = document.getElementById('file-importa');
+pp</th>#
 document.getElementById('btn-importa-dati').addEventListener('click', () => {
+pp</th>#
   fileImporta.value = '';
+pp</th>#
   fileImporta.click();
+pp</th>#
 });
+pp</th>#
 fileImporta.addEventListener('change', (e) => {
+pp</th>#
   const file = e.target.files[0];
+pp</th>#
   if (!file) return;
+pp</th>#
   const reader = new FileReader();
+pp</th>#
   reader.onload = (ev) => {
+pp</th>#
     try {
+pp</th>#
       const importato = JSON.parse(ev.target.result);
+pp</th>#
       if (!importato.scatole) throw new Error('Formato non valido');
+pp</th>#
 
+pp</th>#
       let scatoleAggiunte = 0;
+pp</th>#
       let oggettiAggiunti = 0;
+pp</th>#
 
+pp</th>#
       for (const [numStr, oggettiImportati] of Object.entries(importato.scatole)) {
+pp</th>#
         const num = isChiaveSpeciale(numStr) ? numStr : Number(numStr);
+pp</th>#
 
+pp</th>#
         // Se la scatola non esiste ancora su questo dispositivo, la crea
+pp</th>#
         if (!stato.scatole[num]) {
+pp</th>#
           stato.scatole[num] = [];
+pp</th>#
           scatoleAggiunte++;
+pp</th>#
         }
+pp</th>#
 
+pp</th>#
         // Aggiunge solo gli oggetti non già presenti (stesso nome+categoria+valore = duplicato)
+pp</th>#
         for (const o of oggettiImportati) {
+pp</th>#
           const esisteGia = stato.scatole[num].some(x =>
+pp</th>#
             x.nome === o.nome &&
+pp</th>#
             (x.categoria || '') === (o.categoria || '') &&
+pp</th>#
             (x.valore ?? null) === (o.valore ?? null)
+pp</th>#
           );
+pp</th>#
           if (!esisteGia) {
+pp</th>#
             stato.scatole[num].push(o);
+pp</th>#
             oggettiAggiunti++;
+pp</th>#
           }
+pp</th>#
         }
+pp</th>#
         stato.scatole[num].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+pp</th>#
 
+pp</th>#
         // Unisce i metadati (viaggio/stanza) solo se mancano su questo dispositivo
+pp</th>#
         if (importato.meta && importato.meta[num]) {
+pp</th>#
           if (!stato.meta[num]) stato.meta[num] = { viaggio: '', stanza: '' };
+pp</th>#
           if (!stato.meta[num].viaggio && importato.meta[num].viaggio) stato.meta[num].viaggio = importato.meta[num].viaggio;
+pp</th>#
           if (!stato.meta[num].stanza && importato.meta[num].stanza) stato.meta[num].stanza = importato.meta[num].stanza;
+pp</th>#
           ['lung', 'prof', 'alt', 'peso', 'nome'].forEach(c => { if (!stato.meta[num][c] && importato.meta[num][c]) stato.meta[num][c] = importato.meta[num][c]; });
+pp</th>#
         }
+pp</th>#
 
+pp</th>#
         // Se la scatola era bloccata sull'altro dispositivo, mantiene il blocco anche qui
+pp</th>#
         if (importato.bloccate && importato.bloccate[num] && !stato.bloccate[num]) {
+pp</th>#
           stato.bloccate[num] = true;
+pp</th>#
         }
+pp</th>#
       }
+pp</th>#
 
+pp</th>#
       if (importato.storage) {
+pp</th>#
         const is = importato.storage;
+pp</th>#
         ['l', 'p', 'h', 'mh', 'a'].forEach(c => { if (!stato.storage[c] && is[c]) stato.storage[c] = is[c]; });
+pp</th>#
         Object.keys(is.box || {}).forEach(k => { if (!stato.storage.box[k]) stato.storage.box[k] = is.box[k]; });
+pp</th>#
         if (!stato.storage.fisse.length && Array.isArray(is.fisse)) stato.storage.fisse = is.fisse;
+pp</th>#
       }
+pp</th>#
       if (importato.ignoraDup) { stato.ignoraDup = Object.assign({}, importato.ignoraDup, stato.ignoraDup || {}); }
+pp</th>#
       salvaDati();
+pp</th>#
       aggiornaUI();
+pp</th>#
       mostraToast(`⬆️ Unite ${scatoleAggiunte} nuove scatole, aggiunti ${oggettiAggiunti} oggetti`);
+pp</th>#
     } catch (err) {
+pp</th>#
       alert('Il file selezionato non è valido. Assicurati di aver scelto un file esportato da questa app.');
+pp</th>#
     }
+pp</th>#
   };
+pp</th>#
   reader.readAsText(file);
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── HELPER ETICHETTA SCATOLA ────────────────────────────────────────────────────
+pp</th>#
 function labelScatola(key) {
+pp</th>#
   if (key === 'fuori') return '📤 Fuori scatola';
+pp</th>#
   if (key === 'auto') return '🚗 Diretti in auto';
+pp</th>#
   if (key === 'bozza') return '📝 Bozza / Da valutare';
+pp</th>#
   const nome = (typeof stato !== 'undefined' && stato.meta && stato.meta[key] && stato.meta[key].nome) ? stato.meta[key].nome.trim() : '';
+pp</th>#
   return `🧳 Scatola ${key}${nome ? ' – ' + nome : ''}`;
+pp</th>#
 }
+pp</th>#
 const CHIAVI_SPECIALI = ['bozza', 'fuori', 'auto'];
+pp</th>#
 function isChiaveSpeciale(k) { return CHIAVI_SPECIALI.includes(k); }
+pp</th>#
 function isDepositata(k) { return !!(stato.storage && stato.storage.box[k] && stato.storage.box[k].dep); }
+pp</th>#
 
+pp</th>#
 // ── STANZA EFFETTIVA (propria dell'oggetto, altrimenti default della scatola) ──
+pp</th>#
 function stanzaEffettiva(oggetto, containerKey) {
+pp</th>#
   if (oggetto.stanza && oggetto.stanza.trim()) return oggetto.stanza.trim();
+pp</th>#
   const meta = stato.meta[containerKey];
+pp</th>#
   return (meta && meta.stanza) ? meta.stanza : '';
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── SPOSTAMENTO OGGETTI TRA CONTENITORI ─────────────────────────────────────────
+pp</th>#
 function opzioniDestinazione(correnteKey) {
+pp</th>#
   const chiavi = Object.keys(stato.scatole);
+pp</th>#
   const chiaviNumeriche = chiavi.filter(k => !isChiaveSpeciale(k)).map(Number).sort((a, b) => a - b);
+pp</th>#
   const tutte = [...CHIAVI_SPECIALI, ...chiaviNumeriche].filter(k => !isDepositata(k) || String(k) === String(correnteKey));
+pp</th>#
   return tutte.map(k => `<option value="${k}" ${String(k) === String(correnteKey) ? 'selected' : ''}>${labelScatola(k)}</option>`).join('');
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function spostaOggetto(daKey, idx, destKeyStr) {
+pp</th>#
   const destKey = isChiaveSpeciale(destKeyStr) ? destKeyStr : Number(destKeyStr);
+pp</th>#
   if (String(destKey) === String(daKey)) return;
+pp</th>#
   if (stato.bloccate[daKey]) { mostraToast(`🔒 ${labelScatola(daKey)} è bloccata`); aggiornaUI(); return; }
+pp</th>#
   if (stato.bloccate[destKey]) { mostraToast(`🔒 ${labelScatola(destKey)} è bloccata`); aggiornaUI(); return; }
+pp</th>#
   const oggetto = stato.scatole[daKey][idx];
+pp</th>#
   stato.scatole[daKey].splice(idx, 1);
+pp</th>#
   if (!stato.scatole[destKey]) stato.scatole[destKey] = [];
+pp</th>#
   stato.scatole[destKey].push(oggetto);
+pp</th>#
   stato.scatole[destKey].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+pp</th>#
   if (!stato.meta[destKey]) stato.meta[destKey] = { viaggio: '', stanza: '' };
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast(`↔️ "${oggetto.nome}" spostato in ${labelScatola(destKey)}`);
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── CAMBIO CATEGORIA OGGETTO ────────────────────────────────────────────────────
+pp</th>#
 function elencoCategorieUsate() {
+pp</th>#
   const usate = new Set();
+pp</th>#
   Object.values(stato.scatole).forEach(oggetti => {
+pp</th>#
     oggetti.forEach(o => { if (o.categoria && o.categoria.trim()) usate.add(o.categoria.trim()); });
+pp</th>#
   });
+pp</th>#
   return [...new Set([...CATEGORIE_BASE, ...usate])].sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function elencoStanzeUsate() {
+pp</th>#
   const usate = new Set();
+pp</th>#
   Object.values(stato.scatole).forEach(oggetti => {
+pp</th>#
     oggetti.forEach(o => { if (o.stanza && o.stanza.trim()) usate.add(o.stanza.trim()); });
+pp</th>#
   });
+pp</th>#
   return [...usate].sort((a, b) => a.localeCompare(b, 'it', { sensitivity: 'base' }));
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function opzioniCategoria(correnteCat) {
+pp</th>#
   const cat = (correnteCat || '').trim();
+pp</th>#
   const tutte = elencoCategorieUsate();
+pp</th>#
   const opzioni = [`<option value="" ${cat === '' ? 'selected' : ''}>— Nessuna categoria —</option>`];
+pp</th>#
   tutte.forEach(c => {
+pp</th>#
     opzioni.push(`<option value="${c}" ${c === cat ? 'selected' : ''}>${c}</option>`);
+pp</th>#
   });
+pp</th>#
   return opzioni.join('');
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function cambiaCategoria(key, idx, nuovaCategoria) {
+pp</th>#
   if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); aggiornaUI(); return; }
+pp</th>#
   const oggetto = stato.scatole[key][idx];
+pp</th>#
   oggetto.categoria = nuovaCategoria.trim();
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast(`🏷️ Categoria di "${oggetto.nome}" aggiornata`);
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── CAMBIO STANZA OGGETTO ────────────────────────────────────────────────────────
+pp</th>#
 function opzioniStanza(propriaStanza) {
+pp</th>#
   const val = (propriaStanza || '').trim();
+pp</th>#
   const tutte = elencoStanzeUsate();
+pp</th>#
   const opzioni = [`<option value="" ${val === '' ? 'selected' : ''}>— Come scatola —</option>`];
+pp</th>#
   tutte.forEach(s => {
+pp</th>#
     opzioni.push(`<option value="${s}" ${s === val ? 'selected' : ''}>${s}</option>`);
+pp</th>#
   });
+pp</th>#
   return opzioni.join('');
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function cambiaStanza(key, idx, nuovaStanza) {
+pp</th>#
   if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); aggiornaUI(); return; }
+pp</th>#
   const oggetto = stato.scatole[key][idx];
+pp</th>#
   oggetto.stanza = nuovaStanza.trim();
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast(`📍 Destinazione di "${oggetto.nome}" aggiornata`);
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── MODIFICA NOME/VALORE/STANZA OGGETTO ─────────────────────────────────────────
+pp</th>#
 function modificaOggetto(key, idx) {
+pp</th>#
   if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); return; }
+pp</th>#
   const oggetto = stato.scatole[key][idx];
+pp</th>#
 
+pp</th>#
   const nuovoNome = prompt('Nome oggetto:', oggetto.nome);
+pp</th>#
   if (nuovoNome === null) return;
+pp</th>#
   const nomeTrim = nuovoNome.trim();
+pp</th>#
   if (!nomeTrim) { mostraToast('⚠️ Il nome non può essere vuoto'); return; }
+pp</th>#
 
+pp</th>#
   const stanzaAttuale = oggetto.stanza || '';
+pp</th>#
   const nuovaStanzaStr = prompt('Destinazione (lascia vuoto per nessuna):', stanzaAttuale);
+pp</th>#
 
+pp</th>#
   const valoreAttuale = (oggetto.valore !== null && oggetto.valore !== undefined && !isNaN(oggetto.valore)) ? String(oggetto.valore) : '';
+pp</th>#
   const nuovoValoreStr = prompt('Valore stimato in CHF (lascia vuoto per nessun valore):', valoreAttuale);
+pp</th>#
 
+pp</th>#
   oggetto.nome = nomeTrim;
+pp</th>#
   if (nuovaStanzaStr !== null) oggetto.stanza = nuovaStanzaStr.trim();
+pp</th>#
   if (nuovoValoreStr !== null) {
+pp</th>#
     const valTrim = nuovoValoreStr.trim();
+pp</th>#
     oggetto.valore = valTrim ? parseFloat(valTrim) : null;
+pp</th>#
   }
+pp</th>#
 
+pp</th>#
   stato.scatole[key].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast(`✏️ "${oggetto.nome}" aggiornato`);
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── BOZZA / DA VALUTARE (contenitore speciale senza numero) ────────────────────
+pp</th>#
 document.getElementById('btn-bozza').addEventListener('click', () => {
+pp</th>#
   if (!stato.scatole['bozza']) stato.scatole['bozza'] = [];
+pp</th>#
   if (!stato.meta['bozza']) stato.meta['bozza'] = { viaggio: '', stanza: '' };
+pp</th>#
   stato.scatolaAttiva = 'bozza';
+pp</th>#
   salvaDati();
+pp</th>#
   caricaMetaAttiva();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast('📝 Ora stai aggiungendo a Bozza / Da valutare');
+pp</th>#
   oggettoInput.focus();
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── FUORI SCATOLA (contenitore speciale senza numero) ──────────────────────────
+pp</th>#
 document.getElementById('btn-fuori-scatola').addEventListener('click', () => {
+pp</th>#
   if (!stato.scatole['fuori']) stato.scatole['fuori'] = [];
+pp</th>#
   if (!stato.meta['fuori']) stato.meta['fuori'] = { viaggio: '', stanza: '' };
+pp</th>#
   stato.scatolaAttiva = 'fuori';
+pp</th>#
   salvaDati();
+pp</th>#
   caricaMetaAttiva();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast('📤 Ora stai aggiungendo a Fuori scatola');
+pp</th>#
   oggettoInput.focus();
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── DIRETTI IN AUTO (contenitore speciale senza numero) ─────────────────────────
+pp</th>#
 document.getElementById('btn-diretti-auto').addEventListener('click', () => {
+pp</th>#
   if (!stato.scatole['auto']) stato.scatole['auto'] = [];
+pp</th>#
   if (!stato.meta['auto']) stato.meta['auto'] = { viaggio: '', stanza: '' };
+pp</th>#
   stato.scatolaAttiva = 'auto';
+pp</th>#
   salvaDati();
+pp</th>#
   caricaMetaAttiva();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast('🚗 Ora stai aggiungendo a Diretti in auto');
+pp</th>#
   oggettoInput.focus();
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── NUOVA SCATOLA ───────────────────────────────────────────────────────────────
+pp</th>#
 document.getElementById('btn-nuova-scatola').addEventListener('click', () => {
+pp</th>#
   const numeriEsistenti = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k)).map(Number);
+pp</th>#
   const nuovoNum = Math.max(...numeriEsistenti, 0) + 1;
+pp</th>#
   stato.scatolaAttiva = nuovoNum;
+pp</th>#
   stato.scatole[nuovoNum] = [];
+pp</th>#
   stato.meta[nuovoNum] = { viaggio: '', stanza: '' };
+pp</th>#
   salvaDati();
+pp</th>#
   caricaMetaAttiva();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast(`🧳 Scatola ${nuovoNum} creata!`);
+pp</th>#
   oggettoInput.focus();
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── RIMOZIONE ─────────────────────────────────────────────────────────────────
+pp</th>#
 function rimuoviOggetto(scatola, idx) {
+pp</th>#
   const oggetto = stato.scatole[scatola][idx];
+pp</th>#
   stato.scatole[scatola].splice(idx, 1);
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
   mostraToast(`🗑️ "${oggetto.nome}" rimosso`, {
+pp</th>#
     label: 'Annulla',
+pp</th>#
     onClick: () => {
+pp</th>#
       if (!stato.scatole[scatola]) stato.scatole[scatola] = [];
+pp</th>#
       stato.scatole[scatola].push(oggetto);
+pp</th>#
       stato.scatole[scatola].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+pp</th>#
       salvaDati();
+pp</th>#
       aggiornaUI();
+pp</th>#
       mostraToast(`↩️ "${oggetto.nome}" ripristinato`);
+pp</th>#
     }
+pp</th>#
   });
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── ICONA LUCCHETTO (chiuso rosso / aperto grigio) ─────────────────────────────
+pp</th>#
 function iconaLucchetto(chiuso) {
+pp</th>#
   return chiuso
+pp</th>#
     ? '<svg viewBox="0 0 24 24" aria-label="Bloccata"><path d="M7 11V8a5 5 0 0 1 10 0v3" fill="none" stroke="#718096" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="10.5" rx="2.5" fill="#718096"/><circle cx="12" cy="16" r="1.7" fill="#fff"/></svg>'
+pp</th>#
     : '<svg viewBox="0 0 24 24" aria-label="Sbloccata"><path d="M7 11V8a5 5 0 0 1 9.6-2" fill="none" stroke="#a9b4c4" stroke-width="2.4" stroke-linecap="round"/><rect x="4.5" y="11" width="15" height="10.5" rx="2.5" fill="none" stroke="#a9b4c4" stroke-width="2.2"/><circle cx="12" cy="16" r="1.5" fill="#a9b4c4"/></svg>';
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── LUCCHETTO ─────────────────────────────────────────────────────────────────
+pp</th>#
 function toggleLucchetto(num) {
+pp</th>#
   if (stato.bloccate[num]) {
+pp</th>#
     delete stato.bloccate[num];
+pp</th>#
     mostraToast(`🔓 ${labelScatola(num)} sbloccata`);
+pp</th>#
   } else {
+pp</th>#
     stato.bloccate[num] = true;
+pp</th>#
     if (stato.scatolaAttiva == num) {
+pp</th>#
       const libera = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k)).map(Number).find(n => !stato.bloccate[n] && n != num);
+pp</th>#
       if (libera) { stato.scatolaAttiva = libera; caricaMetaAttiva(); }
+pp</th>#
     }
+pp</th>#
     mostraToast(`🔒 ${labelScatola(num)} bloccata`);
+pp</th>#
   }
+pp</th>#
   salvaDati();
+pp</th>#
   aggiornaUI();
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── USA QUESTA SCATOLA ────────────────────────────────────────────────────────
+pp</th>#
 function usaScatola(num) {
+pp</th>#
   if (stato.bloccate[num]) { mostraToast(`🔒 ${labelScatola(num)} è bloccata`); return; }
+pp</th>#
   stato.scatolaAttiva = num;
+pp</th>#
   salvaDati();
+pp</th>#
   caricaMetaAttiva();
+pp</th>#
   aggiornaUI();
+pp</th>#
   window.scrollTo({ top: 0, behavior: 'smooth' });
+pp</th>#
   mostraToast(`📌 Ora stai riempiendo ${labelScatola(num)}`);
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── TOGGLE APERTURA ───────────────────────────────────────────────────────────
+pp</th>#
 function toggleScatola(num) {
+pp</th>#
   const el = document.getElementById(`oggetti-${num}`);
+pp</th>#
   const toggle = document.getElementById(`toggle-${num}`);
+pp</th>#
   el.classList.toggle('visibile');
+pp</th>#
   toggle.classList.toggle('aperta');
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── STAMPA / EXPORT PDF ────────────────────────────────────────────────────────
+pp</th>#
 function stampaScatola(num, conMeta = true) {
+pp</th>#
   const oggetti = stato.scatole[num] || [];
+pp</th>#
   const meta = stato.meta[num] || {};
+pp</th>#
   const righe = oggetti.map((o, i) => `
+pp</th>#
     <tr>
+pp</th>#
       <td>${i + 1}</td>
+pp</th>#
       <td>${o.nome}</td>
+pp</th>#
       <td>${o.categoria || '—'}</td>
+pp</th>#
       <td>${stanzaEffettiva(o, num) || '—'}</td>
+pp</th>#
       ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
+pp</th>#
     </tr>`).join('');
+pp</th>#
   const totale = sommaValori(oggetti);
+pp</th>#
   const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '—';
+pp</th>#
   const html = `<!DOCTYPE html>
+pp</th>#
 <html lang="it">
+pp</th>#
 <head>
+pp</th>#
 <meta charset="UTF-8"/>
+pp</th>#
 <title>${labelScatola(num)}</title>
+pp</th>#
 <style>
+pp</th>#
 body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
+pp</th>#
 h1 { font-size: 1.6rem; margin-bottom: 4px; }
+pp</th>#
 .sub { color: #718096; margin-bottom: 8px; font-size: 0.95rem; }
+pp</th>#
 .meta { color: #4a5568; margin-bottom: 20px; font-size: 0.9rem; }
+pp</th>#
 table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+pp</th>#
 th:nth-child(1), td:nth-child(1) { width: 6%; }
+pp</th>#
 th:nth-child(2), td:nth-child(2) { width: 34%; }
+pp</th>#
 th:nth-child(3), td:nth-child(3) { width: 24%; }
+pp</th>#
 th:nth-child(4), td:nth-child(4) { width: 20%; }
+pp</th>#
 th:nth-child(5), td:nth-child(5) { width: 16%; }
+pp</th>#
 th { background: #e5e5e5; color: #000; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 12px; text-align: left; font-size: 0.85rem; font-weight: 700; }
+pp</th>#
 th.val, td.val { text-align: right; }
+pp</th>#
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+pp</th>#
 tr:last-child td { border-bottom: none; }
+pp</th>#
 tr:nth-child(even) td { background: #f7fafc; }
+pp</th>#
 tfoot td { font-weight: 700; border-top: 2px solid #000; border-bottom: none; background: white; }
+pp</th>#
 .footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
+pp</th>#
 @media print { body { padding: 16px; } }
+pp</th>#
 </style>
+pp</th>#
 </head>
+pp</th>#
 <body>
+pp</th>#
 <h1>${labelScatola(num)}</h1>
+pp</th>#
 ${conMeta ? `<div class="sub">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'}${fmtDim(meta) ? ' &nbsp;|&nbsp; Dimensioni: ' + fmtDim(meta) + (volumeLitri(meta) ? ' (' + fmtLitri(volumeLitri(meta)) + ')' : '') : ''}${pesoKg(meta) ? ' &nbsp;|&nbsp; Peso: ' + fmtKg(pesoKg(meta)) : ''}</div>` : `<div class="sub">stampato il ${new Date().toLocaleDateString('it-IT')}</div>`}
+pp</th>#
 <table>
+pp</th>#
 <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
+pp</th>#
 <tbody>${righe}</tbody>
+pp</th>#
 ${mostraValoreStampa ? `<tfoot><tr><td colspan="4">Totale valore scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
+pp</th>#
 </table>
+pp</th>#
 <div class="footer">Oggetti in Scatola</div>
+pp</th>#
 <script>window.onload = () => { window.print(); }<\/script>
+pp</th>#
 </body>
+pp</th>#
 </html>`;
+pp</th>#
   const w = window.open('', '_blank');
+pp</th>#
   w.document.write(html);
+pp</th>#
   w.document.close();
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── SELEZIONE SCATOLE ────────────────────────────────────────────────────────
+pp</th>#
 function toggleSelezione(num) {
+pp</th>#
   if (selezionate.has(num)) selezionate.delete(num);
+pp</th>#
   else selezionate.add(num);
+pp</th>#
   aggiornaBottoneSelezionate();
+pp</th>#
 }
+pp</th>#
 function aggiornaBottoneSelezionate() {
+pp</th>#
   const btn = document.getElementById('btn-esporta-selezionate');
+pp</th>#
   document.getElementById('conteggio-selezionate').textContent = selezionate.size;
+pp</th>#
   btn.style.display = selezionate.size > 0 ? 'inline-flex' : 'none';
+pp</th>#
   const es = document.getElementById('etichette-sub');
+pp</th>#
   const bl = document.getElementById('btn-lista-scatole'); if (bl) bl.textContent = selezionate.size > 0 ? '📋 Lista (' + [...selezionate].filter(k => !isChiaveSpeciale(k)).length + ' selez.)' : '📋 Lista scatole';
+pp</th>#
   if (es) es.textContent = selezionate.size > 0 ? '(' + [...selezionate].filter(k => !isChiaveSpeciale(k)).length + ' selez.)' : '(tutte)';
+pp</th>#
   aggiornaRiepilogoVolume();
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── STAMPA / EXPORT SCATOLE (generica: tutte o selezionate) ────────────────────
+pp</th>#
 function esportaScatole(numeriRichiesti) {
+pp</th>#
   const numeriConOggetti = numeriRichiesti
+pp</th>#
     .filter(n => (stato.scatole[n] || []).length > 0)
+pp</th>#
     .sort((a, b) => {
+pp</th>#
       const ordineSpeciali = { bozza: -3, fuori: -2, auto: -1 };
+pp</th>#
       const aSpeciale = ordineSpeciali[a];
+pp</th>#
       const bSpeciale = ordineSpeciali[b];
+pp</th>#
       if (aSpeciale !== undefined || bSpeciale !== undefined) {
+pp</th>#
         return (aSpeciale ?? 0) - (bSpeciale ?? 0);
+pp</th>#
       }
+pp</th>#
       return a - b;
+pp</th>#
     });
+pp</th>#
 
+pp</th>#
   if (numeriConOggetti.length === 0) {
+pp</th>#
     mostraToast('⚠️ Nessun oggetto da esportare');
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
 
+pp</th>#
   let totaleGenerale = 0;
+pp</th>#
 
+pp</th>#
   const blocchi = numeriConOggetti.map(num => {
+pp</th>#
     const oggetti = stato.scatole[num] || [];
+pp</th>#
     const meta = stato.meta[num] || {};
+pp</th>#
     const totale = sommaValori(oggetti);
+pp</th>#
     totaleGenerale += totale;
+pp</th>#
     const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '—';
+pp</th>#
     const righe = oggetti.map((o, i) => `
+pp</th>#
       <tr>
+pp</th>#
         <td>${i + 1}</td>
+pp</th>#
         <td>${o.nome}</td>
+pp</th>#
         <td>${o.categoria || '—'}</td>
+pp</th>#
         <td>${stanzaEffettiva(o, num) || '—'}</td>
+pp</th>#
         ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
+pp</th>#
       </tr>`).join('');
+pp</th>#
     return `
+pp</th>#
     <div class="blocco-scatola">
+pp</th>#
       <h2>${labelScatola(num)}${fmtDim(stato.meta[num]) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtDim(stato.meta[num])}${volumeLitri(stato.meta[num]) ? ' (' + fmtLitri(volumeLitri(stato.meta[num])) + ')' : ''}${pesoKg(stato.meta[num]) ? ' — ' + fmtKg(pesoKg(stato.meta[num])) : ''}</span>` : (pesoKg(stato.meta[num]) ? ` <span style="font-weight:400;font-size:0.8rem;color:#4a5568">— ${fmtKg(pesoKg(stato.meta[num]))}</span>` : '')}</h2>
+pp</th>#
       <table>
+pp</th>#
         <thead><tr><th>#</th><th>Oggetto</th><th>Categoria</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
+pp</th>#
         <tbody>${righe}</tbody>
+pp</th>#
         ${mostraValoreStampa ? `<tfoot><tr><td colspan="4">Totale scatola</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
+pp</th>#
       </table>
+pp</th>#
     </div>`;
+pp</th>#
   }).join('');
+pp</th>#
 
+pp</th>#
   const totOggettiGen = numeriConOggetti.reduce((s, n) => s + (stato.scatole[n] || []).length, 0);
+pp</th>#
 
+pp</th>#
   const html = `<!DOCTYPE html>
+pp</th>#
 <html lang="it">
+pp</th>#
 <head>
+pp</th>#
 <meta charset="UTF-8"/>
+pp</th>#
 <title>Elenco scatole</title>
+pp</th>#
 <style>
+pp</th>#
 body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
+pp</th>#
 h1 { font-size: 1.7rem; margin-bottom: 4px; color: #000; }
+pp</th>#
 h2 { font-size: 1.2rem; margin-bottom: 4px; color: #000; }
+pp</th>#
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
+pp</th>#
 .blocco-scatola { margin-bottom: 28px; }
+pp</th>#
 .meta { color: #4a5568; margin-bottom: 10px; font-size: 0.85rem; }
+pp</th>#
 table { width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
+pp</th>#
 th:nth-child(1), td:nth-child(1) { width: 6%; }
+pp</th>#
 th:nth-child(2), td:nth-child(2) { width: 34%; }
+pp</th>#
 th:nth-child(3), td:nth-child(3) { width: 24%; }
+pp</th>#
 th:nth-child(4), td:nth-child(4) { width: 20%; }
+pp</th>#
 th:nth-child(5), td:nth-child(5) { width: 16%; }
+pp</th>#
 th { background: #e5e5e5; color: #000; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 12px; text-align: left; font-size: 0.85rem; font-weight: 700; }
+pp</th>#
 th.val, td.val { text-align: right; }
+pp</th>#
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+pp</th>#
 tr:last-child td { border-bottom: none; }
+pp</th>#
 tr:nth-child(even) td { background: #f7fafc; }
+pp</th>#
 tfoot td { font-weight: 700; border-top: 2px solid #000; border-bottom: none; background: white; }
+pp</th>#
 .totale-generale {
+pp</th>#
   margin-top: 20px;
+pp</th>#
   padding: 16px 20px;
+pp</th>#
   background: #f2f2f2;
+pp</th>#
   border: 2px solid #000;
+pp</th>#
   border-radius: 10px;
+pp</th>#
   display: flex;
+pp</th>#
   justify-content: space-between;
+pp</th>#
   align-items: center;
+pp</th>#
   font-size: 1.1rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   color: #000;
+pp</th>#
 }
+pp</th>#
 .footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
+pp</th>#
 @media print {
+pp</th>#
   body { padding: 16px; }
+pp</th>#
 }
+pp</th>#
 </style>
+pp</th>#
 </head>
+pp</th>#
 <body>
+pp</th>#
 <h1>🧳 Elenco masserizie</h1>
+pp</th>#
 <div class="sub">${numeriConOggetti.length} ${numeriConOggetti.length === 1 ? 'scatola' : 'scatole'}, ${totOggettiGen} oggetti totali — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
+pp</th>#
 ${blocchi}
+pp</th>#
 ${mostraValoreStampa ? `<div class="totale-generale">
+pp</th>#
   <span>Totale valore complessivo</span>
+pp</th>#
   <span>CHF ${totaleGenerale.toFixed(2)}</span>
+pp</th>#
 </div>` : ''}
+pp</th>#
 <div class="footer">Oggetti in Scatola</div>
+pp</th>#
 <script>window.onload = () => { window.print(); }<\/script>
+pp</th>#
 </body>
+pp</th>#
 </html>`;
+pp</th>#
   const w = window.open('', '_blank');
+pp</th>#
   w.document.write(html);
+pp</th>#
   w.document.close();
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function esportaTutto() {
+pp</th>#
   const tutteLeScatole = Object.keys(stato.scatole).map(k => isChiaveSpeciale(k) ? k : Number(k));
+pp</th>#
   esportaScatole(tutteLeScatole);
+pp</th>#
 }
+pp</th>#
 document.getElementById('btn-esporta-tutto').addEventListener('click', esportaTutto);
+pp</th>#
 
+pp</th>#
 function esportaSelezionate() {
+pp</th>#
   esportaScatole(Array.from(selezionate));
+pp</th>#
 }
+pp</th>#
 document.getElementById('btn-esporta-selezionate').addEventListener('click', esportaSelezionate);
+pp</th>#
 
+pp</th>#
 // ── ETICHETTE DA ATTACCARE (una per pagina: numero e peso in caratteri grandi) ──
+pp</th>#
 function stampaEtichette() {
+pp</th>#
   let chiavi = (selezionate.size > 0 ? [...selezionate] : Object.keys(stato.scatole))
+pp</th>#
     .map(String)
+pp</th>#
     .filter(k => !isChiaveSpeciale(k) && (stato.scatole[k] || []).length > 0)
+pp</th>#
     .sort((a, b) => Number(a) - Number(b));
+pp</th>#
   if (!chiavi.length) { mostraToast('⚠️ Nessuna scatola numerata da etichettare'); return; }
+pp</th>#
   const per4 = document.getElementById('etichette-per-foglio').value === '4';
+pp</th>#
   const copie = Number(document.getElementById('etichette-copie').value) || 1;
+pp</th>#
   const sezioni = chiavi.map(k => {
+pp</th>#
     const m = stato.meta[k] || {};
+pp</th>#
     const w = pesoKg(m);
+pp</th>#
     const nome = (m.nome || '').trim();
+pp</th>#
     const per = (typeof pericolosiInBox === 'function' ? pericolosiInBox(k) : []);
+pp</th>#
     const tipi = [...new Set(per.map(o => PERICOLI[o.pericolo].ico + ' ' + PERICOLI[o.pericolo].n))];
+pp</th>#
     return `<section>
+pp</th>#
 ${per.length ? `<div class="pericolo">PERICOLO: ${tipi.join(' · ')}</div>` : ''}
+pp</th>#
 <div class="lbl">SCATOLA</div>
+pp</th>#
 <div class="num">${escH(k)}</div>
+pp</th>#
 ${nome ? `<div class="nome">${escH(nome)}</div>` : ''}
+pp</th>#
 <div class="peso">${w ? escH(fmtKg(w)) : 'Peso: ________ kg'}</div>
+pp</th>#
 </section>`;
+pp</th>#
   }).flatMap(x => Array(copie).fill(x));
+pp</th>#
   const n = per4 ? 4 : 1, gruppi = [];
+pp</th>#
   for (let i = 0; i < sezioni.length; i += n) gruppi.push(`<div class="pag">${sezioni.slice(i, i + n).join('')}</div>`);
+pp</th>#
   const pagine = gruppi.join('');
+pp</th>#
   const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"/><title>Etichette scatole</title>
+pp</th>#
 <style>
+pp</th>#
 @page { size: A4 landscape; margin: 10mm; }
+pp</th>#
 * { box-sizing: border-box; }
+pp</th>#
 body { margin: 0; font-family: Arial, Helvetica, sans-serif; color: #000; }
+pp</th>#
 .pag { height: 190mm; page-break-after: always; break-after: page; }
+pp</th>#
 .pag:last-child { page-break-after: auto; break-after: auto; }
+pp</th>#
 section { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; border: 4px solid #000; border-radius: 12px; position: relative; overflow: hidden; }
+pp</th>#
 ${per4 ? `.pag { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 4mm; }
+pp</th>#
 section { border-width: 2px; border-radius: 6px; }
+pp</th>#
 .lbl { font-size: 14pt !important; letter-spacing: 4px !important; }
+pp</th>#
 .num { font-size: 105pt !important; }
+pp</th>#
 .nome { font-size: 14pt !important; margin-top: 1mm !important; }
+pp</th>#
 .peso { font-size: 34pt !important; margin-top: 2mm !important; }
+pp</th>#
 .pericolo { font-size: 13pt !important; padding: 1.5mm !important; }` : ''}
+pp</th>#
 .lbl { font-size: 36pt; font-weight: 700; letter-spacing: 8px; }
+pp</th>#
 .num { font-size: 260pt; font-weight: 900; line-height: 1; }
+pp</th>#
 .nome { font-size: 32pt; margin-top: 4mm; }
+pp</th>#
 .peso { font-size: 80pt; font-weight: 800; margin-top: 6mm; }
+pp</th>#
 .pericolo { position: absolute; top: 0; left: 0; right: 0; background: #000; color: #fff; font-size: 30pt; font-weight: 800; padding: 4mm; border-radius: 8px 8px 0 0; }
+pp</th>#
 </style></head><body>${pagine}
+pp</th>#
 <script>window.onload=()=>window.print()<\/script></body></html>`;
+pp</th>#
   const w = window.open('', '_blank');
+pp</th>#
   w.document.write(html);
+pp</th>#
   w.document.close();
+pp</th>#
 }
+pp</th>#
 document.getElementById('btn-etichette').addEventListener('click', stampaEtichette);
+pp</th>#
 
+pp</th>#
 // ── LISTA SCATOLE DA STAMPARE (tabella con casella da spuntare) ─────────────────
+pp</th>#
 function stampaListaScatole() {
+pp</th>#
   const chiavi = (selezionate.size > 0 ? [...selezionate] : Object.keys(stato.scatole))
+pp</th>#
     .map(String)
+pp</th>#
     .filter(k => !isChiaveSpeciale(k) && (stato.scatole[k] || []).length > 0)
+pp</th>#
     .sort((a, b) => Number(a) - Number(b));
+pp</th>#
   if (!chiavi.length) { mostraToast('⚠️ Nessuna scatola numerata da elencare'); return; }
+pp</th>#
   let totKg = 0, totL = 0, senzaPeso = 0;
+pp</th>#
   const righe = chiavi.map(k => {
+pp</th>#
     const m = stato.meta[k] || {};
+pp</th>#
     const kg = pesoKg(m), l = volumeLitri(m);
+pp</th>#
     totKg += kg; totL += l; if (!kg) senzaPeso++;
+pp</th>#
     const dove = isDepositata(k) ? 'Box storage' : (m.stanza === 'auto' ? 'Auto' : 'Casa');
+pp</th>#
     const per = pericolosiInBox(k).length;
+pp</th>#
     const nome = (m.nome || '').trim();
+pp</th>#
     return `<tr><td class="n">${escH(k)}</td><td>${escH(nome)}${per ? ' <b class="pe">⚠️ PERICOLO</b>' : ''}</td><td class="r">${kg ? escH(fmtKg(kg)) : '—'}</td><td class="r">${fmtDim(m) ? escH(fmtDim(m)) : '—'}</td><td class="ck">☐</td><td class="ck">☐</td><td class="d">${escH(dove)}</td></tr>`;
+pp</th>#
   }).join('');
+pp</th>#
   const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"/><title>Lista scatole</title>
+pp</th>#
 <style>
+pp</th>#
 @page { size: A4 portrait; margin: 12mm; }
+pp</th>#
 body { font-family: Arial, Helvetica, sans-serif; color: #000; margin: 0; }
+pp</th>#
 h1 { font-size: 16pt; margin: 0 0 2mm; }
+pp</th>#
 .sub { font-size: 9pt; color: #444; margin-bottom: 4mm; }
+pp</th>#
 table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+pp</th>#
 th, td { border: 1px solid #888; padding: 5px 6px; text-align: left; vertical-align: middle; }
+pp</th>#
 th { background: #e5e5e5; }
+pp</th>#
 tr { page-break-inside: avoid; }
+pp</th>#
 thead { display: table-header-group; }
+pp</th>#
 td.ck { width: 14mm; text-align: center; font-size: 16pt; }
+pp</th>#
 td.d { color: #555; font-size: 8.5pt; }
+pp</th>#
 td.n { width: 12mm; font-weight: 800; font-size: 13pt; text-align: center; }
+pp</th>#
 td.r { text-align: right; white-space: nowrap; }
+pp</th>#
 td.d { white-space: nowrap; }
+pp</th>#
 .pe { color: #000; background: #ddd; padding: 0 3px; }
+pp</th>#
 tfoot td { font-weight: 700; background: #f2f2f2; }
+pp</th>#
 </style></head><body>
+pp</th>#
 <h1>Lista scatole</h1>
+pp</th>#
 <div class="sub">${chiavi.length} scatole — ${new Date().toLocaleDateString('it-IT')}</div>
+pp</th>#
 <table><thead><tr><th>N.</th><th>Nome</th><th>Peso</th><th>Misure (cm)</th><th>Qui</th><th>Di là</th><th>Nell'app</th></tr></thead><tbody>${righe}</tbody>
+pp</th>#
 <tfoot><tr><td colspan="2">Totale (${chiavi.length} scatole${senzaPeso ? ', ' + senzaPeso + ' senza peso' : ''})</td><td class="r">${escH(fmtKg(totKg))}</td><td class="r">${totL ? escH(fmtLitri(totL)) : '—'}</td><td colspan="3"></td></tr></tfoot></table>
+pp</th>#
 <script>window.onload=()=>window.print()<\/script></body></html>`;
+pp</th>#
   const w = window.open('', '_blank');
+pp</th>#
   w.document.write(html);
+pp</th>#
   w.document.close();
+pp</th>#
 }
+pp</th>#
 document.getElementById('btn-lista-scatole').addEventListener('click', stampaListaScatole);
+pp</th>#
 
+pp</th>#
 // ── RAGGRUPPAMENTO OGGETTI PER CATEGORIA ────────────────────────────────────────
+pp</th>#
 function raggruppaPerCategoria() {
+pp</th>#
   const gruppi = {};
+pp</th>#
   let totOggetti = 0;
+pp</th>#
   for (const [num, oggetti] of Object.entries(stato.scatole)) {
+pp</th>#
     oggetti.forEach(o => {
+pp</th>#
       const cat = o.categoria && o.categoria.trim() ? o.categoria.trim() : 'Senza categoria';
+pp</th>#
       if (!gruppi[cat]) gruppi[cat] = [];
+pp</th>#
       gruppi[cat].push({ ...o, scatola: num });
+pp</th>#
       totOggetti++;
+pp</th>#
     });
+pp</th>#
   }
+pp</th>#
   const categorieOrdinate = Object.keys(gruppi).sort((a, b) => {
+pp</th>#
     if (a === 'Senza categoria') return 1;
+pp</th>#
     if (b === 'Senza categoria') return -1;
+pp</th>#
     return a.localeCompare(b, 'it', { sensitivity: 'base' });
+pp</th>#
   });
+pp</th>#
   return { gruppi, categorieOrdinate, totOggetti };
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── STAMPA / EXPORT PER CATEGORIA (trasversale a tutte le scatole) ─────────────
+pp</th>#
 function esportaPerCategoria(filtroCategorie) {
+pp</th>#
   const { gruppi, categorieOrdinate: tutteLeCategorie, totOggetti } = raggruppaPerCategoria();
+pp</th>#
 
+pp</th>#
   if (totOggetti === 0) {
+pp</th>#
     mostraToast('⚠️ Nessun oggetto da esportare');
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
 
+pp</th>#
   const categorieOrdinate = filtroCategorie
+pp</th>#
     ? tutteLeCategorie.filter(c => filtroCategorie.includes(c))
+pp</th>#
     : tutteLeCategorie;
+pp</th>#
 
+pp</th>#
   if (categorieOrdinate.length === 0) {
+pp</th>#
     mostraToast('⚠️ Nessuna categoria selezionata');
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
 
+pp</th>#
   let totaleGenerale = 0;
+pp</th>#
 
+pp</th>#
   const blocchi = categorieOrdinate.map(cat => {
+pp</th>#
     const oggetti = gruppi[cat].sort((a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }));
+pp</th>#
     const totale = sommaValori(oggetti);
+pp</th>#
     totaleGenerale += totale;
+pp</th>#
     const righe = oggetti.map((o, i) => `
+pp</th>#
       <tr>
+pp</th>#
         <td>${i + 1}</td>
+pp</th>#
         <td>${o.nome}</td>
+pp</th>#
         <td>${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}</td>
+pp</th>#
         <td>${stanzaEffettiva(o, o.scatola) || '—'}</td>
+pp</th>#
         ${mostraValoreStampa ? `<td class="val">${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? 'CHF ' + o.valore.toFixed(2) : '—'}</td>` : ''}
+pp</th>#
       </tr>`).join('');
+pp</th>#
     return `
+pp</th>#
     <div class="blocco-scatola">
+pp</th>#
       <h2>${cat}</h2>
+pp</th>#
       <table>
+pp</th>#
         <thead><tr><th>#</th><th>Oggetto</th><th>Si trova in</th><th>Destinazione</th>${mostraValoreStampa ? '<th class="val">Valore stimato</th>' : ''}</tr></thead>
+pp</th>#
         <tbody>${righe}</tbody>
+pp</th>#
         ${mostraValoreStampa ? `<tfoot><tr><td colspan="4">Totale categoria</td><td class="val">CHF ${totale.toFixed(2)}</td></tr></tfoot>` : ''}
+pp</th>#
       </table>
+pp</th>#
     </div>`;
+pp</th>#
   }).join('');
+pp</th>#
 
+pp</th>#
   const html = `<!DOCTYPE html>
+pp</th>#
 <html lang="it">
+pp</th>#
 <head>
+pp</th>#
 <meta charset="UTF-8"/>
+pp</th>#
 <title>Elenco per categoria</title>
+pp</th>#
 <style>
+pp</th>#
 body { font-family: Arial, sans-serif; padding: 32px; color: #1a202c; }
+pp</th>#
 h1 { font-size: 1.7rem; margin-bottom: 4px; }
+pp</th>#
 h2 { font-size: 1.2rem; margin-bottom: 4px; color: #9f7aea; }
+pp</th>#
 .sub { color: #718096; margin-bottom: 24px; font-size: 0.95rem; }
+pp</th>#
 .blocco-scatola { margin-bottom: 28px; }
+pp</th>#
 table { width: 100%; border-collapse: collapse; margin-bottom: 4px; table-layout: fixed; }
+pp</th>#
 th:nth-child(1), td:nth-child(1) { width: 6%; }
+pp</th>#
 th:nth-child(2), td:nth-child(2) { width: 34%; }
+pp</th>#
 th:nth-child(3), td:nth-child(3) { width: 24%; }
+pp</th>#
 th:nth-child(4), td:nth-child(4) { width: 20%; }
+pp</th>#
 th:nth-child(5), td:nth-child(5) { width: 16%; }
+pp</th>#
 th { background: #9f7aea; color: white; padding: 8px 12px; text-align: left; font-size: 0.85rem; }
+pp</th>#
 th.val, td.val { text-align: right; }
+pp</th>#
 td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; vertical-align: top; word-wrap: break-word; overflow-wrap: break-word; }
+pp</th>#
 tr:last-child td { border-bottom: none; }
+pp</th>#
 tr:nth-child(even) td { background: #f7fafc; }
+pp</th>#
 tfoot td { font-weight: 700; border-top: 2px solid #9f7aea; border-bottom: none; background: white; }
+pp</th>#
 .totale-generale {
+pp</th>#
   margin-top: 20px;
+pp</th>#
   padding: 16px 20px;
+pp</th>#
   background: #faf5ff;
+pp</th>#
   border-radius: 10px;
+pp</th>#
   display: flex;
+pp</th>#
   justify-content: space-between;
+pp</th>#
   align-items: center;
+pp</th>#
   font-size: 1.1rem;
+pp</th>#
   font-weight: 700;
+pp</th>#
   color: #9f7aea;
+pp</th>#
 }
+pp</th>#
 .footer { margin-top: 24px; font-size: 0.8rem; color: #a0aec0; }
+pp</th>#
 @media print { body { padding: 16px; } }
+pp</th>#
 </style>
+pp</th>#
 </head>
+pp</th>#
 <body>
+pp</th>#
 <h1>📂 Elenco masserizie per categoria</h1>
+pp</th>#
 <div class="sub">${categorieOrdinate.length} categorie, ${totOggetti} oggetti totali — stampato il ${new Date().toLocaleDateString('it-IT')}</div>
+pp</th>#
 ${blocchi}
+pp</th>#
 ${mostraValoreStampa ? `<div class="totale-generale">
+pp</th>#
   <span>Totale valore complessivo</span>
+pp</th>#
   <span>CHF ${totaleGenerale.toFixed(2)}</span>
+pp</th>#
 </div>` : ''}
+pp</th>#
 <div class="footer">Oggetti in Scatola</div>
+pp</th>#
 <script>window.onload = () => { window.print(); }<\/script>
+pp</th>#
 </body>
+pp</th>#
 </html>`;
+pp</th>#
   const w = window.open('', '_blank');
+pp</th>#
   w.document.write(html);
+pp</th>#
   w.document.close();
+pp</th>#
 }
+pp</th>#
 document.getElementById('btn-esporta-categoria').addEventListener('click', apriModalCategorie);
+pp</th>#
 
+pp</th>#
 // ── MODAL SELEZIONE CATEGORIE ───────────────────────────────────────────────────
+pp</th>#
 const modalCategorie = document.getElementById('modal-categorie');
+pp</th>#
 const modalCatLista = document.getElementById('modal-cat-lista');
+pp</th>#
 
+pp</th>#
 function apriModalCategorie() {
+pp</th>#
   const { gruppi, categorieOrdinate, totOggetti } = raggruppaPerCategoria();
+pp</th>#
   if (totOggetti === 0) {
+pp</th>#
     mostraToast('⚠️ Nessun oggetto da esportare');
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
   modalCatLista.innerHTML = categorieOrdinate.map(cat => {
+pp</th>#
     const oggetti = gruppi[cat];
+pp</th>#
     const totale = sommaValori(oggetti);
+pp</th>#
     return `
+pp</th>#
     <label class="modal-cat-riga">
+pp</th>#
       <input type="checkbox" class="modal-cat-checkbox" value="${cat.replace(/"/g, '&quot;')}" checked />
+pp</th>#
       <span class="nome">${cat}</span>
+pp</th>#
       <span class="dettagli">${oggetti.length} ${oggetti.length === 1 ? 'oggetto' : 'oggetti'}${mostraValoreStampa ? ' · CHF ' + totale.toFixed(2) : ''}</span>
+pp</th>#
     </label>`;
+pp</th>#
   }).join('');
+pp</th>#
   modalCategorie.style.display = 'flex';
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 function chiudiModalCategorie() {
+pp</th>#
   modalCategorie.style.display = 'none';
+pp</th>#
 }
+pp</th>#
 document.getElementById('modal-cat-chiudi').addEventListener('click', chiudiModalCategorie);
+pp</th>#
 modalCategorie.addEventListener('click', (e) => { if (e.target === modalCategorie) chiudiModalCategorie(); });
+pp</th>#
 
+pp</th>#
 document.getElementById('modal-cat-tutte').addEventListener('click', () => {
+pp</th>#
   const checkboxes = modalCatLista.querySelectorAll('.modal-cat-checkbox');
+pp</th>#
   const tutteSelezionate = [...checkboxes].every(c => c.checked);
+pp</th>#
   checkboxes.forEach(c => { c.checked = !tutteSelezionate; });
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 document.getElementById('modal-cat-esporta').addEventListener('click', () => {
+pp</th>#
   const selezionate = [...modalCatLista.querySelectorAll('.modal-cat-checkbox:checked')].map(c => c.value);
+pp</th>#
   if (selezionate.length === 0) {
+pp</th>#
     mostraToast('⚠️ Seleziona almeno una categoria');
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
   chiudiModalCategorie();
+pp</th>#
   esportaPerCategoria(selezionate);
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── RICERCA ───────────────────────────────────────────────────────────────────
+pp</th>#
 const cercaInput = document.getElementById('cerca-input');
+pp</th>#
 const cercaClear = document.getElementById('cerca-clear');
+pp</th>#
 const risultatiContainer = document.getElementById('risultati-ricerca');
+pp</th>#
 const scatoleContainer = document.getElementById('scatole-container');
+pp</th>#
 
+pp</th>#
 function eseguiRicerca() {
+pp</th>#
   const q = cercaInput.value.trim().toLowerCase();
+pp</th>#
   cercaClear.style.display = q ? 'block' : 'none';
+pp</th>#
   if (!q) {
+pp</th>#
     risultatiContainer.style.display = 'none';
+pp</th>#
     scatoleContainer.style.display = 'block';
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
   scatoleContainer.style.display = 'none';
+pp</th>#
   risultatiContainer.style.display = 'block';
+pp</th>#
 
+pp</th>#
   const trovati = [];
+pp</th>#
   for (const [num, oggetti] of Object.entries(stato.scatole)) {
+pp</th>#
     oggetti.forEach((o, idx) => {
+pp</th>#
       if (o.nome.toLowerCase().includes(q) || (o.categoria || '').toLowerCase().includes(q)) {
+pp</th>#
         trovati.push({ ...o, scatola: num, idx });
+pp</th>#
       }
+pp</th>#
     });
+pp</th>#
   }
+pp</th>#
   if (trovati.length === 0) {
+pp</th>#
     risultatiContainer.innerHTML = `<div id="nessun-risultato">Nessun oggetto trovato per "${cercaInput.value}"</div>`;
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
   risultatiContainer.innerHTML = trovati.map(o => {
+pp</th>#
     const chiaveJs = (typeof o.scatola === 'string') ? `'${o.scatola}'` : o.scatola;
+pp</th>#
     const chiaveOriginale = isChiaveSpeciale(o.scatola) ? o.scatola : Number(o.scatola);
+pp</th>#
     return `
+pp</th>#
     <div class="res-item">
+pp</th>#
       <div>
+pp</th>#
         <div class="res-nome">${o.nome}</div>
+pp</th>#
         ${badgePericolo(o)}
+pp</th>#
         ${o.categoria ? `<div class="res-categoria">${o.categoria}</div>` : ''}
+pp</th>#
         <div class="res-scatola" style="margin-top:4px;">${isChiaveSpeciale(o.scatola) ? labelScatola(o.scatola) : 'Scatola ' + o.scatola}${isDepositata(o.scatola) ? ' · 📦 nel box storage' : ''}</div>
+pp</th>#
         ${chipDoppione(o.scatola, o.idx).chip}
+pp</th>#
       </div>
+pp</th>#
       <div style="display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:3px; margin-top:6px;">
+pp</th>#
         <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaCategoria(${chiaveJs}, ${o.idx}, this.value)" ${stato.bloccate[chiaveOriginale] ? 'disabled' : ''}>
+pp</th>#
           ${opzioniCategoria(o.categoria)}
+pp</th>#
         </select>
+pp</th>#
         <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaStanza(${chiaveJs}, ${o.idx}, this.value)" ${stato.bloccate[chiaveOriginale] ? 'disabled' : ''}>
+pp</th>#
           ${opzioniStanza(o.stanza)}
+pp</th>#
         </select>
+pp</th>#
         <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${o.idx}, this.value)" ${stato.bloccate[chiaveOriginale] ? 'disabled' : ''}>
+pp</th>#
           ${opzioniDestinazione(o.scatola)}
+pp</th>#
         </select>
+pp</th>#
         ${btnPericolo(chiaveJs, o.idx, o)}
+pp</th>#
         <button class="btn-modifica" onclick="event.stopPropagation(); modificaOggetto(${chiaveJs}, ${o.idx})" title="Modifica nome/valore">✏️</button>
+pp</th>#
         <button class="btn-rimuovi" onclick="event.stopPropagation(); rimuoviOggetto(${chiaveJs}, ${o.idx})" title="Rimuovi">✕</button>
+pp</th>#
       </div>
+pp</th>#
     </div>`;
+pp</th>#
   }).join('');
+pp</th>#
 }
+pp</th>#
 cercaInput.addEventListener('input', eseguiRicerca);
+pp</th>#
 cercaClear.addEventListener('click', () => {
+pp</th>#
   cercaInput.value = '';
+pp</th>#
   cercaInput.dispatchEvent(new Event('input'));
+pp</th>#
 });
+pp</th>#
 
+pp</th>#
 // ── HELPER VALORE ─────────────────────────────────────────────────────────────
+pp</th>#
 function sommaValori(oggetti) {
+pp</th>#
   return oggetti.reduce((s, o) => s + ((o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? o.valore : 0), 0);
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── CATEGORIE SUGGERITE DINAMICHE ───────────────────────────────────────────────
+pp</th>#
 const CATEGORIE_BASE = ['Cucina', 'Vestiti', 'Elettronica', 'Bagno', 'Documenti', 'Decorazioni', 'Attrezzi', 'Giocattoli', 'Sport', 'Varie'];
+pp</th>#
 function aggiornaCategorieSuggerite() {
+pp</th>#
   const tutte = elencoCategorieUsate();
+pp</th>#
   const datalist = document.getElementById('categorie-suggerite');
+pp</th>#
   datalist.innerHTML = tutte.map(c => `<option value="${c}">`).join('');
+pp</th>#
 
+pp</th>#
   const stanze = elencoStanzeUsate();
+pp</th>#
   const datalistStanze = document.getElementById('stanze-suggerite');
+pp</th>#
   datalistStanze.innerHTML = stanze.map(s => `<option value="${s}">`).join('');
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── UI ─────────────────────────────────────────────────────────────────────────
+pp</th>#
 function aggiornaRiepilogoVolume() {
+pp</th>#
   const el = document.getElementById('riepilogo-volume');
+pp</th>#
   const chiaviTutte = Object.keys(stato.scatole).filter(k => !isDepositata(k));
+pp</th>#
   const chiavi = chiaviTutte.filter(k => !isChiaveSpeciale(k));
+pp</th>#
   const vol = k => volumeLitri(stato.meta[k]);
+pp</th>#
   const peso = k => pesoKg(stato.meta[k]);
+pp</th>#
   const conDati = chiaviTutte.filter(k => vol(k) > 0 || peso(k) > 0);
+pp</th>#
   if (conDati.length === 0) { el.style.display = 'none'; return; }
+pp</th>#
   const fmt = (v, w) => [v ? fmtLitri(v) : '', w ? fmtKg(w) : ''].filter(Boolean).join(' · ') || '—';
+pp</th>#
   const somma = ks => [ks.reduce((a, k) => a + vol(k), 0), ks.reduce((a, k) => a + peso(k), 0)];
+pp</th>#
   const [tv, tw] = somma(conDati);
+pp</th>#
   const senzaVol = chiavi.filter(k => !(vol(k) > 0)).length;
+pp</th>#
   const senzaPeso = chiavi.filter(k => !(peso(k) > 0)).length;
+pp</th>#
   const note = [senzaVol ? `${senzaVol} senza misure` : '', senzaPeso ? `${senzaPeso} senza peso` : ''].filter(Boolean).join(', ');
+pp</th>#
   const perViaggio = {};
+pp</th>#
   conDati.forEach(k => { const v = (stato.meta[k] && stato.meta[k].viaggio) || ''; (perViaggio[v] = perViaggio[v] || []).push(k); });
+pp</th>#
   const nomeV = v => v === '' ? 'Senza viaggio' : v === 'dopo' ? 'Da spedire dopo' : `Viaggio ${v}`;
+pp</th>#
   const righe = '';
+pp</th>#
   const selNum = [...selezionate].filter(k => stato.scatole[k]);
+pp</th>#
   let rigaSel = '';
+pp</th>#
   if (selNum.length > 0) {
+pp</th>#
     const [sv, sw] = somma(selNum);
+pp</th>#
     const sSenza = [selNum.filter(k => !(vol(k) > 0)).length ? 'senza misure' : '', selNum.filter(k => !(peso(k) > 0)).length ? 'senza peso' : ''].filter(Boolean);
+pp</th>#
     const nSenza = selNum.filter(k => !(vol(k) > 0) || !(peso(k) > 0)).length;
+pp</th>#
     rigaSel = `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">✅ Selezionate (${selNum.length}): <b>${fmt(sv, sw)}</b>${nSenza ? ` <span style="color:#c05621">(dati mancanti su ${nSenza})</span>` : ''}</div>`;
+pp</th>#
   }
+pp</th>#
   const dep = Object.keys(stato.scatole).filter(isDepositata);
+pp</th>#
   const [dv, dw] = [dep.reduce((a, k) => a + vol(k), 0), dep.reduce((a, k) => a + peso(k), 0)];
+pp</th>#
   const rigaDep = dep.length ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0">📦 Già nel box storage (${dep.length}): <b>${fmt(dv, dw)}</b></div>` : '';
+pp</th>#
   el.innerHTML = `📐 Totale da trasportare: <b>${fmt(tv, tw)}</b> <span style="color:#718096">(${conDati.length} contenitori con dati${note ? ', ' + note : ''})</span>${righe}${rigaSel}${rigaDep}`;
+pp</th>#
   el.style.display = 'block';
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 
+pp</th>#
 
+pp</th>#
 // ── OGGETTI PERICOLOSI (batterie, infiammabili…): non vanno nel box storage ──
+pp</th>#
 const PERICOLI = { b: { ico: '🔋', n: 'Batterie' }, i: { ico: '🔥', n: 'Infiammabile' }, a: { ico: '⚠️', n: 'Altro' } };
+pp</th>#
 const RE_PERICOLO = /batteri|\bpil[ae]\b|accumulator|power ?bank|benzina|gasolio|diesel|solvent|vernic|acetone|alcol|accendin|fiammifer|bombolett|spray|aerosol|bombola|\bgas\b|petrolio|diluente|trielina|lacca|antigelo|candeggina|detergente per|olio motore|carburante/i;
+pp</th>#
 function badgePericolo(o) {
+pp</th>#
   const p = PERICOLI[o && o.pericolo];
+pp</th>#
   return p ? `<div class="badge-pericolo">${p.ico} ${p.n}</div>` : '';
+pp</th>#
 }
+pp</th>#
 function btnPericolo(chiaveJs, idx, o) {
+pp</th>#
   const p = PERICOLI[o && o.pericolo];
+pp</th>#
   return `<button class="btn-pericolo${p ? ' attivo' : ''}" onclick="event.stopPropagation(); cambiaPericolo(${chiaveJs}, ${idx})" title="Pericoloso (batterie, infiammabili…): tocca per cambiare">${p ? p.ico : '⚠️'}</button>`;
+pp</th>#
 }
+pp</th>#
 function cambiaPericolo(key, idx) {
+pp</th>#
   if (stato.bloccate[key]) { mostraToast(`🔒 ${labelScatola(key)} è bloccata`); return; }
+pp</th>#
   const o = stato.scatole[key][idx];
+pp</th>#
   const ordine = ['', 'b', 'i', 'a'];
+pp</th>#
   const nuovo = ordine[(ordine.indexOf(o.pericolo || '') + 1) % ordine.length];
+pp</th>#
   if (nuovo) o.pericolo = nuovo; else delete o.pericolo;
+pp</th>#
   salvaDati(); aggiornaUI();
+pp</th>#
   mostraToast(nuovo ? `${PERICOLI[nuovo].ico} "${o.nome}": pericoloso (${PERICOLI[nuovo].n})` : `"${o.nome}": non più pericoloso`);
+pp</th>#
 }
+pp</th>#
 function oggettiPericolosi() {
+pp</th>#
   const out = [];
+pp</th>#
   Object.keys(stato.scatole).forEach(k => stato.scatole[k].forEach((o, idx) => { if (PERICOLI[o.pericolo]) out.push({ k, idx, o }); }));
+pp</th>#
   const ord = { b: 0, i: 1, a: 2 };
+pp</th>#
   return out.sort((x, y) => ord[x.o.pericolo] - ord[y.o.pericolo] || String(x.k).localeCompare(String(y.k), 'it', { numeric: true }));
+pp</th>#
 }
+pp</th>#
 function pericolosiInBox(k) { return (stato.scatole[k] || []).filter(o => PERICOLI[o.pericolo]); }
+pp</th>#
 function renderPericolosi() {
+pp</th>#
   const el = document.getElementById('riepilogo-pericolosi');
+pp</th>#
   const lista = oggettiPericolosi();
+pp</th>#
   if (!lista.length) { el.style.display = 'none'; return; }
+pp</th>#
   const aperto = el.open;
+pp</th>#
   el.style.display = 'block';
+pp</th>#
   el.innerHTML = `<summary>⚠️ Oggetti pericolosi (${lista.length}) — non vanno nel box</summary>` + lista.map(x => {
+pp</th>#
     const nelBox = stato.storage && stato.storage.box[x.k] && stato.storage.box[x.k].in;
+pp</th>#
     return `<div class="prow"><div class="pn">${PERICOLI[x.o.pericolo].ico} ${escH(x.o.nome)}<small>${escH(labelScatola(x.k))} · ${PERICOLI[x.o.pericolo].n}${nelBox ? ' · <b style="color:#c53030">⛔ scatola scelta per il box</b>' : ''}</small></div><button class="pbtn" onclick="vaiAOggetto('${x.k}', ${x.idx})">Vai</button></div>`;
+pp</th>#
   }).join('');
+pp</th>#
   el.open = aperto;
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── PIANO BOX STORAGE ────────────────────────────────────────────────────────
+pp</th>#
 const PS_ACC = { s: 'Subito (davanti)', p: 'Prima o poi', m: 'In fondo' };
+pp</th>#
 function escH(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+pp</th>#
 const psAperte = new Set();
+pp</th>#
 // Modo «Segna quelle rimaste a casa»: null = spento, altrimenti Set delle scatole ancora a casa
+pp</th>#
 let psCasa = null;
+pp</th>#
 function psNumeriCasa() { return psChiavi().filter(k => !isChiaveSpeciale(k) && (stato.scatole[k] || []).length > 0); }
+pp</th>#
 function psCasaApri() { psCasa = new Set(); renderPianoStorage(); }
+pp</th>#
 function psCasaChiudi() { psCasa = null; renderPianoStorage(); }
+pp</th>#
 function psCasaToggle(k) { k = String(k); if (psCasa.has(k)) psCasa.delete(k); else psCasa.add(k); renderPianoStorage(); }
+pp</th>#
 function psCasaTutteQui() { psCasa = new Set(psNumeriCasa().map(String)); renderPianoStorage(); }
+pp</th>#
 function psCasaDeposita() {
+pp</th>#
   const altre = psNumeriCasa().filter(k => !psCasa.has(String(k)));
+pp</th>#
   if (!altre.length) { mostraToast('Nessuna scatola da depositare: sono tutte segnate a casa'); return; }
+pp</th>#
   const per = altre.filter(k => pericolosiInBox(k).length);
+pp</th>#
   let msg = `Hai segnato ${psCasa.size} scatole a casa.\n\nDepositare nel box storage le altre ${altre.length}?\n\n${altre.map(k => labelScatola(k)).join(', ')}\n\nSpariranno dall'elenco e verranno bloccate (le ritrovi nel Piano box storage, dove puoi riportarle fuori).`;
+pp</th>#
   if (per.length) msg += `\n\n⚠️ Contengono oggetti pericolosi: ${per.map(k => labelScatola(k)).join(', ')}.`;
+pp</th>#
   if (!confirm(msg)) return;
+pp</th>#
   psMettiInBox(altre);
+pp</th>#
   psCasa = null;
+pp</th>#
   salvaDati(); aggiornaUI();
+pp</th>#
   mostraToast(`📦 ${altre.length} scatole depositate nel box storage`);
+pp</th>#
 }
+pp</th>#
 function psCasaHtml() {
+pp</th>#
   const tutte = psNumeriCasa();
+pp</th>#
   const nCasa = tutte.filter(k => psCasa.has(String(k))).length;
+pp</th>#
   const chip = tutte.map(k => { const q = psCasa.has(String(k)); return `<button class="ps-chip${q ? ' qui' : ''}" onclick="psCasaToggle('${k}')">${q ? '🏠 ' : ''}${escH(String(k))}</button>`; }).join('');
+pp</th>#
   return `<div class="ps-casa"><b>Tocca le scatole che sono ancora a casa</b>
+pp</th>#
     <div class="ps-chips">${chip || 'Nessuna scatola numerata.'}</div>
+pp</th>#
     <div class="ps-casa-conta">🏠 A casa: <b>${nCasa}</b> · 📦 Nel box (da depositare): <b>${tutte.length - nCasa}</b></div>
+pp</th>#
     <button class="ps-btn" style="background:#2b6cb0;color:#fff" onclick="psCasaDeposita()">📥 Deposita tutte le altre (${tutte.length - nCasa})</button>
+pp</th>#
     <button class="ps-btn" onclick="psCasaTutteQui()">Tutte a casa</button><button class="ps-btn" onclick="psCasaChiudi()">Annulla</button></div>`;
+pp</th>#
 }
+pp</th>#
 function psToggleOgg(k) { if (psAperte.has(k)) psAperte.delete(k); else psAperte.add(k); renderPianoStorage(); }
+pp</th>#
 function psBox(k) { return stato.storage.box[k] || { in: false, acc: 'p', fr: false }; }
+pp</th>#
 function psSet(k, campo, val) {
+pp</th>#
   if (!stato.storage.box[k]) stato.storage.box[k] = { in: false, acc: 'p', fr: false };
+pp</th>#
   stato.storage.box[k][campo] = val;
+pp</th>#
   salvaDati();
+pp</th>#
   renderPianoStorage();
+pp</th>#
   renderPericolosi();
+pp</th>#
 }
+pp</th>#
 function psDim(campo, val) {
+pp</th>#
   stato.storage[campo] = val;
+pp</th>#
   salvaDati();
+pp</th>#
   psAggiornaPiano();
+pp</th>#
 }
+pp</th>#
 function psSelezionaBloccate(v) {
+pp</th>#
   psChiavi().forEach(k => {
+pp</th>#
     if (v && !(stato.bloccate[k] && !isChiaveSpeciale(k))) return;
+pp</th>#
     if (!stato.storage.box[k]) stato.storage.box[k] = { in: false, acc: 'p', fr: false };
+pp</th>#
     stato.storage.box[k].in = v;
+pp</th>#
   });
+pp</th>#
   salvaDati();
+pp</th>#
   renderPianoStorage();
+pp</th>#
 }
+pp</th>#
 function psChiavi() {
+pp</th>#
   const num = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k) && !isDepositata(k)).sort((a, b) => Number(a) - Number(b));
+pp</th>#
   const spe = CHIAVI_SPECIALI.filter(k => k !== 'auto' && !isDepositata(k) && stato.scatole[k] && (volumeLitri(stato.meta[k]) > 0 || pesoKg(stato.meta[k]) > 0));
+pp</th>#
   return [...num, ...spe];
+pp</th>#
 }
+pp</th>#
 function psCalcola() {
+pp</th>#
   const L = num0(stato.storage.l), P = num0(stato.storage.p), H = num0(stato.storage.h);
+pp</th>#
   const scelte = Object.keys(stato.scatole).filter(k => psBox(k).in);
+pp</th>#
   const items = [], senzaMisure = [];
+pp</th>#
   scelte.forEach(k => {
+pp</th>#
     const m = stato.meta[k] || {};
+pp</th>#
     const l = num0(m.lung), p = num0(m.prof), h = num0(m.alt);
+pp</th>#
     if (!(l && p && h)) { senzaMisure.push(k); return; }
+pp</th>#
     const b = psBox(k);
+pp</th>#
     items.push({ k, label: labelScatola(k), l, p, h, fp: [Math.min(l, p), Math.max(l, p)], peso: pesoKg(m), accPeso: !!pesoKg(m), acc: b.acc || 'p', fr: !!b.fr, dep: isDepositata(k) });
+pp</th>#
   });
+pp</th>#
   const senzaPeso = items.filter(i => !i.accPeso).map(i => i.label);
+pp</th>#
   const A = (L && P) ? L * P : num0(stato.storage.a) * 10000;
+pp</th>#
   const HC = Math.min(H || Infinity, num0(stato.storage.mh) || Infinity);
+pp</th>#
   const fisseK = new Set();
+pp</th>#
   const fisse = [];
+pp</th>#
   (stato.storage.fisse || []).forEach((col, idx) => {
+pp</th>#
     const box = (col.keys || []).map(k => items.find(i => String(i.k) === String(k))).filter(Boolean);
+pp</th>#
     (col.keys || []).forEach(k => fisseK.add(String(k)));
+pp</th>#
     if (box.length) fisse.push({ idx, g: col.g || 'p', base: box[0].fp, box, h: box.reduce((a, i) => a + i.h, 0), peso: box.reduce((a, i) => a + i.peso, 0) });
+pp</th>#
   });
+pp</th>#
   const liberi = items.filter(i => !fisseK.has(String(i.k)));
+pp</th>#
   const res = { L, P, H, A, HC, scelte, items, senzaMisure, senzaPeso, colonne: [], fisse, nonEntra: [], avvisi: [] };
+pp</th>#
   if (!A || HC === Infinity) return res;
+pp</th>#
   const fpL = (L && P) ? [Math.min(L, P), Math.max(L, P)] : [Infinity, Infinity];
+pp</th>#
   const sta = (fp, base) => fp[0] <= base[0] + 1e-9 && fp[1] <= base[1] + 1e-9;
+pp</th>#
   ['s', 'p', 'm'].forEach(g => {
+pp</th>#
     const gi = liberi.filter(i => i.acc === g);
+pp</th>#
     const normali = gi.filter(i => !i.fr).sort((a, b) => b.peso - a.peso || (b.fp[0] * b.fp[1]) - (a.fp[0] * a.fp[1]));
+pp</th>#
     const fragili = gi.filter(i => i.fr).sort((a, b) => b.peso - a.peso);
+pp</th>#
     const stacks = [];
+pp</th>#
     const piazza = (i, ultimo) => {
+pp</th>#
       if (!sta(i.fp, fpL) || i.h > HC) { res.nonEntra.push(i); return; }
+pp</th>#
       const s = stacks.find(st => !st.chiusa && st.h + i.h <= HC && sta(i.fp, st.base));
+pp</th>#
       if (s) { s.box.push(i); s.h += i.h; s.peso += i.peso; if (ultimo) s.chiusa = true; }
+pp</th>#
       else stacks.push({ g, base: i.fp, box: [i], h: i.h, peso: i.peso, chiusa: !!ultimo });
+pp</th>#
     };
+pp</th>#
     normali.forEach(i => piazza(i, false));
+pp</th>#
     fragili.forEach(i => piazza(i, true));
+pp</th>#
     res.colonne.push(...stacks);
+pp</th>#
   });
+pp</th>#
   res.areaUsata = [...res.colonne, ...res.fisse].reduce((a, c) => a + c.base[0] * c.base[1], 0);
+pp</th>#
   res.areaBox = A;
+pp</th>#
   res.volScatole = items.reduce((a, i) => a + i.l * i.p * i.h / 1000, 0);
+pp</th>#
   res.volBox = H ? (A * H / 1000) : 0;
+pp</th>#
   res.pesoTot = items.reduce((a, i) => a + i.peso, 0);
+pp</th>#
   return res;
+pp</th>#
 }
+pp</th>#
 function psFmtColonna(c, n) {
+pp</th>#
   const righe = c.box.slice().reverse().map((i, idx, arr) => {
+pp</th>#
     const pos = idx === arr.length - 1 ? 'A terra' : (idx === 0 && arr.length > 1 ? 'In cima' : 'Sopra');
+pp</th>#
     return { pos, i };
+pp</th>#
   });
+pp</th>#
   return righe;
+pp</th>#
 }
+pp</th>#
 function psPianoHtml() {
+pp</th>#
   const r = psCalcola();
+pp</th>#
   if (r.scelte.length === 0) return '<div class="ps-avv">Seleziona sopra le scatole che vanno nel box.</div>';
+pp</th>#
   const kg = v => fmtKg(v);
+pp</th>#
   let h = '';
+pp</th>#
   const conPer = r.scelte.filter(k => pericolosiInBox(k).length);
+pp</th>#
   if (conPer.length) h += `<div class="ps-avv">⛔ Contengono oggetti pericolosi (non possono andare nel box): ${conPer.map(k => escH(labelScatola(k)) + ' (' + pericolosiInBox(k).map(o => escH(o.nome)).join(', ') + ')').join('; ')}</div>`;
+pp</th>#
   const mh0 = num0(stato.storage.mh), hh0 = num0(stato.storage.h);
+pp</th>#
   if ((mh0 && mh0 < 30) || (hh0 && hh0 < 30)) h += `<div class="ps-avv">⚠️ Altezza di ${mh0 && mh0 < 30 ? mh0 : hh0}: le misure sono in <b>cm</b>. Se intendevi metri, scrivi ${Math.round((mh0 && mh0 < 30 ? mh0 : hh0) * 100)}.</div>`;
+pp</th>#
   if (r.senzaMisure.length) h += `<div class="ps-avv">⚠️ Senza misure (escluse dal piano): ${r.senzaMisure.map(k => escH(labelScatola(k))).join(', ')}</div>`;
+pp</th>#
   if (r.senzaPeso.length) h += `<div class="ps-avv">⚠️ Senza peso (trattate come le più leggere): ${r.senzaPeso.map(escH).join(', ')}</div>`;
+pp</th>#
   if (!r.A || r.HC === Infinity) {
+pp</th>#
     const v = r.items.reduce((a, i) => a + i.l * i.p * i.h / 1000, 0), w = r.items.reduce((a, i) => a + i.peso, 0);
+pp</th>#
     return h + `<div style="margin-top:6px">Selezionate ${r.scelte.length}: <b>${fmtLitri(v)}</b>${w ? ' · <b>' + kg(w) + '</b>' : ''}. Per il piano inserisci la superficie del box (o larghezza × profondità) e un'altezza: quella del box oppure il massimo di una colonna.</div>`;
+pp</th>#
   }
+pp</th>#
   const perc = r.areaUsata / r.areaBox * 100, pv = r.volBox ? r.volScatole / r.volBox * 100 : 0;
+pp</th>#
   const clsA = perc > 100 ? 'ps-bad' : (perc > 85 ? '' : 'ps-ok');
+pp</th>#
   h += `<div style="margin-top:6px">Volume scatole: <b>${fmtLitri(r.volScatole)}</b>${r.volBox ? ' su ' + fmtLitri(r.volBox) + ' (' + pv.toFixed(0) + '%)' : ''} · Peso: <b>${kg(r.pesoTot)}</b><br>Pavimento occupato dalle colonne: <span class="${clsA}">${perc.toFixed(0)}%</span> <span style="color:#718096">(indicativo: gli spazi tra le scatole non si recuperano)</span></div>`;
+pp</th>#
   if (perc > 100) h += `<div class="ps-avv">⛔ Le colonne non entrano nel pavimento del box: servono meno scatole o un box più grande.</div>`;
+pp</th>#
   else if (perc > 85) h += `<div class="ps-avv">⚠️ Pavimento quasi pieno: nella pratica potrebbe non bastare.</div>`;
+pp</th>#
   if (r.nonEntra.length) h += `<div class="ps-avv">⛔ Non entrano per misure: ${r.nonEntra.map(i => escH(i.label)).join(', ')}</div>`;
+pp</th>#
   const gruppi = { s: 'Subito (vicino alla porta)', p: 'Prima o poi', m: 'In fondo' };
+pp</th>#
   let n = 0, ultimoG = '';
+pp</th>#
   const righeCol = c => psFmtColonna(c).map(x => `<div class="ps-liv">${x.pos}: ${escH(x.i.label)}${x.i.fr ? ' 🥚' : ''}${x.i.dep ? ' <span title="già depositata: se la colonna cambia va spostata">📦</span>' : ''} <span style="color:#718096">${x.i.accPeso ? kg(x.i.peso) + ' · ' : ''}${escH(fmtDim({ lung: x.i.l, prof: x.i.p, alt: x.i.h }))}</span></div>`).join('');
+pp</th>#
   if (r.fisse.length) {
+pp</th>#
     h += `<div class="ps-sez">🔒 Colonne finite (non cambiano)</div>`;
+pp</th>#
     r.fisse.forEach(c => {
+pp</th>#
       n++;
+pp</th>#
       h += `<div class="ps-col" style="border-left:4px solid #38a169"><b>Colonna ${n}</b> — ${kg(c.peso)} · alta ${c.h.toLocaleString('it-IT', { maximumFractionDigits: 0 })} cm · <span style="color:#718096">${gruppi[c.g]}</span>${righeCol(c)}<button class="ps-btn" onclick="psRiapri(${c.idx})">↩️ Riapri colonna</button></div>`;
+pp</th>#
     });
+pp</th>#
   }
+pp</th>#
   r.colonne.forEach(c => {
+pp</th>#
     if (c.g !== ultimoG) { h += `<div class="ps-sez">${gruppi[c.g]}${r.fisse.length ? ' — da sistemare' : ''}</div>`; ultimoG = c.g; }
+pp</th>#
     n++;
+pp</th>#
     h += `<div class="ps-col"><b>Colonna ${n}</b> — ${kg(c.peso)} · alta ${c.h.toLocaleString('it-IT', { maximumFractionDigits: 0 })} cm`;
+pp</th>#
     h += righeCol(c);
+pp</th>#
     const inv = c.box.some((x, idx) => idx > 0 && x.peso > c.box[idx - 1].peso + 1e-9);
+pp</th>#
     if (inv) h += `<div class="ps-avv">⚠️ Una scatola più pesante sta sopra una più leggera (di solito per la spunta fragile): controlla.</div>`;
+pp</th>#
     h += `<button class="ps-btn" onclick="psFinita('${c.box.map(i => i.k).join('|')}', '${c.g}')">✅ Colonna finita</button>`;
+pp</th>#
     h += '</div>';
+pp</th>#
   });
+pp</th>#
   h += '<button class="ps-btn" onclick="psStampa()">🖨️ Stampa piano</button>';
+pp</th>#
   return h;
+pp</th>#
 }
+pp</th>#
 function psAggiornaPiano() {
+pp</th>#
   const el = document.getElementById('ps-piano');
+pp</th>#
   if (el) el.innerHTML = psPianoHtml();
+pp</th>#
   const sm = document.getElementById('ps-summary-n');
+pp</th>#
   if (sm) sm.textContent = psChiavi().filter(k => psBox(k).in).length;
+pp</th>#
 }
+pp</th>#
 function psDeposita() {
+pp</th>#
   const k_da = psChiavi().filter(k => psBox(k).in);
+pp</th>#
   if (!k_da.length) { mostraToast('Seleziona prima le scatole da depositare'); return; }
+pp</th>#
   const per = k_da.filter(k => pericolosiInBox(k).length);
+pp</th>#
   let msg = `Depositare ${k_da.length} scatole nel box storage?\n\nSpariranno dall'elenco delle scatole (le ritrovi nel pannello «Piano box storage», dove puoi anche riportarle fuori) e verranno bloccate.`;
+pp</th>#
   if (per.length) msg += `\n\n⚠️ Attenzione: contengono oggetti pericolosi: ${per.map(k => labelScatola(k)).join(', ')}.`;
+pp</th>#
   if (!confirm(msg)) return;
+pp</th>#
   psMettiInBox(k_da);
+pp</th>#
   salvaDati(); aggiornaUI();
+pp</th>#
   mostraToast(`📦 ${k_da.length} scatole depositate nel box storage`);
+pp</th>#
 }
+pp</th>#
 function psMettiInBox(keys) {
+pp</th>#
   keys.forEach(k => {
+pp</th>#
     if (!stato.storage.box[k]) stato.storage.box[k] = { in: true, acc: 'p', fr: false };
+pp</th>#
     stato.storage.box[k].in = true;
+pp</th>#
     stato.storage.box[k].dep = true;
+pp</th>#
     stato.bloccate[k] = true;
+pp</th>#
     selezionate.delete(k); selezionate.delete(String(k)); selezionate.delete(Number(k));
+pp</th>#
   });
+pp</th>#
   if (isDepositata(stato.scatolaAttiva)) {
+pp</th>#
     const lib = Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k) && !isDepositata(k)).map(Number).sort((a, b) => b - a);
+pp</th>#
     if (lib.length) stato.scatolaAttiva = lib[0];
+pp</th>#
     else {
+pp</th>#
       const nuovoNum = Math.max(...Object.keys(stato.scatole).filter(k => !isChiaveSpeciale(k)).map(Number), 0) + 1;
+pp</th>#
       stato.scatolaAttiva = nuovoNum; stato.scatole[nuovoNum] = []; stato.meta[nuovoNum] = { viaggio: '', stanza: '' };
+pp</th>#
     }
+pp</th>#
     caricaMetaAttiva();
+pp</th>#
   }
+pp</th>#
 }
+pp</th>#
 function psFinita(str, g) {
+pp</th>#
   const keys = str.split('|');
+pp</th>#
   const nuove = keys.filter(k => !isDepositata(k));
+pp</th>#
   const per = keys.filter(k => pericolosiInBox(k).length);
+pp</th>#
   let msg = `Segnare questa colonna come finita?\n\n${keys.map(labelScatola).join('\n')}\n\nNon verrà più ricalcolata.`;
+pp</th>#
   if (nuove.length) msg += `\nLe ${nuove.length} scatole non ancora depositate verranno depositate nel box (spariscono dall'elenco e vengono bloccate).`;
+pp</th>#
   if (per.length) msg += `\n\n⚠️ Contiene oggetti pericolosi: ${per.map(labelScatola).join(', ')}.`;
+pp</th>#
   if (!confirm(msg)) return;
+pp</th>#
   psMettiInBox(keys);
+pp</th>#
   stato.storage.fisse.push({ g: g || 'p', keys });
+pp</th>#
   salvaDati(); aggiornaUI();
+pp</th>#
   mostraToast('✅ Colonna finita');
+pp</th>#
 }
+pp</th>#
 function psStampaDepositate() {
+pp</th>#
   const keys = Object.keys(stato.scatole).filter(isDepositata).map(k => isChiaveSpeciale(k) ? k : Number(k));
+pp</th>#
   if (!keys.length) { mostraToast('Nessuna scatola nel box storage'); return; }
+pp</th>#
   esportaScatole(keys);
+pp</th>#
 }
+pp</th>#
 function psRiapri(idx) {
+pp</th>#
   if (!confirm('Riaprire la colonna? Le sue scatole torneranno a essere ridistribuite dal piano (restano depositate).')) return;
+pp</th>#
   stato.storage.fisse.splice(idx, 1);
+pp</th>#
   salvaDati(); aggiornaUI();
+pp</th>#
   mostraToast('↩️ Colonna riaperta');
+pp</th>#
 }
+pp</th>#
 function psRiporta(k) {
+pp</th>#
   if (!confirm(`Riportare fuori dal box ${labelScatola(k)}? Tornerà nell'elenco delle scatole (resta bloccata).`)) return;
+pp</th>#
   stato.storage.box[k].dep = false;
+pp</th>#
   stato.storage.box[k].in = false;
+pp</th>#
   stato.storage.fisse = stato.storage.fisse.map(c => ({ g: c.g, keys: c.keys.filter(x => String(x) !== String(k)) })).filter(c => c.keys.length);
+pp</th>#
   salvaDati(); aggiornaUI();
+pp</th>#
   mostraToast(`↩️ ${labelScatola(k)} riportata nell'elenco`);
+pp</th>#
 }
+pp</th>#
 function psElencoOgg(k) {
+pp</th>#
   const ogg = stato.scatole[k] || [];
+pp</th>#
   return `<div class="ps-ogg">${ogg.length ? ogg.map(o => `<div>${escH(o.nome)}${o.categoria ? ' <span style="color:#a0aec0">· ' + escH(o.categoria) + '</span>' : ''}${PERICOLI[o.pericolo] ? ' <span style="color:#c53030;font-weight:700">' + PERICOLI[o.pericolo].ico + ' ' + PERICOLI[o.pericolo].n + '</span>' : ''}</div>`).join('') : '<div>Nessun oggetto</div>'}</div>`;
+pp</th>#
 }
+pp</th>#
 function renderPianoStorage() {
+pp</th>#
   const el = document.getElementById('piano-storage');
+pp</th>#
   if (!el) return;
+pp</th>#
   const chiavi = psChiavi();
+pp</th>#
   const depositate = Object.keys(stato.scatole).filter(isDepositata).sort((a, b) => String(a).localeCompare(String(b), 'it', { numeric: true }));
+pp</th>#
   if (chiavi.length === 0 && depositate.length === 0) { el.style.display = 'none'; return; }
+pp</th>#
   el.style.display = 'block';
+pp</th>#
   const aperto = el.open;
+pp</th>#
   const st = stato.storage;
+pp</th>#
   const nScelte = chiavi.filter(k => psBox(k).in).length;
+pp</th>#
   const righe = chiavi.map(k => {
+pp</th>#
     const b = psBox(k), m = stato.meta[k] || {};
+pp</th>#
     const info = [fmtDim(m), pesoKg(m) ? fmtKg(pesoKg(m)) : ''].filter(Boolean).join(' · ');
+pp</th>#
     const kj = `'${k}'`;
+pp</th>#
     const ogg = stato.scatole[k] || [];
+pp</th>#
     const aperta = psAperte.has(k);
+pp</th>#
     return `<div class="ps-row">
+pp</th>#
       <input type="checkbox" ${b.in ? 'checked' : ''} onchange="psSet(${kj}, 'in', this.checked)">
+pp</th>#
       <div class="ps-n">${escH(labelScatola(k))}<small>${info ? escH(info) : '⚠️ senza misure'}${stato.bloccate[k] ? ' · 🔒' : ''}${pericolosiInBox(k).length ? ' · <b style="color:#c53030">⚠️ ' + pericolosiInBox(k).length + ' pericolosi</b>' : ''}</small><button class="ps-link" onclick="psToggleOgg(${kj})">📋 ${ogg.length} oggetti ${aperta ? '▲' : '▼'}</button></div>
+pp</th>#
       <select onchange="psSet(${kj}, 'acc', this.value)">${Object.keys(PS_ACC).map(a => `<option value="${a}" ${(b.acc || 'p') === a ? 'selected' : ''}>${PS_ACC[a]}</option>`).join('')}</select>
+pp</th>#
       <label class="ps-fr"><input type="checkbox" ${b.fr ? 'checked' : ''} onchange="psSet(${kj}, 'fr', this.checked)"> 🥚 fragile</label>
+pp</th>#
     </div>${aperta ? psElencoOgg(k) : ''}`;
+pp</th>#
   }).join('');
+pp</th>#
   const righeDep = depositate.map(k => {
+pp</th>#
     const m = stato.meta[k] || {}, kj = `'${k}'`, ogg = stato.scatole[k] || [], aperta = psAperte.has(k);
+pp</th>#
     const info = [fmtDim(m), pesoKg(m) ? fmtKg(pesoKg(m)) : ''].filter(Boolean).join(' · ');
+pp</th>#
     return `<div class="ps-row">
+pp</th>#
       <div class="ps-n">${escH(labelScatola(k))}<small>${escH(info) || '—'}${pericolosiInBox(k).length ? ' · <b style="color:#c53030">⚠️ ' + pericolosiInBox(k).length + ' pericolosi</b>' : ''}</small><button class="ps-link" onclick="psToggleOgg(${kj})">📋 ${ogg.length} oggetti ${aperta ? '▲' : '▼'}</button></div>
+pp</th>#
       <button class="ps-btn" style="margin:0" onclick="psRiporta(${kj})">↩️ Riporta fuori</button>
+pp</th>#
     </div>${aperta ? psElencoOgg(k) : ''}`;
+pp</th>#
   }).join('');
+pp</th>#
   el.innerHTML = `<summary>📦 Piano box storage (<span id="ps-summary-n">${nScelte}</span> da depositare${depositate.length ? ' · ' + depositate.length + ' depositate' : ''})</summary>
+pp</th>#
     <div class="ps-sez">Misure del box (cm)</div>
+pp</th>#
     <div class="ps-dim">
+pp</th>#
       <input type="number" min="0" inputmode="decimal" placeholder="Largh." value="${st.l || ''}" oninput="psDim('l', this.value)"> ×
+pp</th>#
       <input type="number" min="0" inputmode="decimal" placeholder="Prof." value="${st.p || ''}" oninput="psDim('p', this.value)"> ×
+pp</th>#
       <input type="number" min="0" inputmode="decimal" placeholder="Alt." value="${st.h || ''}" oninput="psDim('h', this.value)">
+pp</th>#
     </div>
+pp</th>#
     <div class="ps-dim" style="margin-top:6px">oppure solo la superficie: <input type="number" min="0" step="0.1" inputmode="decimal" placeholder="m²" value="${st.a || ''}" oninput="psDim('a', this.value)"> m² <span style="color:#718096">(usata se larghezza e profondità sono vuote)</span></div>
+pp</th>#
     <div class="ps-dim" style="margin-top:6px">Altezza massima di una colonna (cm): <input type="number" min="0" inputmode="decimal" placeholder="facolt." value="${st.mh || ''}" oninput="psDim('mh', this.value)"> cm <span style="color:#718096">(in centimetri: 2,5 m = 250. Se vuoto: altezza del box)</span></div>
+pp</th>#
     <div class="ps-sez">Quali scatole vanno nel box?</div>
+pp</th>#
     <button class="ps-btn" onclick="psSelezionaBloccate(true)">🔒 Scegli tutte le bloccate</button><button class="ps-btn" onclick="psSelezionaBloccate(false)">Deseleziona tutte</button>
+pp</th>#
     <button class="ps-btn" style="background:#c6f6d5;color:#22543d" onclick="psCasaApri()">🏠 Segna quelle rimaste a casa</button>
+pp</th>#
     ${psCasa ? psCasaHtml() : ''}
+pp</th>#
     ${righe || '<div class="ps-avv">Nessuna scatola disponibile da scegliere.</div>'}
+pp</th>#
     <button class="ps-btn" style="background:#2b6cb0;color:#fff;font-size:0.84rem;padding:8px 14px" onclick="psDeposita()">📥 Deposita nel box le ${nScelte} scelte</button>
+pp</th>#
     ${depositate.length ? `<div class="ps-sez">Già nel box storage (${depositate.length})</div><button class="ps-btn" onclick="psStampaDepositate()">🖨️ Stampa le scatole nel box storage</button>${righeDep}` : ''}
+pp</th>#
     <div class="ps-sez">Piano</div>
+pp</th>#
     <div id="ps-piano">${psPianoHtml()}</div>`;
+pp</th>#
   el.open = aperto;
+pp</th>#
 }
+pp</th>#
 function psStampa() {
+pp</th>#
   const r = psCalcola();
+pp</th>#
   let n = 0, corpo = '';
+pp</th>#
   const gruppi = { s: 'Subito (vicino alla porta)', p: 'Prima o poi', m: 'In fondo', F: 'Colonne finite (non cambiano)' };
+pp</th>#
   let ultimoG = '';
+pp</th>#
   [...r.fisse.map(c => Object.assign({}, c, { g: 'F' })), ...r.colonne].forEach(c => {
+pp</th>#
     if (c.g !== ultimoG) { corpo += `<tr><th colspan="4" class="g">${gruppi[c.g]}</th></tr>`; ultimoG = c.g; }
+pp</th>#
     n++;
+pp</th>#
     psFmtColonna(c).forEach((x, idx, arr) => {
+pp</th>#
       corpo += `<tr>${idx === 0 ? `<td rowspan="${arr.length}" class="c">Colonna ${n}<br><small>${fmtKg(c.peso)}</small></td>` : ''}<td>${x.pos}</td><td>${escH(x.i.label)}${x.i.fr ? ' (fragile)' : ''}</td><td>${x.i.accPeso ? fmtKg(x.i.peso) : '—'} · ${escH(fmtDim({ lung: x.i.l, prof: x.i.p, alt: x.i.h }))}</td></tr>`;
+pp</th>#
     });
+pp</th>#
   });
+pp</th>#
   const extra = [r.senzaMisure.length ? 'Senza misure (escluse): ' + r.senzaMisure.map(k => escH(labelScatola(k))).join(', ') : '', r.nonEntra.length ? 'Non entrano: ' + r.nonEntra.map(i => escH(i.label)).join(', ') : ''].filter(Boolean).join('<br>');
+pp</th>#
   const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Piano box storage</title>
+pp</th>#
 <style>body{font-family:Arial,sans-serif;padding:24px;color:#000}h1{font-size:1.3rem;margin:0 0 4px}.sub{color:#444;font-size:.85rem;margin-bottom:14px}table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:top}th.g{background:#e5e5e5;border-top:2px solid #000;border-bottom:2px solid #000}td.c{font-weight:700;width:90px}small{font-weight:400}</style></head><body>
+pp</th>#
 <h1>📦 Piano box storage</h1>
+pp</th>#
 <div class="sub">Box ${(r.L && r.P) ? r.L + ' × ' + r.P + ' cm' : (r.A ? (r.A / 10000).toLocaleString('it-IT') + ' m²' : '?')}${r.H ? ' × h ' + r.H + ' cm' : ''}${(num0(stato.storage.mh)) ? ' — colonne max ' + num0(stato.storage.mh) + ' cm' : ''} — dalla porta verso il fondo — ${new Date().toLocaleDateString('it-IT')}${r.pesoTot ? ' — peso totale ' + fmtKg(r.pesoTot) : ''}</div>
+pp</th>#
 <table>${corpo || '<tr><td>Nessuna colonna: seleziona le scatole e inserisci superficie (o larghezza × profondità) e altezza massima delle colonne, in cm.</td></tr>'}</table>
+pp</th>#
 ${extra ? `<p style="font-size:.85rem">${extra}</p>` : ''}
+pp</th>#
 <script>window.onload=()=>window.print()<\/script></body></html>`;
+pp</th>#
   const w = window.open('', '_blank');
+pp</th>#
   w.document.write(html);
+pp</th>#
   w.document.close();
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // Ridisegna tutto ma mantiene aperti gli elenchi che l'utente ha aperto (si chiudono solo a mano)
+pp</th>#
 function aggiornaUI() {
+pp</th>#
   const aperte = Array.from(document.querySelectorAll('.scatola-oggetti.visibile')).map(e => e.id.replace(/^oggetti-/, ''));
+pp</th>#
   const y = window.scrollY;
+pp</th>#
   aggiornaUIInterna();
+pp</th>#
   aperte.forEach(k => {
+pp</th>#
     const el = document.getElementById('oggetti-' + k), t = document.getElementById('toggle-' + k);
+pp</th>#
     if (el) el.classList.add('visibile');
+pp</th>#
     if (t) t.classList.add('aperta');
+pp</th>#
   });
+pp</th>#
   if (Math.abs(window.scrollY - y) > 2) window.scrollTo(0, y);
+pp</th>#
 }
+pp</th>#
 function aggiornaUIInterna() {
+pp</th>#
   calcolaDoppioni();
+pp</th>#
   aggiornaRiepilogoVolume();
+pp</th>#
   renderPianoStorage();
+pp</th>#
   renderPericolosi();
+pp</th>#
   aggiornaCategorieSuggerite();
+pp</th>#
   const numeroEl = document.getElementById('numero-scatola');
+pp</th>#
   if (isChiaveSpeciale(stato.scatolaAttiva)) {
+pp</th>#
     numeroEl.textContent = labelScatola(stato.scatolaAttiva);
+pp</th>#
     numeroEl.classList.add('testo');
+pp</th>#
   } else {
+pp</th>#
     numeroEl.textContent = stato.scatolaAttiva;
+pp</th>#
     numeroEl.classList.remove('testo');
+pp</th>#
   }
+pp</th>#
   const n = (stato.scatole[stato.scatolaAttiva] || []).length;
+pp</th>#
   document.getElementById('conteggio-scatola').textContent = n === 1 ? '1 oggetto' : `${n} oggetti`;
+pp</th>#
 
+pp</th>#
   const chiavi = Object.keys(stato.scatole).filter(k => !isDepositata(k));
+pp</th>#
   const chiaviNumeriche = chiavi.filter(k => !isChiaveSpeciale(k)).map(Number).sort((a, b) => {
+pp</th>#
     const aBloccata = stato.bloccate[a] ? 1 : 0;
+pp</th>#
     const bBloccata = stato.bloccate[b] ? 1 : 0;
+pp</th>#
     if (aBloccata !== bBloccata) return aBloccata - bBloccata;
+pp</th>#
     return b - a;
+pp</th>#
   });
+pp</th>#
   const chiaviSpeciali = CHIAVI_SPECIALI.filter(k => chiavi.includes(k));
+pp</th>#
   const ordineChiavi = [...chiaviSpeciali, ...chiaviNumeriche];
+pp</th>#
   const totOggetti = Object.values(stato.scatole).reduce((s, a) => s + a.length, 0);
+pp</th>#
 
+pp</th>#
   if (totOggetti === 0) {
+pp</th>#
     scatoleContainer.innerHTML = `
+pp</th>#
       <div id="empty-state">
+pp</th>#
         <div class="emoji">🧳</div>
+pp</th>#
         <p>Nessun oggetto ancora.<br>Aggiungi il primo qui sopra!</p>
+pp</th>#
       </div>`;
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
 
+pp</th>#
   if (ordineChiavi.length === 0) {
+pp</th>#
     scatoleContainer.innerHTML = `<div id="empty-state"><div class="emoji">📦</div><p>Tutte le scatole sono nel box storage.<br>Le trovi nel pannello «Piano box storage».</p></div>`;
+pp</th>#
     aggiornaBottoneSelezionate();
+pp</th>#
     return;
+pp</th>#
   }
+pp</th>#
   scatoleContainer.innerHTML = ordineChiavi.map(num => {
+pp</th>#
     const oggetti = stato.scatole[num] || [];
+pp</th>#
     const meta = stato.meta[num] || {};
+pp</th>#
     const isAttiva = num === stato.scatolaAttiva;
+pp</th>#
     const viaggioLabel = meta.viaggio ? (meta.viaggio === 'dopo' ? 'Da spedire dopo' : `Viaggio ${meta.viaggio}`) : '';
+pp</th>#
     const chiaveJs = (typeof num === 'string') ? `'${num}'` : num;
+pp</th>#
     const per = pericolosiInBox(num);
+pp</th>#
     const bandaPer = per.length ? (() => {
+pp</th>#
       const c = {}; per.forEach(o => { c[o.pericolo] = (c[o.pericolo] || 0) + 1; });
+pp</th>#
       return `<div class="banda-pericolo">⚠️ PERICOLO — non va nel box: <span>${Object.keys(c).map(t => PERICOLI[t].ico + ' ' + PERICOLI[t].n + (c[t] > 1 ? ' ×' + c[t] : '')).join(' · ')}</span></div>`;
+pp</th>#
     })() : '';
+pp</th>#
     return `
+pp</th>#
     <div class="scatola-card${per.length ? ' pericolosa' : ''}${stato.bloccate[num] ? ' bloccata' : ''}${num === 'fuori' ? ' fuori-scatola' : ''}${num === 'auto' ? ' diretti-auto' : ''}${num === 'bozza' ? ' bozza' : ''}">
+pp</th>#
       ${bandaPer}
+pp</th>#
       <div class="scatola-header" onclick="toggleScatola(${chiaveJs})">
+pp</th>#
         <div style="display:flex; align-items:flex-start;">
+pp</th>#
           <input type="checkbox" class="checkbox-scatola" data-num="${num}" ${selezionate.has(num) ? 'checked' : ''} onclick="event.stopPropagation(); toggleSelezione(${chiaveJs})" />
+pp</th>#
           <div>
+pp</th>#
             <div class="scatola-titolo">${labelScatola(num)}${isAttiva ? ' ✏️' : ''}</div>
+pp</th>#
             <div class="scatola-info">${oggetti.length === 1 ? '1 oggetto' : `${oggetti.length} oggetti`}</div>
+pp</th>#
             <div class="scatola-badges">
+pp</th>#
               
+pp</th>#
               ${meta.stanza ? `<span class="badge badge-stanza">📍 ${meta.stanza}</span>` : ''}
+pp</th>#
               ${pesoKg(meta) ? `<span class="badge badge-dim">⚖️ ${fmtKg(pesoKg(meta))}</span>` : ''}
+pp</th>#
               ${fmtDim(meta) ? `<span class="badge badge-dim">📐 ${fmtDim(meta)}${volumeLitri(meta) ? ' · ' + fmtLitri(volumeLitri(meta)) : ''}</span>` : ''}
+pp</th>#
             </div>
+pp</th>#
           </div>
+pp</th>#
         </div>
+pp</th>#
         <div style="display:flex; align-items:center; gap:6px;">
+pp</th>#
           ${(num == stato.scatolaAttiva || stato.bloccate[num]) ? '' : `<button class="btn-stampa" onclick="event.stopPropagation(); usaScatola(${chiaveJs})" title="Usa questa scatola">📌</button>`}
+pp</th>#
           <button class="btn-lucchetto${stato.bloccate[num] ? ' bloccato' : ''}" onclick="event.stopPropagation(); toggleLucchetto(${chiaveJs})" title="${stato.bloccate[num] ? 'Sblocca' : 'Blocca'} scatola">${iconaLucchetto(!!stato.bloccate[num])}</button>
+pp</th>#
           <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs})" title="Esporta PDF completo">🖨️</button>
+pp</th>#
           <button class="btn-stampa" onclick="event.stopPropagation(); stampaScatola(${chiaveJs}, false)" title="Esporta PDF semplice (senza viaggio/destinazione)">🧾</button>
+pp</th>#
           <div class="scatola-toggle" id="toggle-${num}">▼</div>
+pp</th>#
         </div>
+pp</th>#
       </div>
+pp</th>#
       <div class="scatola-oggetti" id="oggetti-${num}">
+pp</th>#
         ${oggetti.length === 0
+pp</th>#
           ? '<div class="nessun-oggetto">Nessun oggetto</div>'
+pp</th>#
           : oggetti.map((o, idx) => `
+pp</th>#
             <div class="oggetto-item ${chipDoppione(num, idx).cls}">
+pp</th>#
               <div>
+pp</th>#
                 <div class="oggetto-nome">${o.nome}</div>
+pp</th>#
                 ${badgePericolo(o)}
+pp</th>#
                 ${chipDoppione(num, idx).chip}
+pp</th>#
                 ${o.categoria ? `<div class="oggetto-categoria">${o.categoria}</div>` : ''}
+pp</th>#
                 ${(() => {
+pp</th>#
                   const stanzaEff = stanzaEffettiva(o, num);
+pp</th>#
                   if (!stanzaEff) return '';
+pp</th>#
                   const ereditata = !(o.stanza && o.stanza.trim());
+pp</th>#
                   return `<div class="oggetto-stanza">📍 ${stanzaEff}${ereditata ? ' <span style="opacity:0.6; font-size:0.72rem;">(scatola)</span>' : ''}</div>`;
+pp</th>#
                 })()}
+pp</th>#
                 ${(o.valore !== null && o.valore !== undefined && !isNaN(o.valore)) ? `<div class="oggetto-valore">CHF ${o.valore.toFixed(2)}</div>` : ''}
+pp</th>#
               </div>
+pp</th>#
               <div style="display:flex; align-items:center; flex-wrap:wrap; justify-content:flex-end; gap:3px;">
+pp</th>#
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaCategoria(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
+pp</th>#
                   ${opzioniCategoria(o.categoria)}
+pp</th>#
                 </select>
+pp</th>#
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); cambiaStanza(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
+pp</th>#
                   ${opzioniStanza(o.stanza)}
+pp</th>#
                 </select>
+pp</th>#
                 <select class="select-sposta" onclick="event.stopPropagation();" onchange="event.stopPropagation(); spostaOggetto(${chiaveJs}, ${idx}, this.value)" ${stato.bloccate[num] ? 'disabled' : ''}>
+pp</th>#
                   ${opzioniDestinazione(num)}
+pp</th>#
                 </select>
+pp</th>#
                 ${btnPericolo(chiaveJs, idx, o)}
+pp</th>#
                 <button class="btn-modifica" onclick="event.stopPropagation(); modificaOggetto(${chiaveJs}, ${idx})" title="Modifica nome/valore">✏️</button>
+pp</th>#
                 <button class="btn-rimuovi" onclick="rimuoviOggetto(${chiaveJs}, ${idx})" title="Rimuovi">✕</button>
+pp</th>#
               </div>
+pp</th>#
             </div>`).join('')
+pp</th>#
         }
+pp</th>#
         ${oggetti.length > 0 ? `
+pp</th>#
         <div class="scatola-totale">
+pp</th>#
           <span>Totale valore scatola</span>
+pp</th>#
           <span class="importo">CHF ${sommaValori(oggetti).toFixed(2)}</span>
+pp</th>#
         </div>` : ''}
+pp</th>#
       </div>
+pp</th>#
     </div>`;
+pp</th>#
   }).join('');
+pp</th>#
   aggiornaBottoneSelezionate();
+pp</th>#
   if (cercaInput.value.trim()) eseguiRicerca();
+pp</th>#
 }
+pp</th>#
 
+pp</th>#
 // ── INIT ──────────────────────────────────────────────────────────────────────
+pp</th>#
 caricaMetaAttiva();
+pp</th>#
 aggiornaUI();
+pp</th>#
 </script>
+pp</th>#
 
+pp</th>#
 </body>
+pp</th>#
 </html>
+pp</th>#
