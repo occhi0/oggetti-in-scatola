@@ -579,14 +579,18 @@ footer {
   <div id="lista-scatole">
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; gap:8px; flex-wrap:wrap;">
       <h2 style="margin-bottom:0;">Tutte le scatole</h2>
-      <div style="display:flex; gap:6px;">
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
         <button id="btn-lista-scatole" style="background:#718096; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">📋 Lista scatole</button>
-        <select id="etichette-per-foglio" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Etichette per foglio"><option value="1">1 per foglio</option><option value="4">4 per foglio</option></select>
-        <select id="etichette-copie" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Copie per scatola"><option value="1">1 copia</option><option value="2">2 copie</option><option value="3">3 copie</option></select>
-        <button id="btn-etichette" style="background:#dd6b20; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🏷️ Etichette <span id="etichette-sub"></span></button>
-        <button id="btn-esporta-selezionate" style="display:none; background:#38a169; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta selezionate (<span id="conteggio-selezionate">0</span>)</button>
         <button id="btn-esporta-categoria" style="background:#9f7aea; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Per categoria</button>
         <button id="btn-esporta-tutto" style="background:#2b6cb0; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta tutto</button>
+        <button id="btn-esporta-selezionate" style="display:none; background:#38a169; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🖨️ Esporta selezionate (<span id="conteggio-selezionate">0</span>)</button>
+    </div>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:12px;">
+        <button id="btn-etichette" style="background:#dd6b20; color:white; border:none; border-radius:8px; padding:8px 12px; font-size:0.82rem; font-weight:700; cursor:pointer; white-space:nowrap;">🏷️ Etichette <span id="etichette-sub"></span></button>
+      <div style="display:flex; gap:6px; flex-basis:100%;">
+        <select id="etichette-per-foglio" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Etichette per foglio"><option value="1">1 per foglio</option><option value="4">4 per foglio</option></select>
+        <select id="etichette-copie" style="border:1px solid #cbd5e0; border-radius:8px; padding:6px; font-size:0.82rem;" title="Copie per scatola"><option value="1">1 copia</option><option value="2">2 copie</option><option value="3">3 copie</option></select>
       </div>
     </div>
 
