@@ -237,6 +237,11 @@ main { padding: 16px; max-width: 600px; margin: 0 auto; }
 #piano-storage .ps-ogg div { padding: 2px 0; border-bottom: 1px dashed #e2e8f0; }
 #piano-storage .ps-ogg div:last-child { border-bottom: none; }
 #piano-storage .ps-fr { font-size: 0.75rem; color: #4a5568; white-space: nowrap; }
+#piano-storage .ps-casa { background: #f0fff4; border: 2px solid #38a169; border-radius: 10px; padding: 10px; margin: 8px 0; font-size: 0.85rem; }
+#piano-storage .ps-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+#piano-storage .ps-chip { border: 2px solid #a0aec0; background: #fff; color: #2d3748; border-radius: 10px; min-width: 52px; padding: 10px 8px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+#piano-storage .ps-chip.qui { background: #38a169; border-color: #276749; color: #fff; }
+#piano-storage .ps-casa-conta { margin: 4px 0 2px; }
 #piano-storage .ps-btn { border: none; cursor: pointer; background: #bee3f8; color: #2c5282; font-size: 0.78rem; padding: 5px 10px; border-radius: 8px; font-weight: 600; margin: 6px 6px 0 0; }
 #piano-storage .ps-col { background: #fff; border-radius: 8px; padding: 8px 10px; margin-top: 6px; }
 #piano-storage .ps-col b { color: #2c5282; }
@@ -1831,6 +1836,35 @@ function renderPericolosi() {
 const PS_ACC = { s: 'Subito (davanti)', p: 'Prima o poi', m: 'In fondo' };
 function escH(t) { return String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 const psAperte = new Set();
+// Modo «Segna quelle rimaste a casa»: null = spento, altrimenti Set delle scatole ancora a casa
+let psCasa = null;
+function psNumeriCasa() { return psChiavi().filter(k => !isChiaveSpeciale(k) && (stato.scatole[k] || []).length > 0); }
+function psCasaApri() { psCasa = new Set(); renderPianoStorage(); }
+function psCasaChiudi() { psCasa = null; renderPianoStorage(); }
+function psCasaToggle(k) { k = String(k); if (psCasa.has(k)) psCasa.delete(k); else psCasa.add(k); renderPianoStorage(); }
+function psCasaTutteQui() { psCasa = new Set(psNumeriCasa().map(String)); renderPianoStorage(); }
+function psCasaDeposita() {
+  const altre = psNumeriCasa().filter(k => !psCasa.has(String(k)));
+  if (!altre.length) { mostraToast('Nessuna scatola da depositare: sono tutte segnate a casa'); return; }
+  const per = altre.filter(k => pericolosiInBox(k).length);
+  let msg = `Hai segnato ${psCasa.size} scatole a casa.\n\nDepositare nel box storage le altre ${altre.length}?\n\n${altre.map(k => labelScatola(k)).join(', ')}\n\nSpariranno dall'elenco e verranno bloccate (le ritrovi nel Piano box storage, dove puoi riportarle fuori).`;
+  if (per.length) msg += `\n\n⚠️ Contengono oggetti pericolosi: ${per.map(k => labelScatola(k)).join(', ')}.`;
+  if (!confirm(msg)) return;
+  psMettiInBox(altre);
+  psCasa = null;
+  salvaDati(); aggiornaUI();
+  mostraToast(`📦 ${altre.length} scatole depositate nel box storage`);
+}
+function psCasaHtml() {
+  const tutte = psNumeriCasa();
+  const nCasa = tutte.filter(k => psCasa.has(String(k))).length;
+  const chip = tutte.map(k => { const q = psCasa.has(String(k)); return `<button class="ps-chip${q ? ' qui' : ''}" onclick="psCasaToggle('${k}')">${q ? '🏠 ' : ''}${escH(String(k))}</button>`; }).join('');
+  return `<div class="ps-casa"><b>Tocca le scatole che sono ancora a casa</b>
+    <div class="ps-chips">${chip || 'Nessuna scatola numerata.'}</div>
+    <div class="ps-casa-conta">🏠 A casa: <b>${nCasa}</b> · 📦 Nel box (da depositare): <b>${tutte.length - nCasa}</b></div>
+    <button class="ps-btn" style="background:#2b6cb0;color:#fff" onclick="psCasaDeposita()">📥 Deposita tutte le altre (${tutte.length - nCasa})</button>
+    <button class="ps-btn" onclick="psCasaTutteQui()">Tutte a casa</button><button class="ps-btn" onclick="psCasaChiudi()">Annulla</button></div>`;
+}
 function psToggleOgg(k) { if (psAperte.has(k)) psAperte.delete(k); else psAperte.add(k); renderPianoStorage(); }
 function psBox(k) { return stato.storage.box[k] || { in: false, acc: 'p', fr: false }; }
 function psSet(k, campo, val) {
@@ -2071,6 +2105,8 @@ function renderPianoStorage() {
     <div class="ps-dim" style="margin-top:6px">Altezza massima di una colonna (cm): <input type="number" min="0" inputmode="decimal" placeholder="facolt." value="${st.mh || ''}" oninput="psDim('mh', this.value)"> cm <span style="color:#718096">(in centimetri: 2,5 m = 250. Se vuoto: altezza del box)</span></div>
     <div class="ps-sez">Quali scatole vanno nel box?</div>
     <button class="ps-btn" onclick="psSelezionaBloccate(true)">🔒 Scegli tutte le bloccate</button><button class="ps-btn" onclick="psSelezionaBloccate(false)">Deseleziona tutte</button>
+    <button class="ps-btn" style="background:#c6f6d5;color:#22543d" onclick="psCasaApri()">🏠 Segna quelle rimaste a casa</button>
+    ${psCasa ? psCasaHtml() : ''}
     ${righe || '<div class="ps-avv">Nessuna scatola disponibile da scegliere.</div>'}
     <button class="ps-btn" style="background:#2b6cb0;color:#fff;font-size:0.84rem;padding:8px 14px" onclick="psDeposita()">📥 Deposita nel box le ${nScelte} scelte</button>
     ${depositate.length ? `<div class="ps-sez">Già nel box storage (${depositate.length})</div><button class="ps-btn" onclick="psStampaDepositate()">🖨️ Stampa le scatole nel box storage</button>${righeDep}` : ''}
