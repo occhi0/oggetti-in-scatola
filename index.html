@@ -1527,7 +1527,7 @@ function stampaListaScatole() {
     const dove = isDepositata(k) ? 'Box storage' : (m.stanza === 'auto' ? 'Auto' : 'Casa');
     const per = pericolosiInBox(k).length;
     const nome = (m.nome || '').trim();
-    return `<tr><td class="ck">☐</td><td class="n">${escH(k)}</td><td>${escH(nome)}${per ? ' <b class="pe">⚠️ PERICOLO</b>' : ''}</td><td class="d">${escH(dove)}</td><td class="r">${kg ? escH(fmtKg(kg)) : '—'}</td><td class="r">${fmtDim(m) ? escH(fmtDim(m)) : '—'}</td></tr>`;
+    return `<tr><td class="n">${escH(k)}</td><td>${escH(nome)}${per ? ' <b class="pe">⚠️ PERICOLO</b>' : ''}</td><td class="r">${kg ? escH(fmtKg(kg)) : '—'}</td><td class="r">${fmtDim(m) ? escH(fmtDim(m)) : '—'}</td><td class="ck">☐</td><td class="ck">☐</td><td class="d">${escH(dove)}</td></tr>`;
   }).join('');
   const html = `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"/><title>Lista scatole</title>
 <style>
@@ -1540,7 +1540,8 @@ th, td { border: 1px solid #888; padding: 5px 6px; text-align: left; vertical-al
 th { background: #e5e5e5; }
 tr { page-break-inside: avoid; }
 thead { display: table-header-group; }
-td.ck { width: 8mm; text-align: center; font-size: 14pt; }
+td.ck { width: 14mm; text-align: center; font-size: 16pt; }
+td.d { color: #555; font-size: 8.5pt; }
 td.n { width: 12mm; font-weight: 800; font-size: 13pt; text-align: center; }
 td.r { text-align: right; white-space: nowrap; }
 td.d { white-space: nowrap; }
@@ -1549,8 +1550,8 @@ tfoot td { font-weight: 700; background: #f2f2f2; }
 </style></head><body>
 <h1>Lista scatole</h1>
 <div class="sub">${chiavi.length} scatole — ${new Date().toLocaleDateString('it-IT')}</div>
-<table><thead><tr><th></th><th>N.</th><th>Nome</th><th>Dove</th><th>Peso</th><th>Misure (cm)</th></tr></thead><tbody>${righe}</tbody>
-<tfoot><tr><td colspan="4">Totale (${chiavi.length} scatole${senzaPeso ? ', ' + senzaPeso + ' senza peso' : ''})</td><td class="r">${escH(fmtKg(totKg))}</td><td class="r">${totL ? escH(fmtLitri(totL)) : '—'}</td></tr></tfoot></table>
+<table><thead><tr><th>N.</th><th>Nome</th><th>Peso</th><th>Misure (cm)</th><th>Qui</th><th>Di là</th><th>Nell'app</th></tr></thead><tbody>${righe}</tbody>
+<tfoot><tr><td colspan="2">Totale (${chiavi.length} scatole${senzaPeso ? ', ' + senzaPeso + ' senza peso' : ''})</td><td class="r">${escH(fmtKg(totKg))}</td><td class="r">${totL ? escH(fmtLitri(totL)) : '—'}</td><td colspan="3"></td></tr></tfoot></table>
 <script>window.onload=()=>window.print()<\/script></body></html>`;
   const w = window.open('', '_blank');
   w.document.write(html);
